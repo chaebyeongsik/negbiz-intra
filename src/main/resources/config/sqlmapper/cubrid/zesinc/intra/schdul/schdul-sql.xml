@@ -1,0 +1,396 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="zesinc.intra.schdul.SchdulMapper">
+
+    <!-- 일정 조회 -->
+    <select id="selectSchdul" parameterType="schdulVo" resultType="schdulVo">
+        SELECT
+        <trim suffixOverrides=",">
+            A.REG_SN,
+            A.TTL,
+            A.DOC_CONTS_CN,
+            A.FILE_SN,
+            A.SE_CD_ID,
+            A.SCHDL_SE_CD_ID,
+            A.HLDY_SE_CD_ID,
+            A.PLC_CD_ID,
+            TO_CHAR(TO_DATETIME(A.BGNG_YMD , 'YYYYMMDD'), 'YYYY-MM-DD') AS BGNG_YMD,
+            CASE 
+		        WHEN A.END_YMD != '' THEN TO_CHAR(TO_DATETIME(A.END_YMD, 'YYYYMMDD'), 'YYYY-MM-DD') 
+		        ELSE NULL 
+		    END AS END_YMD,
+            A.BGNG_HR,
+            A.END_HR,
+            A.RPTT_YN,
+            A.RPTT_TYPE_CD,
+           	CASE 
+		        WHEN A.RPTT_END_YMD != '' THEN TO_CHAR(TO_DATETIME(A.RPTT_END_YMD, 'YYYYMMDD'), 'YYYY-MM-DD') 
+		        ELSE NULL 
+		    END AS RPTT_END_YMD,
+            A.MNDAY_RSVT_NO,
+            A.TSDAY_RSVT_NO,
+            A.WDDAY_RSVT_NO,
+            A.TRDAY_RSVT_NO,
+            A.FRDAY_RSVT_NO,
+            A.STDAY_RSVT_NO,
+            A.SNDAY_RSVT_NO,
+            A.COLOR_NM,
+            A.RLS_YN,
+            A.RGTR_ID,
+            A.REG_DT,
+            A.MDFR_ID,
+            A.UPDT_DT,
+            (SELECT CD_NM FROM TC_CODE WHERE HGHRK_CD_ID = #{hghrkCdId} AND CD_ID = A.SE_CD_ID) SE_NM,
+            (SELECT CD_NM FROM TC_CODE WHERE HGHRK_CD_ID = #{hghrkCdId} AND CD_ID = A.SCHDL_SE_CD_ID) SCHDUL_SE_NM,
+            (SELECT CD_NM FROM TC_CODE WHERE HGHRK_CD_ID = #{hghrkCdId} AND CD_ID = A.HLDY_SE_CD_ID) RESTDE_SE_NM,
+            (SELECT CD_NM FROM TC_CODE WHERE HGHRK_CD_ID = #{hghrkCdId} AND CD_ID = A.PLC_CD_ID) PLACE_NM,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.RGTR_ID) AS RGTR_NM,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.MDFR_ID) AS UPDUSR_NM,
+        </trim>
+        FROM
+            TN_SCHDUL A
+        WHERE
+                 A.REG_SN = #{paramMap.q_regSn}
+    </select>
+
+    <!-- 일정 목록 -->
+    <sql id="incSchdulWhere">
+        <where>
+            <if test="paramMap.q_searchVal != null and paramMap.q_searchVal != ''">
+                AND A.TTL LIKE '%' || #{paramMap.q_searchVal} || '%'
+            </if>
+            <if test="paramMap.q_seCdId != null and paramMap.q_seCdId != ''">
+                AND A.SE_CD_ID = #{paramMap.q_seCdId}
+            </if>
+            <if test="paramMap.q_schdlSeCdId != null and paramMap.q_schdlSeCdId != ''">
+                AND A.SCHDL_SE_CD_ID = #{paramMap.q_schdlSeCdId}
+            </if>
+            <if test="paramMap.q_hldySeCdId != null and paramMap.q_hldySeCdId != ''">
+                AND A.HLDY_SE_CD_ID = #{paramMap.q_hldySeCdId}
+            </if>
+            <if test="paramMap.q_plcCdId != null and paramMap.q_plcCdId != ''">
+                AND A.PLC_CD_ID = #{paramMap.q_plcCdId}
+            </if>
+            <!-- 
+            <if test="paramMap.q_startDt != null and paramMap.q_startDt != ''">
+                AND A.BGNG_YMD &gt;= REPLACE(#{paramMap.q_startDt}, '-', '')
+            </if>
+            <if test="paramMap.q_endDt != null and paramMap.q_endDt != ''">
+                AND A.END_YMD &lt;= REPLACE(#{paramMap.q_endDt}, '-', '')
+            </if>
+             -->
+            <if test="paramMap.q_startDt != null and paramMap.q_startDt != ''">
+            	<if test="paramMap.q_endDt != null and paramMap.q_endDt != ''">
+                     AND (     
+                              (      A.RPTT_YN = 'N' 
+                                AND (   (A.BGNG_YMD &gt;= REPLACE (#{paramMap.q_startDt}, '-', '') AND A.END_YMD &lt;= REPLACE (#{paramMap.q_endDt}, '-', ''))
+                                     OR (A.BGNG_YMD &lt;= REPLACE (#{paramMap.q_startDt}, '-', '') AND A.END_YMD &gt;= REPLACE (#{paramMap.q_endDt}, '-', ''))
+                                     OR (REPLACE (#{paramMap.q_startDt}, '-', '') BETWEEN A.BGNG_YMD AND A.END_YMD)
+                                     OR (REPLACE (#{paramMap.q_endDt}, '-', '') BETWEEN A.BGNG_YMD AND A.END_YMD)
+                                    )
+                               )
+                              OR 
+                              (    A.RPTT_YN = 'Y'
+                                  AND EXISTS (
+                                              SELECT * 
+                                                FROM TN_SCHDUL_DETAIL DTL
+                                               WHERE DTL.REG_SN = A.REG_SN 
+                                                 AND DTL.SE_CD_ID = A.SE_CD_ID
+                                                 AND DTL.BGNG_YMD BETWEEN REPLACE(#{paramMap.q_startDt}, '-', '') AND REPLACE(#{paramMap.q_endDt}, '-', '')
+                                              )
+                                 )
+                         )
+            	</if>
+            </if>
+        </where>
+    </sql>
+    <select id="selectSchdulList" parameterType="schdulVo" resultType="schdulVo">
+        SELECT
+            Y.*,
+            TO_CHAR(TO_DATETIME(Y.BGNG_YMD_TMP , 'YYYYMMDD'), 'YYYY-MM-DD') AS BGNG_YMD,
+	      	CASE 
+		        WHEN Y.END_YMD_TMP != '' THEN TO_CHAR(TO_DATETIME(Y.END_YMD_TMP, 'YYYYMMDD'), 'YYYY-MM-DD') 
+		        ELSE NULL 
+		    END AS END_YMD,
+		  	CASE 
+		        WHEN Y.RPTT_END_YMD_TMP != '' THEN TO_CHAR(TO_DATETIME(Y.RPTT_END_YMD_TMP, 'YYYYMMDD'), 'YYYY-MM-DD') 
+		        ELSE NULL 
+		    END AS RPTT_END_YMD,
+            (SELECT CD_NM FROM TC_CODE WHERE HGHRK_CD_ID = #{hghrkCdId} AND CD_ID = Y.SE_CD_ID) SE_NM,
+            (SELECT CD_NM FROM TC_CODE WHERE HGHRK_CD_ID = #{hghrkCdId} AND CD_ID = Y.SCHDL_SE_CD_ID) SCHDUL_SE_NM,
+            (SELECT CD_NM FROM TC_CODE WHERE HGHRK_CD_ID = #{hghrkCdId} AND CD_ID = Y.HLDY_SE_CD_ID) RESTDE_SE_NM,
+            (SELECT CD_NM FROM TC_CODE WHERE HGHRK_CD_ID = #{hghrkCdId} AND CD_ID = Y.PLC_CD_ID) PLACE_NM,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = Y.RGTR_ID) AS RGTR_NM,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = Y.MDFR_ID) AS UPDUSR_NM
+        FROM (
+            SELECT ROWNUM NUM, X.* FROM (
+                SELECT
+                <trim suffixOverrides=",">
+                    A.REG_SN,
+                    A.TTL,
+                    A.SE_CD_ID,
+                    A.SCHDL_SE_CD_ID,
+                    A.HLDY_SE_CD_ID,
+                    A.PLC_CD_ID,
+                    A.BGNG_YMD AS BGNG_YMD_TMP,
+                    A.END_YMD AS END_YMD_TMP,
+                    A.BGNG_HR,
+                    A.END_HR,
+                    A.RPTT_YN,
+                    A.RPTT_TYPE_CD,
+                    A.RPTT_END_YMD AS RPTT_END_YMD_TMP,
+                    A.MNDAY_RSVT_NO,
+                    A.TSDAY_RSVT_NO,
+                    A.WDDAY_RSVT_NO,
+                    A.TRDAY_RSVT_NO,
+                    A.FRDAY_RSVT_NO,
+                    A.STDAY_RSVT_NO,
+                    A.SNDAY_RSVT_NO,
+                    A.COLOR_NM,
+                    A.RLS_YN,
+                    A.RGTR_ID,
+                    A.REG_DT,
+                    A.MDFR_ID,
+                    A.UPDT_DT,
+                </trim>
+                FROM
+                    TN_SCHDUL A
+                <include refid="incSchdulWhere"/>
+                ORDER BY A.REG_DT DESC
+            ) X
+            WHERE ROWNUM &lt;= #{paramMap.q_pagingEndNum}
+         ) Y
+         WHERE NUM &gt;= #{paramMap.q_pagingStartNum}
+    </select>
+
+    <!-- 일정 조회 목록 카운트 -->
+    <select id="selectSchdulListCount" parameterType="schdulVo" resultType="int">
+        SELECT
+            COUNT(A.REG_SN) AS TOTAL_COUNT
+        FROM
+            TN_SCHDUL A
+        <include refid="incSchdulWhere"/>
+    </select>
+
+    <!-- 일정 등록 -->
+    <insert id="insertSchdul" parameterType="schdulVo">
+        <selectKey order="BEFORE" keyProperty="regSn" resultType="int">
+            SELECT NVL(MAX(REG_SN), 0) + 1
+            FROM TN_SCHDUL
+        </selectKey>
+        INSERT INTO TN_SCHDUL (
+        <trim suffixOverrides=",">
+            REG_SN,
+            TTL,
+            DOC_CONTS_CN,
+            FILE_SN,
+            SE_CD_ID,
+            SCHDL_SE_CD_ID,
+            HLDY_SE_CD_ID,
+            PLC_CD_ID,
+            BGNG_YMD,
+            END_YMD,
+            BGNG_HR,
+            END_HR,
+            RPTT_YN,
+            RPTT_TYPE_CD,
+            RPTT_END_YMD,
+            MNDAY_RSVT_NO,
+            TSDAY_RSVT_NO,
+            WDDAY_RSVT_NO,
+            TRDAY_RSVT_NO,
+            FRDAY_RSVT_NO,
+            STDAY_RSVT_NO,
+            SNDAY_RSVT_NO,
+            COLOR_NM,
+            RLS_YN,
+            RGTR_ID,
+            REG_DT,
+        </trim>
+        ) VALUES (
+        <trim suffixOverrides=",">
+            #{regSn},
+            #{ttl},
+            #{docContsCn},
+            #{fileSn},
+            #{seCdId},
+            #{schdlSeCdId},
+            #{hldySeCdId},
+            #{plcCdId},
+            #{bgngYmd},
+            #{endYmd},
+            #{bgngHr},
+            #{endHr},
+            #{rpttYn},
+            #{rpttTypeCd},
+            #{rpttEndYmd},
+            #{mndayRsvtNo},
+            #{tsdayRsvtNo},
+            #{wddayRsvtNo},
+            #{trdayRsvtNo},
+            #{frdayRsvtNo},
+            #{stdayRsvtNo},
+            #{sndayRsvtNo},
+            #{colorNm},
+            #{rlsYn},
+            #{rgtrId},
+            SYSDATETIME,
+        </trim>
+        )
+    </insert>
+
+    <!-- 일정 수정 -->
+    <update id="updateSchdul" parameterType="schdulVo">
+        UPDATE TN_SCHDUL 
+          <set>
+            TTL = #{ttl},
+            DOC_CONTS_CN = #{docContsCn},
+            <if test="fileSn != null">
+            FILE_SN = #{fileSn},
+            </if>
+            SE_CD_ID = #{seCdId},
+            SCHDL_SE_CD_ID = #{schdlSeCdId},
+            HLDY_SE_CD_ID = #{hldySeCdId},
+            PLC_CD_ID = #{plcCdId},
+            BGNG_YMD = #{bgngYmd},
+            END_YMD = #{endYmd},
+            BGNG_HR = #{bgngHr},
+            END_HR = #{endHr},
+            RPTT_YN = #{rpttYn},
+            RPTT_TYPE_CD = #{rpttTypeCd},
+            RPTT_END_YMD = #{rpttEndYmd},
+            MNDAY_RSVT_NO = #{mndayRsvtNo},
+            TSDAY_RSVT_NO = #{tsdayRsvtNo},
+            WDDAY_RSVT_NO = #{wddayRsvtNo},
+            TRDAY_RSVT_NO = #{trdayRsvtNo},
+            FRDAY_RSVT_NO = #{frdayRsvtNo},
+            STDAY_RSVT_NO = #{stdayRsvtNo},
+            SNDAY_RSVT_NO = #{sndayRsvtNo},
+            COLOR_NM = #{colorNm},
+            RLS_YN = #{rlsYn},
+            MDFR_ID = #{mdfrId},
+            UPDT_DT = SYSDATETIME,
+          </set>
+        WHERE
+             REG_SN = #{paramMap.q_regSn}
+    </update>
+
+    <!-- 일정 삭제 -->
+    <delete id="deleteSchdul" parameterType="schdulVo">
+        DELETE FROM TN_SCHDUL
+        WHERE
+             REG_SN = #{paramMap.q_regSn}
+    </delete>
+
+    <!-- 일정상세 목록 -->
+    <sql id="incSchdulDetailWhere">
+        <where>
+                A.REG_SN = B.REG_SN
+            <if test="paramMap.q_rlsYn != null and paramMap.q_rlsYn != ''">
+                AND A.RLS_YN = #{paramMap.q_rlsYn}
+            </if>
+            <if test="paramMap.q_regSn != null and paramMap.q_regSn != ''">
+                AND A.REG_SN = #{paramMap.q_regSn}
+            </if>
+            <if test="paramMap.q_bgngYmd != null and paramMap.q_bgngYmd != ''">
+                AND B.BGNG_YMD &gt;= REPLACE(#{paramMap.q_bgngYmd}, '-', '')
+            </if>
+            <if test="paramMap.q_endYmd != null and paramMap.q_endYmd != ''">
+                AND B.END_YMD &lt;= REPLACE(#{paramMap.q_endYmd}, '-', '')
+            </if>
+            <if test="paramMap.q_searchVal != null and paramMap.q_searchVal != ''">
+                AND A.TTL LIKE '%' || #{paramMap.q_searchVal} || '%'
+            </if>
+            <if test="paramMap.q_seCdId != null and paramMap.q_seCdId != ''">
+                AND A.SE_CD_ID = #{paramMap.q_seCdId}
+            </if>
+            <if test="paramMap.q_schdlSeCdId != null and paramMap.q_schdlSeCdId != ''">
+                AND A.SCHDL_SE_CD_ID = #{paramMap.q_schdlSeCdId}
+            </if>
+            <if test="paramMap.q_hldySeCdId != null and paramMap.q_hldySeCdId != ''">
+                AND A.HLDY_SE_CD_ID = #{paramMap.q_hldySeCdId}
+            </if>
+            <if test="paramMap.q_plcCdId != null and paramMap.q_plcCdId != ''">
+                AND A.PLC_CD_ID = #{paramMap.q_plcCdId}
+            </if>
+        </where>
+    </sql>
+    <select id="selectSchdulDetailList" parameterType="schdulVo" resultType="schdulVo">
+        SELECT
+        <trim suffixOverrides=",">
+            A.REG_SN,
+            A.TTL,
+            A.DOC_CONTS_CN,
+            A.SE_CD_ID,
+            A.SCHDL_SE_CD_ID,
+            A.HLDY_SE_CD_ID,
+            A.PLC_CD_ID,
+            A.BGNG_HR,
+            A.END_HR,
+            A.COLOR_NM,
+            (SELECT CD_NM FROM TC_CODE WHERE HGHRK_CD_ID = #{hghrkCdId} AND CD_ID = A.SE_CD_ID) SE_NM,
+            (SELECT CD_NM FROM TC_CODE WHERE HGHRK_CD_ID = #{hghrkCdId} AND CD_ID = A.SCHDL_SE_CD_ID) SCHDUL_SE_NM,
+            (SELECT CD_NM FROM TC_CODE WHERE HGHRK_CD_ID = #{hghrkCdId} AND CD_ID = A.HLDY_SE_CD_ID) RESTDE_SE_NM,
+            (SELECT CD_NM FROM TC_CODE WHERE HGHRK_CD_ID = #{hghrkCdId} AND CD_ID = A.PLC_CD_ID) PLACE_NM,
+            B.DTL_SN,
+            TO_CHAR(TO_DATETIME(A.BGNG_YMD , 'YYYYMMDD'), 'YYYY-MM-DD') AS CONF_BGNG_YMD,
+            CASE WHEN A.END_YMD = ''
+                THEN
+                    ''
+                ELSE
+                    TO_CHAR(TO_TIMESTAMP(A.END_YMD, 'YYYYMMDD'), 'YYYY-MM-DD')    
+            END AS CONF_END_YMD,
+            TO_CHAR(TO_DATETIME(B.BGNG_YMD , 'YYYYMMDD'), 'YYYY-MM-DD') AS BGNG_YMD,
+            TO_CHAR(TO_DATETIME(B.END_YMD , 'YYYYMMDD'), 'YYYY-MM-DD') AS END_YMD
+        </trim>
+        FROM
+            TN_SCHDUL A, TN_SCHDUL_DETAIL B
+        <include refid="incSchdulDetailWhere"/>
+        ORDER BY B.BGNG_YMD ASC, B.BGNG_HR ASC
+    </select>
+
+    <!-- 일정상세 등록 -->
+    <insert id="insertSchdulDetail" parameterType="schdulDetailVo">
+        <selectKey order="BEFORE" keyProperty="dtlSn" resultType="int">
+            SELECT NVL(MAX(DTL_SN), 0) + 1
+            FROM TN_SCHDUL_DETAIL
+            WHERE
+                 REG_SN = #{regSn}
+        </selectKey>
+        INSERT INTO TN_SCHDUL_DETAIL (
+        <trim suffixOverrides=",">
+            REG_SN,
+            DTL_SN,
+            SE_CD_ID,
+            BGNG_YMD,
+            END_YMD,
+            BGNG_HR,
+            END_HR,
+        </trim>
+        ) VALUES (
+        <trim suffixOverrides=",">
+            #{regSn},
+            #{dtlSn},
+            #{seCdId},
+            #{bgngYmd},
+            #{endYmd},
+            #{bgngHr},
+            #{endHr},
+        </trim>
+        )
+    </insert>
+
+    <!-- 일정상세 삭제 -->
+    <delete id="deleteSchdulDetail" parameterType="schdulDetailVo">
+        DELETE FROM TN_SCHDUL_DETAIL
+        WHERE
+             REG_SN = #{paramMap.q_regSn}
+        <if test="paramMap.q_dtlSn != null and paramMap.q_dtlSn != ''">
+            AND DTL_SN = #{paramMap.q_dtlSn}
+        </if>
+        <if test="paramMap.q_afterDay != null and paramMap.q_afterDay != ''">
+            AND BGNG_YMD &gt;= #{paramMap.q_afterDay}
+        </if>
+    </delete>
+
+</mapper>

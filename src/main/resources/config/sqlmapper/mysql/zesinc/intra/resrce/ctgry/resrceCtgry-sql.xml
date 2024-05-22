@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="zesinc.intra.resrce.ctgry.ResrceCtgryMapper">
+
+    <!-- 자원카테고리 조회 -->
+    <select id="selectResrceCtgry" parameterType="resrceCtgryVo" resultType="resrceCtgryVo">
+        SELECT
+        <trim suffixOverrides=",">
+            A.CTGRY_SN,
+            A.UP_CTGRY_SN,
+            A.CTGRY_NM,
+            A.CTGRY_PATH_NM,
+            A.USE_YN,
+            A.RGTR_ID,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.RGTR_ID) AS RGTR_NM,
+            A.REG_DT,
+            IF (((SELECT COUNT(1) FROM TN_RESRCE_CTGRY WHERE UP_CTGRY_SN = A.CTGRY_SN))= 0, '0', '1') AS isFolder
+        </trim>
+        FROM
+            TN_RESRCE_CTGRY A
+        WHERE
+                 A.CTGRY_SN = #{paramMap.q_ctgrySn}
+    </select>
+
+    <!-- 자원카테고리 사용여부 조회 -->
+    <select id="selectResrceUseCount" parameterType="resrceCtgryVo" resultType="int">
+        SELECT
+        <trim suffixOverrides=",">
+            COUNT(A.DATA_SN) AS CNT
+        </trim>
+        FROM
+            TN_RESRCE A
+        WHERE
+                 A.CTGRY_SN = #{paramMap.q_ctgrySn}
+    </select>
+
+    <!-- 자원카테고리 조회 -->
+    <select id="selectResrceCtgryTreeList" parameterType="resrceCtgryVo" resultType="treeVo">
+        SELECT
+        <trim suffixOverrides=",">
+            A.CTGRY_SN AS "key",
+            A.CTGRY_NM AS title,
+            IF (((SELECT COUNT(1) FROM TN_RESRCE_CTGRY WHERE UP_CTGRY_SN = A.CTGRY_SN))= 0, '0', '1') AS folder,
+            IF (((SELECT COUNT(1) FROM TN_RESRCE_CTGRY WHERE UP_CTGRY_SN = A.CTGRY_SN))= 0, '0', '1') AS lazy,
+        </trim>
+        FROM
+            TN_RESRCE_CTGRY A
+        WHERE
+                 A.UP_CTGRY_SN = #{paramMap.q_upCtgrySn}
+        ORDER BY title
+    </select>
+
+    <!-- 자원카테고리 목록 -->
+    <sql id="incResrceCtgryWhere">
+        <where>
+                 A.CTGRY_SN = #{paramMap.q_ctgrySn}
+        </where>
+    </sql>
+    <select id="selectResrceCtgryList" parameterType="resrceCtgryVo" resultType="resrceCtgryVo">
+        SELECT Y.* FROM (
+            SELECT  X.* FROM (
+                SELECT
+                <trim suffixOverrides=",">
+                    A.CTGRY_SN,
+                    A.UP_CTGRY_SN,
+                    A.CTGRY_NM,
+                    A.CTGRY_PATH_NM,
+                    A.USE_YN,
+                    A.RGTR_ID,
+                    (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.RGTR_ID) AS RGTR_NM,
+                    A.REG_DT,
+                </trim>
+                FROM
+                    TN_RESRCE_CTGRY A
+                <include refid="incResrceCtgryWhere"/>
+                ORDER BY A.UP_CTGRY_SN ASC, A.CTGRY_SN ASC
+            ) X
+         ) Y
+         LIMIT #{paramMap.q_rowPerPage}
+         OFFSET #{paramMap.q_pagingStartNum}
+    </select>
+
+    <!-- 자원카테고리 조회 목록 카운트 -->
+    <select id="selectResrceCtgryListCount" parameterType="resrceCtgryVo" resultType="int">
+        SELECT
+            COUNT(A.CTGRY_SN) AS TOTAL_COUNT
+        FROM
+            TN_RESRCE_CTGRY A
+        <include refid="incResrceCtgryWhere"/>
+    </select>
+
+    <!-- 자원카테고리 등록 -->
+    <insert id="insertResrceCtgry" parameterType="resrceCtgryVo">
+        <selectKey order="BEFORE" keyProperty="ctgrySn" resultType="int">
+            SELECT IFNULL(MAX(CTGRY_SN), 0) + 1
+            FROM TN_RESRCE_CTGRY
+        </selectKey>
+        INSERT INTO TN_RESRCE_CTGRY (
+        <trim suffixOverrides=",">
+            CTGRY_SN,
+            UP_CTGRY_SN,
+            CTGRY_NM,
+            CTGRY_PATH_NM,
+            USE_YN,
+            RGTR_ID,
+            REG_DT,
+        </trim>
+        ) VALUES (
+        <trim suffixOverrides=",">
+            #{ctgrySn},
+            #{upCtgrySn},
+            #{ctgryNm},
+            #{ctgryPathNm},
+            #{useYn},
+            #{rgtrId},
+            NOW(),
+        </trim>
+        )
+    </insert>
+
+    <!-- 자원카테고리 수정 -->
+    <update id="updateResrceCtgry" parameterType="resrceCtgryVo">
+        UPDATE TN_RESRCE_CTGRY 
+          <set>
+            CTGRY_NM = #{ctgryNm},
+            CTGRY_PATH_NM = #{ctgryPathNm},
+            USE_YN = #{useYn},
+          </set>
+        WHERE
+             CTGRY_SN = #{paramMap.q_ctgrySn}
+    </update>
+
+    <!-- 자원카테고리 정렬순서 수정 -->
+    <update id="updateResrceCtgrySortOrder" parameterType="resrceCtgryVo">
+        UPDATE TN_RESRCE_CTGRY 
+          <set>
+          UP_CTGRY_SN = #{upCtgrySn},
+          CTGRY_PATH_NM = #{ctgryPathNm},
+          </set>
+        WHERE
+             CTGRY_SN = #{paramMap.q_ctgrySn}
+    </update>
+
+    <!-- 자원카테고리 삭제 -->
+    <delete id="deleteResrceCtgry" parameterType="resrceCtgryVo">
+        DELETE FROM TN_RESRCE_CTGRY
+        WHERE
+             CTGRY_SN = #{paramMap.q_ctgrySn}
+    </delete>
+
+</mapper>

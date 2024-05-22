@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="zesinc.intra.mymenu.MyMenuMapper">
+
+    <!-- 내메뉴 목록 -->
+    <select id="selectMyMenuList" parameterType="myMenuVo" resultType="myMenuVo">
+        SELECT
+        <trim suffixOverrides=",">
+            A.MENU_SN,
+            B.MENU_NM,
+            A.SORT_SN,
+        </trim>
+        FROM
+            TN_MY_MENU A, TN_MENU B
+        WHERE
+                 A.PIC_ID = #{picId}
+             AND A.MENU_SN = B.MENU_SN
+    </select>
+
+    <!-- 내메뉴 제외 권한메뉴 목록 -->
+    <sql id="incMyMenuWhere">
+        <where>
+                A.MENU_SN = B.MENU_SN
+            AND B.MENU_SN = C.MENU_SN
+            AND C.MPG_URL_YN = 'Y'
+            AND A.AUTHRT_CD_ID IN (
+                    SELECT
+                        AUTHRT_CD_ID
+                    FROM
+                        TN_MNGR_AUTHOR_ASGN
+                    WHERE
+                            PIC_ID = #{picId}
+                        AND USE_YN = 'Y'
+            )
+            AND B.MENU_SN NOT IN (
+                SELECT
+                    A.MENU_SN
+                FROM
+                    TN_MY_MENU A
+                WHERE
+                    A.PIC_ID = #{picId}
+            )
+        </where>
+    </sql>
+    <select id="selectAuthMenuList" parameterType="myMenuVo" resultType="myMenuVo">
+        SELECT
+            DISTINCT
+            A.MENU_SN,
+            B.MENU_NM
+        FROM
+            TN_MENU_AUTHOR_ASGN A, TN_MENU B, TN_MENU_URL C
+        <include refid="incMyMenuWhere"/>
+        ORDER BY B.MENU_NM ASC
+    </select>
+
+    <!-- 내메뉴 등록 -->
+    <insert id="insertMyMenu" parameterType="myMenuVo">
+        INSERT INTO TN_MY_MENU (
+        <trim suffixOverrides=",">
+            PIC_ID,
+            MENU_SN,
+            SORT_SN,
+        </trim>
+        ) VALUES (
+        <trim suffixOverrides=",">
+            #{picId},
+            #{menuSn},
+            #{sortSn},
+        </trim>
+        )
+    </insert>
+
+    <!-- 내메뉴 삭제 -->
+    <delete id="deleteMyMenu" parameterType="myMenuVo">
+        DELETE FROM TN_MY_MENU
+        WHERE
+             PIC_ID = #{picId}
+        <if test="menuSn != null and menuSn != ''">
+            AND MENU_SN = #{menuSn}
+        </if>
+    </delete>
+
+</mapper>

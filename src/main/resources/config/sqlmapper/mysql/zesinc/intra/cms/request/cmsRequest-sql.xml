@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="zesinc.intra.cms.request.CmsRequestMapper">
+
+    <!-- 사용자메뉴컨텐츠 조회 -->
+    <select id="selectCmsRequest" parameterType="cmsRequestVo" resultType="cmsRequestVo">
+        SELECT
+        <trim suffixOverrides=",">
+            B.SITE_SN,
+            (SELECT SITE_NM FROM TN_DOMN WHERE SITE_SN = B.SITE_SN) AS SITE_NM,
+            (SELECT SITE_EXPLN FROM TN_DOMN WHERE SITE_SN = B.SITE_SN) AS SITE_EXPLN,
+            (SELECT PORT_SN FROM TN_DOMN WHERE SITE_SN = B.SITE_SN) AS PORT_SN,
+            (SELECT SITE_PATH_NM FROM TN_DOMN WHERE SITE_SN = B.SITE_SN) AS SITE_PATH_NM,
+            B.USER_MENU_ENG_NM,
+            A.MENU_NM,
+            A.TTL,
+            A.BSC_PATH_NM,
+            A.MENU_PATH_NM,
+            A.LYT_CD_NO,
+            B.CONTS_SN,
+            B.STRT_CONTS_CN,
+            B.MAIN_CONTS_CN,
+            B.APLCN_YN,
+            B.APRV_STTS_NO,
+            B.PBLCN_RSN,
+            B.APRV_RSN,
+            B.AUTZR_ID,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = B.AUTZR_ID) AS CONFMER_NM,
+            B.APRV_DT,
+            B.RGTR_ID,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = B.RGTR_ID) AS RGTR_NM,
+            B.REG_DT,
+            B.MDFR_ID,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = B.MDFR_ID) AS UPDUSR_NM,
+            B.UPDT_DT,
+        </trim>
+        FROM
+            TN_USER_MENU_CNTNTS B, TN_USER_MENU A
+        WHERE
+                B.SITE_SN = A.SITE_SN
+            AND B.USER_MENU_ENG_NM = A.USER_MENU_ENG_NM
+            AND B.SITE_SN = #{paramMap.q_siteSn}
+            AND B.USER_MENU_ENG_NM = #{paramMap.q_userMenuEngNm}
+            AND B.CONTS_SN = #{paramMap.q_contsSn}
+    </select>
+
+    <!-- 사용자메뉴컨텐츠 목록 -->
+    <sql id="incCmsRequestWhere">
+        <where>
+                B.SITE_SN = A.SITE_SN
+            AND B.USER_MENU_ENG_NM = A.USER_MENU_ENG_NM
+            AND B.MDFR_ID = #{mdfrId}
+            <if test="paramMap.q_searchDomnCode != null and paramMap.q_searchDomnCode != ''">
+                AND B.SITE_SN = #{paramMap.q_searchDomnCode}
+            </if>
+            <if test="paramMap.q_aprvSttsNo != null and paramMap.q_aprvSttsNo != 'C0000'">
+                AND B.APRV_STTS_NO = #{paramMap.q_aprvSttsNo}
+            </if>
+            <if test="paramMap.q_searchVal != null and paramMap.q_searchVal != ''">
+                AND A.MENU_PATH_NM LIKE CONCAT('%', #{paramMap.q_searchVal}, '%')
+            </if>
+        </where>
+    </sql>
+    <select id="selectCmsRequestList" parameterType="cmsRequestVo" resultType="cmsRequestVo">
+        SELECT Y.* FROM (
+            SELECT  X.* FROM (
+                SELECT
+                <trim suffixOverrides=",">
+                    B.SITE_SN,
+                    (SELECT SITE_NM FROM TN_DOMN WHERE SITE_SN = B.SITE_SN) AS SITE_NM,
+                    (SELECT SITE_EXPLN FROM TN_DOMN WHERE SITE_SN = B.SITE_SN) AS SITE_EXPLN,
+                    (SELECT PORT_SN FROM TN_DOMN WHERE SITE_SN = B.SITE_SN) AS PORT_SN,
+                    (SELECT SITE_PATH_NM FROM TN_DOMN WHERE SITE_SN = B.SITE_SN) AS SITE_PATH_NM,
+                    B.USER_MENU_ENG_NM,
+                    A.MENU_NM,
+                    A.TTL,
+                    A.MENU_PATH_NM,
+                    A.LYT_CD_NO,
+                    B.CONTS_SN,
+                    B.APLCN_YN,
+                    B.APRV_STTS_NO,
+                    B.PBLCN_RSN,
+                    B.APRV_RSN,
+                    B.AUTZR_ID,
+                    (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = B.AUTZR_ID) AS CONFMER_NM,
+                    B.APRV_DT,
+                    B.RGTR_ID,
+                    (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = B.RGTR_ID) AS RGTR_NM,
+                    B.REG_DT,
+                    B.MDFR_ID,
+                    (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = B.MDFR_ID) AS UPDUSR_NM,
+                    B.UPDT_DT,
+                </trim>
+                FROM
+                    TN_USER_MENU_CNTNTS B, TN_USER_MENU A
+                <include refid="incCmsRequestWhere"/>
+                ORDER BY A.USER_MENU_ENG_NM ASC, B.CONTS_SN DESC, B.UPDT_DT ASC
+            ) X
+         ) Y
+         LIMIT #{paramMap.q_rowPerPage}
+         OFFSET #{paramMap.q_pagingStartNum}
+    </select>
+
+    <!-- 사용자메뉴컨텐츠 조회 목록 카운트 -->
+    <select id="selectCmsRequestListCount" parameterType="cmsRequestVo" resultType="int">
+        SELECT
+            COUNT(B.SITE_SN) AS TOTAL_COUNT
+        FROM
+            TN_USER_MENU_CNTNTS B, TN_USER_MENU A
+        <include refid="incCmsRequestWhere"/>
+    </select>
+
+    <!-- 사용자메뉴컨텐츠 수정 -->
+    <update id="updateCmsRequest" parameterType="cmsRequestVo">
+        UPDATE TN_USER_MENU_CNTNTS 
+          <set>
+            APRV_STTS_NO = 'C1010',
+          </set>
+        WHERE
+               SITE_SN = #{paramMap.q_siteSn}
+            AND USER_MENU_ENG_NM = #{paramMap.q_userMenuEngNm}
+            AND CONTS_SN = #{paramMap.q_contsSn}
+    </update>
+
+</mapper>

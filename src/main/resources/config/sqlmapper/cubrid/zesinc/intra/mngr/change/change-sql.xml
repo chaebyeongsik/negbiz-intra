@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="zesinc.intra.mngr.change.ChangeMapper">
+
+    <!-- 관리자변경이력 조회 -->
+    <select id="selectChange" parameterType="changeVo" resultType="changeVo">
+        SELECT
+        <trim suffixOverrides=",">
+            A.PIC_ID,
+            A.LOG_DT,
+            A.LOG_TYPE,
+            A.DEPT_CD_ID,
+            A.PIC_NM,
+            A.PIC_PSWD,
+            A.JBGD_CD_ID,
+            A.TASK_CN,
+            A.RGN_TELNO,
+            A.TELOFC_TELNO,
+            A.INDIV_TELNO,
+            A.RGN_FXNO,
+            A.TELOFC_FXNO,
+            A.INDIV_FXNO,
+            A.MBL_RGN_TELNO,
+            A.MBL_TELOFC_TELNO,
+            A.MBL_INDIV_TELNO,
+            A.EML_ID,
+            A.EML_SITE_NM,
+            A.LGN_NMTM,
+            A.LGN_DT,
+            A.USE_YN,
+            A.AVTSMT_EXCN_YN,
+            A.EML_AVTSMT_YN,
+            A.SMS_AVTSMT_YN,
+            A.PSWD_CHG_DT,
+            A.TRGT_YN,
+            A.STTS_SN,
+            A.STTS_BGNG_DT,
+            A.STTS_END_DT,
+            A.RGTR_ID,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.RGTR_ID) AS RGTR_NM,
+            A.REG_DT,
+            A.MDFR_ID,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.MDFR_ID) AS UPDUSR_NM,
+            A.UPDT_DT,
+            A.ACNT_NM,
+        </trim>
+        FROM
+            TH_MNGR_CHANGE A
+        WHERE
+                 A.PIC_ID = #{paramMap.q_picId}
+                AND   A.LOG_DT = #{paramMap.q_logDt}
+    </select>
+
+
+    <!-- 관리자변경이력 목록 -->
+    <sql id="incChangeWhere">
+        <where>
+                 A.PIC_ID = #{paramMap.q_picId}
+             <if test="paramMap.q_logType != null and paramMap.q_logType != ''">
+                AND A.LOG_TYPE = #{paramMap.q_logType}
+             </if>
+             <if test="paramMap.q_startDt != null and paramMap.q_startDt != ''">
+                AND A.LOG_DT &gt;= TO_DATETIME(#{paramMap.q_startDt} || ' 000000', 'YYYY-MM-DD HH24MISS')
+             </if>
+             <if test="paramMap.q_endDt != null and paramMap.q_endDt != ''">
+                AND A.LOG_DT &lt;= TO_DATETIME(#{paramMap.q_endDt} || ' 235959', 'YYYY-MM-DD HH24MISS')
+             </if>
+        </where>
+    </sql>
+    <select id="selectChangeList" parameterType="changeVo" resultType="changeVo">
+        SELECT Y.* FROM (
+            SELECT ROWNUM NUM, X.* FROM (
+                SELECT
+                    <trim suffixOverrides=",">
+                    A.PIC_ID,
+                    A.LOG_DT,
+                    A.LOG_TYPE,
+                    A.DEPT_CD_ID,
+                    (SELECT DEPT_NM FROM TN_DEPT WHERE DEPT_CD_ID = A.DEPT_CD_ID) AS DEPT_NM,
+                    A.PIC_NM,
+                    A.PIC_PSWD,
+                    A.JBGD_CD_ID,
+                    (SELECT CD_NM 
+                       FROM TC_CODE
+                      WHERE UP_CD_ID = 'ofcps'
+                        AND CD_ID = A.JBGD_CD_ID) AS CLSF_NM,
+                    A.TASK_CN,
+                    A.RGN_TELNO,
+                    A.TELOFC_TELNO,
+                    A.INDIV_TELNO,
+                    A.RGN_FXNO,
+                    A.TELOFC_FXNO,
+                    A.INDIV_FXNO,
+                    A.MBL_RGN_TELNO,
+                    A.MBL_TELOFC_TELNO,
+                    A.MBL_INDIV_TELNO,
+                    A.EML_ID,
+                    A.EML_SITE_NM,
+                    A.LGN_NMTM,
+                    A.LGN_DT,
+                    A.USE_YN,
+                    A.AVTSMT_EXCN_YN,
+                    A.EML_AVTSMT_YN,
+                    A.SMS_AVTSMT_YN,
+                    A.PSWD_CHG_DT,
+                    A.TRGT_YN,
+                    A.STTS_SN,
+                    A.STTS_BGNG_DT,
+                    A.STTS_END_DT,
+                    A.RGTR_ID,
+                    (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.RGTR_ID) AS RGTR_NM,
+                    A.REG_DT,
+                    A.MDFR_ID,
+                    (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.MDFR_ID) AS UPDUSR_NM,
+                    A.UPDT_DT,
+                    A.ACNT_NM,
+                    </trim>
+                FROM
+                    TH_MNGR_CHANGE A
+                    <include refid="incChangeWhere"/>
+                ORDER BY A.LOG_DT DESC
+            ) X
+            WHERE ROWNUM &lt;= #{paramMap.q_pagingEndNum}
+         ) Y
+         WHERE NUM &gt;= #{paramMap.q_pagingStartNum}
+    </select>
+
+    <!-- 관리자변경이력 조회 목록 카운트 -->
+    <select id="selectChangeListCount" parameterType="changeVo" resultType="int">
+        SELECT
+            COUNT(A.PIC_ID) AS TOTAL_COUNT
+        FROM
+            TH_MNGR_CHANGE A
+        <include refid="incChangeWhere"/>
+    </select>
+
+    <!-- 관리자변경이력 등록 -->
+    <insert id="insertChange" parameterType="changeVo">
+        INSERT INTO TH_MNGR_CHANGE (
+        <trim suffixOverrides=",">
+            PIC_ID,
+            LOG_DT,
+            LOG_TYPE,
+            DEPT_CD_ID,
+            PIC_NM,
+            PIC_PSWD,
+            JBGD_CD_ID,
+            TASK_CN,
+            RGN_TELNO,
+            TELOFC_TELNO,
+            INDIV_TELNO,
+            RGN_FXNO,
+            TELOFC_FXNO,
+            INDIV_FXNO,
+            MBL_RGN_TELNO,
+            MBL_TELOFC_TELNO,
+            MBL_INDIV_TELNO,
+            EML_ID,
+            EML_SITE_NM,
+            LGN_NMTM,
+            LGN_DT,
+            USE_YN,
+            AVTSMT_EXCN_YN,
+            EML_AVTSMT_YN,
+            SMS_AVTSMT_YN,
+            PSWD_CHG_DT,
+            TRGT_YN,
+            STTS_SN,
+            STTS_BGNG_DT,
+            STTS_END_DT,
+            RGTR_ID,
+            REG_DT,
+            MDFR_ID,
+            UPDT_DT,
+            ACNT_NM,
+        </trim>
+        )
+        SELECT
+        <trim suffixOverrides=",">
+            A.PIC_ID,
+            SYSDATETIME,
+            #{logType},
+            A.DEPT_CD_ID,
+            A.PIC_NM,
+            A.PIC_PSWD,
+            A.JBGD_CD_ID,
+            A.TASK_CN,
+            A.RGN_TELNO,
+            A.TELOFC_TELNO,
+            A.INDIV_TELNO,
+            A.RGN_FXNO,
+            A.TELOFC_FXNO,
+            A.INDIV_FXNO,
+            A.MBL_RGN_TELNO,
+            A.MBL_TELOFC_TELNO,
+            A.MBL_INDIV_TELNO,
+            A.EML_ID,
+            A.EML_SITE_NM,
+            A.LGN_NMTM,
+            A.LGN_DT,
+            A.USE_YN,
+            A.AVTSMT_EXCN_YN,
+            A.EML_AVTSMT_YN,
+            A.SMS_AVTSMT_YN,
+            A.PSWD_CHG_DT,
+            A.TRGT_YN,
+            A.STTS_SN,
+            A.STTS_BGNG_DT,
+            A.STTS_END_DT,
+            A.RGTR_ID,
+            A.REG_DT,
+            A.MDFR_ID,
+            A.UPDT_DT,
+            A.ACNT_NM,
+        </trim>
+        FROM
+            TN_MNGR A
+        WHERE
+            A.PIC_ID = #{picId}
+    </insert>
+
+    <!-- 관리자변경이력 수정 -->
+    <update id="updateChange" parameterType="changeVo">
+        UPDATE TH_MNGR_CHANGE 
+          <set>
+            LOG_TYPE = #{logType},
+            DEPT_CD_ID = #{deptCdId},
+            PIC_NM = #{picNm},
+            PIC_PSWD = #{picPswd},
+            JBGD_CD_ID = #{jbgdCdId},
+            TASK_CN = #{taskCn},
+            RGN_TELNO = #{rgnTelno},
+            TELOFC_TELNO = #{telofcTelno},
+            INDIV_TELNO = #{indivTelno},
+            RGN_FXNO = #{rgnFxno},
+            TELOFC_FXNO = #{telofcFxno},
+            INDIV_FXNO = #{indivFxno},
+            MBL_RGN_TELNO = #{mblRgnTelno},
+            MBL_TELOFC_TELNO = #{mblTelofcTelno},
+            MBL_INDIV_TELNO = #{mblIndivTelno},
+            EML_ID = #{emlId},
+            EML_SITE_NM = #{emlSiteNm},
+            LGN_NMTM = #{lgnNmtm},
+            LGN_DT = SYSDATETIME,
+            USE_YN = #{useYn},
+            AVTSMT_EXCN_YN = #{avtsmtExcnYn},
+            EML_AVTSMT_YN = #{emlAvtsmtYn},
+            SMS_AVTSMT_YN = #{smsAvtsmtYn},
+            PSWD_CHG_DT = SYSDATETIME,
+            TRGT_YN = #{trgtYn},
+            STTS_SN = #{sttsSn},
+            STTS_BGNG_DT = SYSDATETIME,
+            STTS_END_DT = SYSDATETIME,
+            MDFR_ID = #{mdfrId},
+            UPDT_DT = SYSDATETIME,
+            ACNT_NM = #{acntNm},
+          </set>
+        WHERE
+             PIC_ID = #{paramMap.q_picId}
+            AND   LOG_DT = #{paramMap.q_logDt}
+    </update>
+
+    <!-- 관리자변경이력 삭제 -->
+    <delete id="deleteChange" parameterType="changeVo">
+        DELETE FROM TH_MNGR_CHANGE
+        WHERE
+             PIC_ID = #{paramMap.q_picId}
+            AND   LOG_DT = #{paramMap.q_logDt}
+    </delete>
+
+</mapper>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+    <!-- 자원관리 관련 환경설정 -->
+    <resrce-config>
+        <!-- 
+              썸네일 자동 생성 관련 크기 설정 W(가로), H(세로)
+              만약 비율 축소가 필요한경우 가로 또는 세로중 하나만 0으로 설정한다.
+        -->
+        <thumbSize1W>800</thumbSize1W>
+        <thumbSize1H>0</thumbSize1H>
+        <thumbSize2W>500</thumbSize2W>
+        <thumbSize2H>0</thumbSize2H>
+        <thumbSize3W>120</thumbSize3W>
+        <thumbSize3H>0</thumbSize3H>
+    </resrce-config>
+</configuration>

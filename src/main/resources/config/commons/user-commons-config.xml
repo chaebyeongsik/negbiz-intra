@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <user-config>
+        <protectedUserInfo>
+            <allowAccess>N</allowAccess>
+            <protectedUserPwdCheckUrl>/component/protectedUser/BD_processPwdCheckForm.do</protectedUserPwdCheckUrl>
+            <session-timeout>10</session-timeout>
+        </protectedUserInfo>
+
+        <urls>
+            <userLog>/intra/user/hist/PD_insertUserLogForm.do</userLog>
+        </urls>
+
+        <userHist>
+            <!-- searchLog / personalLog -->
+            <logType>personalLog</logType>
+            <!-- 로그 사용여부 Y-사유입력창제공 / N-뒷단에서 자동으로 로그 저장 -->
+            <logUseYn>Y</logUseYn>
+            <initListShow>N</initListShow>
+
+            <searchLog>
+                <userManage>
+                    <userId-query>zesinc.intra.user.userManage.UserManageMapper.selectUserId</userId-query><!-- * returnType => String -->
+                    <count-query>zesinc.intra.user.userManage.UserManageMapper.selectUserListCount</count-query>
+                    <url>/intra/user/userManage/BD_selectUserList.do</url>
+                </userManage>
+            </searchLog>
+        </userHist>
+    </user-config>
+<typeAliases></typeAliases>
+</configuration>

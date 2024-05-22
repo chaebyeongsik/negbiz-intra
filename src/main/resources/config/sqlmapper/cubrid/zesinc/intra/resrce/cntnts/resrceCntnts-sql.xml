@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="zesinc.intra.resrce.cntnts.ResrceCntntsMapper">
+
+    <!-- 자원컨텐츠 조회 -->
+    <select id="selectResrceCntnts" parameterType="resrceCntntsVo" resultType="resrceCntntsVo">
+        SELECT
+        <trim suffixOverrides=",">
+            A.DATA_SN,
+            A.CHG_CYCL,
+            A.WRT_TYPE_NM,
+            A.CONTS_CN,
+            A.LANG_CD_ID,
+            A.RGTR_ID,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.RGTR_ID) AS RGTR_NM,
+            A.REG_DT,
+        </trim>
+        FROM
+            TN_RESRCE_CNTNTS A
+        WHERE
+                 A.DATA_SN = #{dataSn}
+                AND A.CHG_CYCL = #{chgCycl}
+    </select>
+
+
+    <!-- 자원컨텐츠 목록 -->
+    <sql id="incResrceCntntsWhere">
+        <where>
+                 A.DATA_SN = #{dataSn}
+                AND A.CHG_CYCL = #{chgCycl}
+        </where>
+    </sql>
+    <select id="selectResrceCntntsList" parameterType="resrceCntntsVo" resultType="resrceCntntsVo">
+        SELECT Y.* FROM (
+            SELECT ROWNUM NUM, X.* FROM (
+                SELECT
+                <trim suffixOverrides=",">
+                    A.DATA_SN,
+                    A.CHG_CYCL,
+                    A.WRT_TYPE_NM,
+                    A.CONTS_CN,
+                    A.LANG_CD_ID,
+                    A.RGTR_ID,
+                    (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.RGTR_ID) AS RGTR_NM,
+                    A.REG_DT,
+                </trim>
+                FROM
+                    TN_RESRCE_CNTNTS A
+                <include refid="incResrceCntntsWhere"/>
+                ORDER BY A.DATA_SN ASC, A.CHG_CYCL ASC
+            ) X
+            WHERE ROWNUM &lt;= #{paramMap.q_pagingEndNum}
+         ) Y
+         WHERE NUM &gt;= #{paramMap.q_pagingStartNum}
+    </select>
+
+    <!-- 자원컨텐츠 조회 목록 카운트 -->
+    <select id="selectResrceCntntsListCount" parameterType="resrceCntntsVo" resultType="int">
+        SELECT
+            COUNT(A.DATA_SN) AS TOTAL_COUNT
+        FROM
+            TN_RESRCE_CNTNTS A
+        <include refid="incResrceCntntsWhere"/>
+    </select>
+
+    <!-- 자원컨텐츠 등록 -->
+    <insert id="insertResrceCntnts" parameterType="resrceCntntsVo">
+        INSERT INTO TN_RESRCE_CNTNTS (
+        <trim suffixOverrides=",">
+            DATA_SN,
+            CHG_CYCL,
+            WRT_TYPE_NM,
+            CONTS_CN,
+            LANG_CD_ID,
+            RGTR_ID,
+            REG_DT,
+        </trim>
+        ) VALUES (
+        <trim suffixOverrides=",">
+            #{dataSn},
+            #{chgCycl},
+            #{wrtTypeNm},
+            #{contsCn},
+            #{langCdId},
+            #{rgtrId},
+            SYSDATETIME,
+        </trim>
+        )
+    </insert>
+
+    <!-- 자원컨텐츠 수정 -->
+    <update id="updateResrceCntnts" parameterType="resrceCntntsVo">
+        UPDATE TN_RESRCE_CNTNTS 
+          <set>
+            WRT_TYPE_NM = #{wrtTypeNm},
+            CONTS_CN = #{contsCn},
+            LANG_CD_ID = #{langCdId},
+          </set>
+        WHERE
+             DATA_SN = #{dataSn}
+            AND CHG_CYCL = #{chgCycl}
+    </update>
+
+    <!-- 자원컨텐츠 삭제 -->
+    <delete id="deleteResrceCntnts" parameterType="resrceCntntsVo">
+        DELETE FROM TN_RESRCE_CNTNTS
+        WHERE
+             DATA_SN = #{dataSn}
+            AND CHG_CYCL = #{chgCycl}
+    </delete>
+
+</mapper>

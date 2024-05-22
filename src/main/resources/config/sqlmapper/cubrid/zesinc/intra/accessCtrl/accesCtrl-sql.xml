@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="zesinc.intra.accessCtrl.AccesCtrlMapper">
+
+    <!-- 담당자목록 Auto Complete 용 -->
+    <select id="selectMngrList" parameterType="domnOrgVo" resultType="domnOrgVo">
+        SELECT
+            (A.PIC_NM || ' / ' || B.DEPT_NM) AS label,
+            A.PIC_NM AS "value",
+            A.PIC_ID,
+            A.PIC_NM,
+            A.DEPT_CD_ID,
+            B.DEPT_NM
+        FROM
+            TN_MNGR A, TN_DEPT B
+        WHERE
+                A.DEPT_CD_ID = B.DEPT_CD_ID
+            AND A.PIC_NM LIKE #{paramMap.q_picNm} || '%'
+            <if test="paramMap.q_useYn != null">
+            AND A.USE_YN = #{paramMap.q_useYn}
+            </if>
+            <if test="paramMap.q_maxRowNum != null">
+            AND ROWNUM &lt; #{paramMap.q_maxRowNum}
+            </if>
+        ORDER BY A.PIC_NM
+    </select>
+
+    <!-- 접근제어 조회 -->
+    <select id="selectAccesCtrl" parameterType="accesCtrlVo" resultType="accesCtrlVo">
+        SELECT
+        <trim suffixOverrides=",">
+            A.REG_SN,
+            A.PRMSN_TYPE_NM,
+            A.PRMSN_ID,
+            A.PRMSN_BGNG_IP,
+            A.PRMSN_END_IP,
+            A.USE_YN,
+            A.RGTR_ID,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.RGTR_ID) AS RGTR_NM,
+            A.REG_DT,
+            A.MDFR_ID,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.MDFR_ID) AS UPDUSR_NM,
+            A.UPDT_DT,
+            (SELECT DEPT_NM FROM TN_DEPT WHERE DEPT_CD_ID =
+                (SELECT DEPT_CD_ID FROM TN_MNGR WHERE PIC_ID = A.PRMSN_ID)
+            ) AS PERM_CHRG_DEPT_NM,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.PRMSN_ID) AS PERM_PIC_NM,
+        </trim>
+        FROM
+            TN_ACCES_CTRL A
+        WHERE
+                 A.REG_SN = #{paramMap.q_regSn}
+    </select>
+
+    <!-- 접근제어 목록 -->
+    <sql id="incAccesCtrlWhere">
+        <where>
+            <if test="paramMap.q_useYn != null and paramMap.q_useYn != ''">
+                 AND A.USE_YN = #{paramMap.q_useYn}
+            </if>
+            <if test="paramMap.q_searchVal != null and paramMap.q_searchVal != ''">
+                AND (
+                    A.PRMSN_ID LIKE '%' || #{paramMap.q_searchVal} || '%'
+                    OR
+                    A.PRMSN_BGNG_IP LIKE '%' || #{paramMap.q_searchVal} || '%'
+                    OR
+                    A.PRMSN_END_IP LIKE '%' || #{paramMap.q_searchVal} || '%'
+                    OR
+                    EXISTS (SELECT 1 FROM TN_MNGR WHERE PIC_ID = A.PRMSN_ID AND PIC_NM LIKE '%' || #{paramMap.q_searchVal} || '%')
+                 )
+             </if>
+        </where>
+    </sql>
+    <select id="selectAccesCtrlList" parameterType="accesCtrlVo" resultType="accesCtrlVo">
+        SELECT
+        <trim suffixOverrides=",">
+            A.REG_SN,
+            A.PRMSN_TYPE_NM,
+            A.PRMSN_ID,
+            A.PRMSN_BGNG_IP,
+            A.PRMSN_END_IP,
+            A.USE_YN,
+            A.RGTR_ID,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.RGTR_ID) AS RGTR_NM,
+            A.REG_DT,
+            A.MDFR_ID,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.MDFR_ID) AS UPDUSR_NM,
+            A.UPDT_DT,
+            (SELECT DEPT_NM FROM TN_DEPT WHERE DEPT_CD_ID =
+                (SELECT DEPT_CD_ID FROM TN_MNGR WHERE PIC_ID = A.PRMSN_ID)
+            ) AS PERM_CHRG_DEPT_NM,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.PRMSN_ID) AS PERM_PIC_NM,
+        </trim>
+        FROM
+            TN_ACCES_CTRL A
+        <include refid="incAccesCtrlWhere"/>
+    </select>
+
+    <!-- 접근제어 조회 목록 카운트 -->
+    <select id="selectAccesCtrlListCount" parameterType="accesCtrlVo" resultType="int">
+        SELECT
+            COUNT(A.REG_SN) AS TOTAL_COUNT
+        FROM
+            TN_ACCES_CTRL A
+        <include refid="incAccesCtrlWhere"/>
+    </select>
+
+    <!-- 접근제어 등록 -->
+    <insert id="insertAccesCtrl" parameterType="accesCtrlVo">
+        <selectKey order="BEFORE" keyProperty="regSn" resultType="int">
+            SELECT NVL(MAX(REG_SN), 0) + 1
+            FROM TN_ACCES_CTRL
+        </selectKey>
+        INSERT INTO TN_ACCES_CTRL (
+        <trim suffixOverrides=",">
+            REG_SN,
+            PRMSN_TYPE_NM,
+            PRMSN_ID,
+            PRMSN_BGNG_IP,
+            PRMSN_END_IP,
+            USE_YN,
+            RGTR_ID,
+            REG_DT,
+        </trim>
+        ) VALUES (
+        <trim suffixOverrides=",">
+            #{regSn},
+            #{prmsnTypeNm},
+            #{prmsnId},
+            #{prmsnBgngIp},
+            #{prmsnEndIp},
+            #{useYn},
+            #{rgtrId},
+            SYSDATETIME,
+        </trim>
+        )
+    </insert>
+
+    <!-- 접근제어 수정 -->
+    <update id="updateAccesCtrl" parameterType="accesCtrlVo">
+        UPDATE TN_ACCES_CTRL
+          <set>
+            PRMSN_TYPE_NM = #{prmsnTypeNm},
+            PRMSN_ID = #{prmsnId},
+            PRMSN_BGNG_IP = #{prmsnBgngIp},
+            PRMSN_END_IP = #{prmsnEndIp},
+            USE_YN = #{useYn},
+            MDFR_ID = #{mdfrId},
+            UPDT_DT = SYSDATETIME,
+          </set>
+        WHERE
+             REG_SN = #{paramMap.q_regSn}
+    </update>
+
+    <!-- 접근제어 삭제 -->
+    <delete id="deleteAccesCtrl" parameterType="accesCtrlVo">
+        DELETE FROM TN_ACCES_CTRL
+        WHERE
+             REG_SN = #{paramMap.q_regSn}
+    </delete>
+
+</mapper>

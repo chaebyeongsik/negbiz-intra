@@ -1,0 +1,32 @@
+/* barchart css templete */
+.bar {
+    fill: orange;
+}
+
+.bar:hover {
+    fill: orangered;
+}
+
+.barText {
+    font-size: 9pt;
+    text-anchor: middle;
+}
+
+.axis {
+    font: 10px sans-serif;
+}
+
+.axis path,.axis line {
+    fill: none;
+    stroke: #000;
+    shape-rendering: crispEdges;
+}
+
+.x.axis path {
+    display: none;
+}
+
+/* piechart css templete */
+.arc path {
+    stroke: #fff;
+}

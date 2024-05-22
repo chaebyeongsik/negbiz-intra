@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="zesinc.login.LoginMapper">
+
+    <!-- 조회 -->
+    <select id="selectLogin" parameterType="loginVo" resultType="loginVo">
+        SELECT
+            A.PIC_ID,
+            A.PIC_NM,
+            A.PIC_PSWD,
+            A.JBGD_CD_ID,
+            A.TASK_CN,
+            A.RGN_TELNO,
+            A.TELOFC_TELNO,
+            A.INDIV_TELNO,
+            A.RGN_FXNO,
+            A.TELOFC_FXNO,
+            A.INDIV_FXNO,
+            A.MBL_RGN_TELNO,
+            A.MBL_TELOFC_TELNO,
+            A.MBL_INDIV_TELNO,
+            A.EML_ID,
+            A.EML_SITE_NM,
+            A.LGN_NMTM,
+            A.LGN_DT,
+            A.USE_YN,
+            A.AVTSMT_EXCN_YN,
+            A.EML_AVTSMT_YN,
+            A.SMS_AVTSMT_YN,
+            A.PSWD_CHG_DT,
+            A.TRGT_YN,
+            A.STTS_SN,
+            A.STTS_BGNG_DT,
+            A.STTS_END_DT,
+            A.RGTR_ID,
+            A.REG_DT,
+            A.MDFR_ID,
+            A.UPDT_DT,
+            A.DEPT_CD_ID,
+            (SELECT DEPT_NM FROM TN_DEPT WHERE DEPT_CD_ID = A.DEPT_CD_ID) AS DEPT_NM,
+            NVL(A.LGN_FAIL_NMTM, 0) AS LGN_FAIL_NMTM
+        FROM
+            TN_MNGR A
+        WHERE
+                A.PIC_ID = #{picId}
+    </select>
+
+    <!-- GPKI 조회 -->
+    <select id="selectGpkiLogin" parameterType="loginVo" resultType="loginVo">
+        SELECT
+            A.PIC_ID,
+            A.PIC_PSWD
+        FROM
+            TN_MNGR A
+        WHERE
+                A.ACNT_NM = #{acntNm}
+    </select>
+
+    <!-- 접근제어 목록 -->
+    <select id="selectAccessCtrlList" parameterType="loginAccesCtrlVo" resultType="loginAccesCtrlVo">
+        SELECT
+        <trim suffixOverrides=",">
+            A.PRMSN_TYPE_NM,
+            A.PRMSN_ID,
+            A.PRMSN_BGNG_IP,
+            A.PRMSN_END_IP,
+        </trim>
+        FROM
+            TN_ACCES_CTRL A
+        WHERE
+            USE_YN = 'Y'
+        <if test="prmsnTypeNm != null and prmsnTypeNm != ''">
+            A.PRMSN_TYPE_NM = #{prmsnTypeNm}
+        </if>
+    </select>
+
+    <!-- 최종 로그인 정보 수정 -->
+    <update id="updateLoginCnt" parameterType="loginVo">
+        UPDATE TN_MNGR SET
+            LGN_NMTM = NVL(LGN_NMTM, 0) + 1,
+            LGN_DT = SYSDATETIME,
+            LGN_FAIL_NMTM = 0
+         WHERE
+            PIC_ID = #{picId}
+    </update>
+
+    <!-- 로그인 실패 카운트 수정 -->
+    <update id="updateLoginFailCnt" parameterType="loginVo">
+        UPDATE TN_MNGR
+           SET LGN_FAIL_NMTM = NVL(LGN_FAIL_NMTM, 0) + 1
+         WHERE PIC_ID = #{picId}
+    </update>
+
+    <!-- 계정사용중지 -->
+    <update id="updateMngrUseStop" parameterType="loginVo">
+        UPDATE TN_MNGR
+           SET USE_YN = 'N'
+         WHERE PIC_ID = #{picId}
+    </update>
+
+</mapper>

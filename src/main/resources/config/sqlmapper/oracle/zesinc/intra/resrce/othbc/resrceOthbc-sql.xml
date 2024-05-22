@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="zesinc.intra.resrce.othbc.ResrceOthbcMapper">
+
+    <!-- 자원 조회 -->
+    <select id="selectResrceOthbc" parameterType="resrceVo" resultType="resrceVo">
+        SELECT
+        <trim suffixOverrides=",">
+            A.DATA_SN,
+            A.CHG_CYCL,
+            A.TTL,
+            A.DATA_TYPE_NO,
+            A.DATA_DTL_TYPE_NM,
+            A.CTGRY_SN,
+            (SELECT CTGRY_PATH_NM FROM TN_RESRCE_CTGRY WHERE CTGRY_SN = A.CTGRY_SN) AS CTGRY_PATH_NM,
+            A.DATA_EXPLN,
+            A.DATA_SRCH_NM,
+            A.RLS_YN,
+            A.RLS_DT,
+            A.USE_YN,
+            A.SRC_NM,
+            A.SRC_EXPLN,
+            A.RGTR_ID,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.RGTR_ID) AS RGTR_NM,
+            A.REG_DT,
+            A.MDFR_ID,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.MDFR_ID) AS UPDUSR_NM,
+            A.UPDT_DT,
+            B.WRT_TYPE_NM,
+            B.CONTS_CN
+        </trim>
+        FROM
+            TN_RESRCE A LEFT OUTER JOIN  TN_RESRCE_CNTNTS B
+        ON
+                A.DATA_SN = B.DATA_SN
+            AND A.CHG_CYCL = B.CHG_CYCL
+        WHERE
+                A.DATA_SN = #{paramMap.q_dataSn}
+            AND A.CHG_CYCL = #{paramMap.q_chgCycl}
+    </select>
+
+
+    <!-- 자원 목록 -->
+    <sql id="incResrceOthbcWhere">
+        <where>
+            AND A.USE_YN = 'Y'
+            AND (
+                    A.RGTR_ID = #{paramMap.q_rgtrId}
+                OR A.RLS_YN = 'Y'
+            )
+            <if test="paramMap.q_searchVal != null and paramMap.q_searchVal != ''">
+            AND (
+                A.TTL LIKE '%' ||  #{paramMap.q_searchVal} || '%'
+                OR
+                A.DATA_EXPLN LIKE '%' ||  #{paramMap.q_searchVal} || '%'
+                OR
+                A.DATA_SRCH_NM LIKE '%' ||  #{paramMap.q_searchVal} || '%'
+            )
+            </if>
+            <if test="paramMap.q_ctgryNm != null and paramMap.q_ctgryNm != ''">
+            AND A.CTGRY_SN IN (SELECT CTGRY_SN FROM TN_RESRCE_CTGRY WHERE CTGRY_NM LIKE '%' ||  #{paramMap.q_ctgryNm} || '%')
+            </if>
+            <if test="paramMap.q_ctgrySn != null and paramMap.q_ctgrySn != ''">
+            AND A.CTGRY_SN = #{paramMap.q_ctgrySn}
+            </if>
+            <if test="paramMap.q_dataTypeNo != null and paramMap.q_dataTypeNo != ''">
+            AND A.DATA_TYPE_NO = #{paramMap.q_dataTypeNo}
+            </if>
+            <if test="paramMap.q_dataDtlTypeNm != null and paramMap.q_dataDtlTypeNm != ''">
+            AND A.DATA_DTL_TYPE_NM = #{paramMap.q_dataDtlTypeNm}
+            </if>
+        </where>
+    </sql>
+    <select id="selectResrceOthbcList" parameterType="resrceVo" resultType="resrceVo">
+        SELECT Y.* FROM (
+            SELECT ROWNUM NUM, X.* FROM (
+                SELECT
+                <trim suffixOverrides=",">
+                    A.DATA_SN,
+                    A.CHG_CYCL,
+                    A.TTL,
+                    A.DATA_TYPE_NO,
+                    A.DATA_DTL_TYPE_NM,
+                    A.CTGRY_SN,
+                    (SELECT CTGRY_PATH_NM FROM TN_RESRCE_CTGRY WHERE CTGRY_SN = A.CTGRY_SN) AS CTGRY_PATH_NM,
+                    A.DATA_EXPLN,
+                    A.DATA_SRCH_NM,
+                    A.RLS_YN,
+                    A.RLS_DT,
+                    A.USE_YN,
+                    A.SRC_NM,
+                    A.SRC_EXPLN,
+                    A.RGTR_ID,
+                    (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.RGTR_ID) AS RGTR_NM,
+                    A.REG_DT,
+                    A.MDFR_ID,
+                    (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.MDFR_ID) AS UPDUSR_NM,
+                    A.UPDT_DT,
+                </trim>
+                FROM
+                    TN_RESRCE A
+                <include refid="incResrceOthbcWhere"/>
+                ORDER BY A.DATA_SN, A.CHG_CYCL
+            ) X
+            WHERE ROWNUM &lt;= #{paramMap.q_pagingEndNum}
+         ) Y
+         WHERE NUM &gt;= #{paramMap.q_pagingStartNum}
+    </select>
+
+    <!-- 자원 조회 목록 카운트 -->
+    <select id="selectResrceOthbcListCount" parameterType="resrceVo" resultType="int">
+        SELECT
+            COUNT(A.DATA_SN) AS TOTAL_COUNT
+        FROM
+            TN_RESRCE A
+        <include refid="incResrceOthbcWhere"/>
+    </select>
+</mapper>

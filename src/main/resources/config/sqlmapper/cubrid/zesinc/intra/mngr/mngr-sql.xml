@@ -1,0 +1,428 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="zesinc.intra.mngr.MngrMapper">
+
+    <!-- 관리자 조회 -->
+    <select id="selectMngr" parameterType="mngrVo" resultType="mngrVo">
+        SELECT
+            A.PIC_ID,
+            A.DEPT_CD_ID,
+            (SELECT DEPT_NM
+               FROM TN_DEPT
+              WHERE DEPT_CD_ID = A.DEPT_CD_ID) AS DEPT_NM,
+            A.PIC_NM,
+            A.PIC_PSWD,
+            A.JBGD_CD_ID,
+            (SELECT CD_NM
+               FROM TC_CODE
+              WHERE UP_CD_ID = 'ofcps'
+                AND CD_ID = A.JBGD_CD_ID) AS CLSF_NM,
+            A.TASK_CN,
+            A.RGN_TELNO,
+            A.TELOFC_TELNO,
+            A.INDIV_TELNO,
+            A.RGN_FXNO,
+            A.TELOFC_FXNO,
+            A.INDIV_FXNO,
+            A.MBL_RGN_TELNO,
+            A.MBL_TELOFC_TELNO,
+            A.MBL_INDIV_TELNO,
+            A.EML_ID,
+            A.EML_SITE_NM,
+            A.LGN_NMTM,
+            TO_CHAR(A.LGN_DT, 'YYYY-MM-DD HH24:MI') AS LGN_DT,
+            A.USE_YN,
+            A.AVTSMT_EXCN_YN,
+            A.EML_AVTSMT_YN,
+            A.SMS_AVTSMT_YN,
+            A.PSWD_CHG_DT,
+            A.RGTR_ID,
+            A.ACNT_NM,
+            TO_CHAR(A.REG_DT, 'YYYY-MM-DD HH24:MI') AS REG_DT,
+            A.MDFR_ID,
+            TO_CHAR(A.UPDT_DT, 'YYYY-MM-DD HH24:MI') AS UPDT_DT
+        FROM
+            TN_MNGR A
+        WHERE
+                 A.PIC_ID = #{paramMap.q_picId}
+    </select>
+
+    <!-- 관리자 목록 -->
+    <sql id="incMngrWhere">
+        <where>
+            <if test="paramMap.q_deptCdId != null and paramMap.q_deptCdId != ''">
+                 A.DEPT_CD_ID = #{paramMap.q_deptCdId}
+            </if>
+            <if test="paramMap.q_deptNm != null and paramMap.q_deptNm != ''">
+                 AND B.DEPT_NM LIKE '%' || #{paramMap.q_deptNm} || '%'
+            </if>
+            <if test="paramMap.q_searchVal != null  and paramMap.q_searchVal != ''">
+                AND (A.PIC_ID LIKE '%' || #{paramMap.q_searchVal} || '%'
+                        OR A.PIC_NM LIKE '%' || #{paramMap.q_searchVal} || '%')
+             </if>
+        </where>
+    </sql>
+    <select id="selectMngrList" parameterType="mngrVo" resultType="mngrVo">
+        SELECT Y.* FROM (
+            SELECT ROWNUM NUM, X.* FROM (
+                SELECT
+                <trim suffixOverrides=",">
+                    A.PIC_ID,
+                    A.DEPT_CD_ID,
+                    (SELECT DEPT_NM
+                       FROM TN_DEPT
+                      WHERE DEPT_CD_ID = A.DEPT_CD_ID) AS DEPT_NM,
+                    (SELECT DEPT_NM
+                       FROM TN_DEPT WHERE DEPT_CD_ID != '0' AND DEPT_CD_ID = B.UP_DEPT_CD_ID) AS UPPER_DEPT_NM,
+                    A.PIC_NM,
+                    A.PIC_PSWD,
+                    A.JBGD_CD_ID,
+                    (SELECT CD_NM
+                       FROM TC_CODE
+                      WHERE UP_CD_ID = 'ofcps'
+                        AND CD_ID = A.JBGD_CD_ID) AS CLSF_NM,
+                    A.TASK_CN,
+                    A.RGN_TELNO,
+                    A.TELOFC_TELNO,
+                    A.INDIV_TELNO,
+                    A.RGN_FXNO,
+                    A.TELOFC_FXNO,
+                    A.INDIV_FXNO,
+                    A.MBL_RGN_TELNO,
+                    A.MBL_TELOFC_TELNO,
+                    A.MBL_INDIV_TELNO,
+                    A.EML_ID,
+                    A.EML_SITE_NM,
+                    A.LGN_NMTM,
+                    TO_CHAR(A.LGN_DT, 'YYYY-MM-DD HH24:MI') AS LGN_DT,
+                    A.USE_YN,
+                    A.RGTR_ID,
+                    TO_CHAR(A.REG_DT, 'YYYY-MM-DD HH24:MI') AS REG_DT,
+                    A.MDFR_ID,
+                    TO_CHAR(A.UPDT_DT, 'YYYY-MM-DD HH24:MI') AS UPDT_DT,
+                </trim>
+                FROM
+                    TN_MNGR A LEFT OUTER JOIN TN_DEPT B
+                ON
+                    A.DEPT_CD_ID = B.DEPT_CD_ID
+                <include refid="incMngrWhere"/>
+                ORDER BY A.REG_DT DESC
+            ) X
+            WHERE ROWNUM &lt;= #{paramMap.q_pagingEndNum}
+         ) Y
+         WHERE NUM &gt;= #{paramMap.q_pagingStartNum}
+    </select>
+
+    <!-- 관리자 조회 목록 카운트 -->
+    <select id="selectMngrListCount" parameterType="mngrVo" resultType="int">
+        SELECT
+            COUNT(A.PIC_ID) AS TOTAL_COUNT
+        FROM
+            TN_MNGR A LEFT OUTER JOIN TN_DEPT B
+        ON
+            A.DEPT_CD_ID = B.DEPT_CD_ID
+        <include refid="incMngrWhere"/>
+    </select>
+
+    <!-- 관리자 등록 -->
+    <insert id="insertMngr" parameterType="mngrVo">
+        INSERT INTO TN_MNGR (
+        <trim suffixOverrides=",">
+            PIC_ID,
+            DEPT_CD_ID,
+            PIC_NM,
+            PIC_PSWD,
+            JBGD_CD_ID,
+            TASK_CN,
+            RGN_TELNO,
+            TELOFC_TELNO,
+            INDIV_TELNO,
+            RGN_FXNO,
+            TELOFC_FXNO,
+            INDIV_FXNO,
+            MBL_RGN_TELNO,
+            MBL_TELOFC_TELNO,
+            MBL_INDIV_TELNO,
+            EML_ID,
+            EML_SITE_NM,
+            LGN_NMTM,
+            USE_YN,
+            AVTSMT_EXCN_YN,
+            EML_AVTSMT_YN,
+            SMS_AVTSMT_YN,
+            RGTR_ID,
+            REG_DT,
+        </trim>
+        ) VALUES (
+        <trim suffixOverrides=",">
+            #{picId},
+            #{deptCdId},
+            #{picNm},
+            #{picPswd},
+            #{jbgdCdId},
+            #{taskCn},
+            #{rgnTelno},
+            #{telofcTelno},
+            #{indivTelno},
+            #{rgnFxno},
+            #{telofcFxno},
+            #{indivFxno},
+            #{mblRgnTelno},
+            #{mblTelofcTelno},
+            #{mblIndivTelno},
+            #{emlId},
+            #{emlSiteNm},
+            0,
+            #{useYn},
+            #{avtsmtExcnYn},
+            #{emlAvtsmtYn},
+            #{smsAvtsmtYn},
+            #{rgtrId},
+            SYSDATETIME,
+        </trim>
+        )
+    </insert>
+
+    <!-- 관리자 수정 -->
+    <update id="updateMngr" parameterType="mngrVo">
+        UPDATE TN_MNGR
+          <set>
+          <if test="changePasswd != null  and changePasswd != ''">
+            PIC_PSWD = #{changePasswd},
+            PSWD_CHG_DT = SYSDATETIME,
+          </if>
+            DEPT_CD_ID = #{deptCdId},
+            PIC_NM = #{picNm},
+            JBGD_CD_ID = #{jbgdCdId},
+            TASK_CN = #{taskCn},
+            RGN_TELNO = #{rgnTelno},
+            TELOFC_TELNO = #{telofcTelno},
+            INDIV_TELNO = #{indivTelno},
+            RGN_FXNO = #{rgnFxno},
+            TELOFC_FXNO = #{telofcFxno},
+            INDIV_FXNO = #{indivFxno},
+            MBL_RGN_TELNO = #{mblRgnTelno},
+            MBL_TELOFC_TELNO = #{mblTelofcTelno},
+            MBL_INDIV_TELNO = #{mblIndivTelno},
+            EML_ID = #{emlId},
+            EML_SITE_NM = #{emlSiteNm},
+            USE_YN = #{useYn},
+            AVTSMT_EXCN_YN = #{avtsmtExcnYn},
+            EML_AVTSMT_YN = #{emlAvtsmtYn},
+            SMS_AVTSMT_YN = #{smsAvtsmtYn},
+            MDFR_ID = #{mdfrId},
+            UPDT_DT = SYSDATETIME,
+          </set>
+        WHERE
+             PIC_ID = #{paramMap.q_picId}
+    </update>
+
+    <!-- 담당자본인 수정 -->
+    <update id="updateCharger" parameterType="mngrVo">
+        UPDATE TN_MNGR
+          <set>
+          <if test="changePasswd != null  and changePasswd != ''">
+            PIC_PSWD = #{changePasswd},
+            PSWD_CHG_DT = SYSDATETIME,
+          </if>
+            JBGD_CD_ID = #{jbgdCdId},
+            TASK_CN = #{taskCn},
+            RGN_TELNO = #{rgnTelno},
+            TELOFC_TELNO = #{telofcTelno},
+            INDIV_TELNO = #{indivTelno},
+            RGN_FXNO = #{rgnFxno},
+            TELOFC_FXNO = #{telofcFxno},
+            INDIV_FXNO = #{indivFxno},
+            MBL_RGN_TELNO = #{mblRgnTelno},
+            MBL_TELOFC_TELNO = #{mblTelofcTelno},
+            MBL_INDIV_TELNO = #{mblIndivTelno},
+            EML_ID = #{emlId},
+            EML_SITE_NM = #{emlSiteNm},
+            AVTSMT_EXCN_YN = #{avtsmtExcnYn},
+            EML_AVTSMT_YN = #{emlAvtsmtYn},
+            SMS_AVTSMT_YN = #{smsAvtsmtYn},
+            MDFR_ID = #{mdfrId},
+            UPDT_DT = SYSDATETIME,
+          </set>
+        WHERE
+             PIC_ID = #{paramMap.q_picId}
+    </update>
+
+    <!-- 이전 GPKI 인증서 삭제 -->
+    <update id="updateCrtfcAcnt" parameterType="mngrVo">S
+        UPDATE TN_MNGR SET
+            ACNT_NM = ''
+        WHERE
+            ACNT_NM = #{acntNm}
+    </update>
+
+    <!-- 인증서 등록 수정 -->
+    <update id="updateMngrCrtfcAcnt" parameterType="mngrVo">
+        UPDATE TN_MNGR
+          <set>
+                ACNT_NM = #{acntNm}
+          </set>
+        WHERE
+             PIC_ID = #{paramMap.q_picId}
+    </update>
+
+    <!-- 관리자 삭제 -->
+    <delete id="deleteMngr" parameterType="mngrVo">
+        DELETE
+          FROM TN_MNGR
+         WHERE PIC_ID = #{paramMap.q_picId}
+    </delete>
+
+    <!-- 관리자 다중삭제 -->
+    <delete id="deleteListMngr" parameterType="mngrVo">
+        DELETE
+          FROM TN_MNGR
+         WHERE PIC_ID IN ( <foreach collection="picIdArray" item="item" separator=", ">#{item}</foreach> )
+    </delete>
+
+    <!-- 담당자 사용여부 수정 -->
+    <update id="updateUseYn" parameterType="mngrVo">
+        UPDATE TN_MNGR
+           SET
+            <if test="useYn != null and useYn != ''">
+                USE_YN = #{useYn},
+            </if>
+                UPDT_DT = SYSDATETIME,
+                MDFR_ID = #{mdfrId}
+         WHERE  PIC_ID  = #{picId}
+    </update>
+
+    <!-- 담당자아이디 중복검사 -->
+    <select id="selectDplctChckId" parameterType="mngrVo" resultType="int">
+        SELECT COUNT(A.PIC_ID) AS TOTAL_COUNT
+          FROM TN_MNGR A
+         WHERE A.PIC_ID = #{picId}
+    </select>
+
+    <!-- 부서이동 담당자 목록 -->
+    <select id="selectDeptTrnsferList" parameterType="mngrVo" resultType="mngrVo">
+        SELECT
+            A.PIC_NM,
+            B.CD_NM AS CLSF_NM,
+            A.DEPT_CD_ID,
+            (SELECT DEPT_NM FROM TN_DEPT WHERE DEPT_CD_ID = A.DEPT_CD_ID) AS DEPT_NM
+        FROM
+            TN_MNGR A LEFT OUTER JOIN TC_CODE B
+        ON
+                B.CD_ID = A.JBGD_CD_ID
+            AND B.HGHRK_CD_ID = 'ofcps'
+        WHERE
+            A.PIC_ID IN ( <foreach collection="picIdArray" item="item" separator=", ">#{item}</foreach> )
+        ORDER BY A.PIC_NM
+    </select>
+
+    <!-- 담당자 부서이동 전 기존 할당권한삭제 -->
+    <delete id="deleteExistingAuth" parameterType="mngrVo">
+        DELETE
+          FROM TN_MNGR_AUTHOR_ASGN
+         WHERE PIC_ID IN ( <foreach collection="picIdArray" item="item" separator=", ">#{item}</foreach> )
+     </delete>
+
+    <!-- 담당자 부서이동 -->
+    <update id="updateDeptTrnsfer" parameterType="mngrVo">
+        UPDATE TN_MNGR
+           SET DEPT_CD_ID = #{deptCdId},
+               UPDT_DT = SYSDATETIME,
+               MDFR_ID = #{mdfrId}
+         WHERE PIC_ID IN ( <foreach collection="picIdArray" item="item" separator=", ">#{item}</foreach> )
+    </update>
+
+    <!-- 권한목록 -->
+    <select id="selectAuthorList" parameterType="mngrVo" resultType="authorVo">
+        SELECT AUTHRT_NM,
+               AUTHRT_CD_ID,
+               (SELECT COUNT(1)
+                  FROM TN_MNGR_AUTHOR_ASGN B
+                 WHERE A.AUTHRT_CD_ID = B.AUTHRT_CD_ID
+                   AND B.PIC_ID  = #{picId}) AS AUTHOR_CNT
+          FROM TN_AUTHOR A
+         ORDER BY AUTHRT_NM ASC
+     </select>
+
+    <!-- 권한할당목록 -->
+    <select id="selectAuthorAsgnList" parameterType="mngrVo" resultType="authorVo">
+        SELECT B.AUTHRT_NM,
+               B.AUTHRT_CD_ID
+          FROM TN_MNGR_AUTHOR_ASGN A,
+               TN_AUTHOR B
+         WHERE A.PIC_ID  = #{picId}
+           AND A.AUTHRT_CD_ID = B.AUTHRT_CD_ID
+         ORDER BY B.AUTHRT_NM
+     </select>
+
+    <!-- 담당자 권한할당 -->
+    <insert id="insertAuth" parameterType="mngrVo">
+        INSERT INTO TN_MNGR_AUTHOR_ASGN (
+            AUTHRT_CD_ID,
+            PIC_ID,
+            RGTR_ID,
+            REG_DT
+        ) VALUES (
+            #{authrtCdId},
+            #{picId},
+            #{rgtrId},
+            SYSDATETIME
+        )
+     </insert>
+
+    <!-- 담당자 할당권한삭제 -->
+    <delete id="deleteAuth" parameterType="mngrVo">
+        DELETE
+          FROM TN_MNGR_AUTHOR_ASGN
+         WHERE PIC_ID = #{picId}
+     </delete>
+
+    <!-- 담당자 권한할당된 메뉴목록 -->
+    <select id="selectAuthorAsgnMenuList" parameterType="mngrVo" resultType="authorAsgnVo">
+        SELECT A.MENU_SN,
+               (SELECT MENU_NM FROM TN_MENU WHERE MENU_SN = A.MENU_SN) AS MENU_NM,
+               A.MAX_AUTHOR_ASGN_CODE AS AUTHRT_GRNT_CD_ID
+          FROM (
+                SELECT MENU_SN, MAX(AUTHRT_GRNT_CD_ID) AS MAX_AUTHOR_ASGN_CODE
+                  FROM TN_MENU_AUTHOR_ASGN
+                 WHERE AUTHRT_CD_ID IN (
+                                       SELECT Y.AUTHRT_CD_ID
+                                         FROM TN_MNGR_AUTHOR_ASGN X, TN_AUTHOR Y
+                                        WHERE X.PIC_ID = #{picId}
+                                          AND X.AUTHRT_CD_ID = Y.AUTHRT_CD_ID
+                                      )
+                GROUP BY MENU_SN
+               ) A
+        ORDER BY A.MENU_SN
+     </select>
+
+    <select id="selectMngrListExcel" parameterType="excelDownloadVo" resultType="hmap">
+        SELECT A.DEPT_CD_ID,
+               (SELECT DEPT_NM FROM TN_DEPT WHERE DEPT_CD_ID = A.DEPT_CD_ID) AS DEPT_NM,
+               A.PIC_ID,
+               A.PIC_NM,
+               A.JBGD_CD_ID,
+               (SELECT CD_NM
+                  FROM TC_CODE
+                 WHERE UP_CD_ID = 'ofcps'
+                   AND CD_ID = A.JBGD_CD_ID) AS CLSF_NM,
+               A.TASK_CN,
+               A.RGN_TELNO,
+               A.TELOFC_TELNO,
+               A.INDIV_TELNO,
+               A.RGN_FXNO,
+               A.TELOFC_FXNO,
+               A.INDIV_FXNO,
+               A.MBL_RGN_TELNO,
+               A.MBL_TELOFC_TELNO,
+               A.MBL_INDIV_TELNO,
+               (A.EML_ID || NVL2(A.EML_SITE_NM, '@', '') || A.EML_SITE_NM) AS EMAIL,
+               A.LGN_NMTM,
+               TO_CHAR(A.LGN_DT, 'YYYY-MM-DD HH24:MI') AS LGN_DT,
+               A.USE_YN
+          FROM TN_MNGR A
+         WHERE A.DEPT_CD_ID = #{paramMap.q_deptCdId}
+        ORDER BY A.REG_DT DESC
+    </select>
+
+</mapper>

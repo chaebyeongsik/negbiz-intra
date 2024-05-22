@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+    <cms-config>
+
+        <!-- 메뉴 생성시 초기화 값 (변수명을 기준으로 생성) -->
+        <default-values>
+            <!-- 권한유형 -->
+            <authrtGroupNm>NO_ONE</authrtGroupNm>
+            <!-- 링크유형 -->
+            <linkTypeNm>DEFAULT</linkTypeNm>
+            <!-- 승인여부 -->
+            <aprvYn>N</aprvYn>
+            <!-- 만족도표시여부 -->
+            <dgstfnIndctYn>N</dgstfnIndctYn>
+            <!-- 담당자표시여부 -->
+            <picIndctYn>N</picIndctYn>
+            <!-- 메뉴표시여부 -->
+            <indctYn>N</indctYn>
+            <!-- 사용여부 -->
+            <useYn>Y</useYn>
+            <!-- SNS 사용여부 -->
+            <snsUseYn>N</snsUseYn>
+            <!-- 메뉴유형 -->
+            <menuType>CONTENTS</menuType>
+            <!-- 링크유형 -->
+            <linkTypeNm>DEFAULT</linkTypeNm>
+            <!-- 부모메뉴 레이아웃 사용여부 -->
+            <upLytUseYn>Y</upLytUseYn>
+        </default-values>
+
+        <!-- 주의 !! 반드시 경로는 / 로 표시하며 제일 마지막을 / 로 닫아 주어야 합니다. -->
+        <basePath>
+            <decoratorFileRoot>WEB-INF/jsp/common/decorator/</decoratorFileRoot>
+            <menuDataRoot>webcontent/menu/data/</menuDataRoot>
+            <resourceFileRoot>webcontent/menu/resources/</resourceFileRoot>
+        </basePath>
+
+        <!-- 고정 URL 정보 -->
+        <urls>
+            <adminUrl>/intra/cms/cntnts/PD_updateCmsCntntsForm.do</adminUrl>
+            <cssValidate>http://jigsaw.w3.org/css-validator/validator?uri=</cssValidate>
+            <htmlValidate>http://validator.kldp.org/check?uri=</htmlValidate>
+        </urls>
+
+        <layouts>
+        </layouts>
+
+        <contents>
+        </contents>
+
+        <dummyRoot>
+            <hghrkMenuEngNm>ROOT</hghrkMenuEngNm>
+            <parentMenuCode>DOMAIN</parentMenuCode>
+            <menuSn>web</menuSn>
+            <menuNm>dummy</menuNm>
+            <menuDepth>-1</menuDepth>
+            <sortOrder>-1</sortOrder>
+        </dummyRoot>
+
+        <htmlOp>
+            <![CDATA[
+<!DOCTYPE html>
+<html lang="ko">
+            ]]>
+        </htmlOp>
+
+        <headOp>
+            <![CDATA[
+<head>
+            ]]>
+        </headOp>
+
+        <titleOp>
+            <![CDATA[
+<title>
+            ]]>
+        </titleOp>
+        <titleEd>
+            <![CDATA[
+</title>
+            ]]>
+        </titleEd>
+
+        <headEd>
+            <![CDATA[
+</head>
+            ]]>
+        </headEd>
+
+        <bodyOp>
+            <![CDATA[
+<body>
+            ]]>
+        </bodyOp>
+
+        <cclOp>
+            <![CDATA[
+<div id="ccl-container" class="ccl-content">
+            ]]>
+        </cclOp>
+
+        <cclEd>
+            <![CDATA[
+</div>
+            ]]>
+        </cclEd>
+
+        <bodyEd>
+            <![CDATA[
+</body>
+            ]]>
+        </bodyEd>
+
+        <htmlEd>
+            <![CDATA[
+</html>
+            ]]>
+        </htmlEd>
+
+    </cms-config>
+<typeAliases></typeAliases>
+</configuration>

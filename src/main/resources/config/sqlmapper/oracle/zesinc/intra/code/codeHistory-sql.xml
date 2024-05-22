@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="zesinc.intra.code.CodeHistoryMapper">
+
+    <!-- 코드이력 조회 -->
+    <select id="selectCodeHistory" parameterType="codeHistoryVo" resultType="codeHistoryVo">
+        SELECT
+        <trim suffixOverrides=",">
+            A.LOG_SN,
+            A.HGHRK_CD_ID,
+            A.CD_ID,
+            A.LOG_DT,
+            A.LOG_TYPE,
+            A.CD_NM,
+            A.PBADMS_STD_CD_ID,
+            A.PBADMS_STD_CD_YN,
+            A.UP_CD_ID,
+            A.MTLNG_CD_NM,
+            A.CD_EXPLN,
+            A.SORT_SN,
+            A.USE_YN,
+            A.MDFR_ID,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.MDFR_ID) AS UPDUSR_NM
+        </trim>
+        FROM
+            TH_CODE A
+        WHERE
+                A.LOG_SN = #{paramMap.q_logSn}
+            AND A.HGHRK_CD_ID = #{paramMap.q_hghrkCdId}
+            AND A.CD_ID = #{paramMap.q_cdId}
+    </select>
+
+    <!-- 코드이력 목록 -->
+    <sql id="incCodeHistoryWhere">
+        <where>
+            <if test="paramMap.q_searchVal != null and paramMap.q_searchVal != ''">
+                AND A.CD_NM LIKE '%' || #{paramMap.q_searchVal} || '%'
+            </if>
+        </where>
+    </sql>
+    <select id="selectCodeHistoryList" parameterType="codeHistoryVo" resultType="codeHistoryVo">
+        SELECT Y.* FROM (
+            SELECT ROWNUM NUM, X.* FROM (
+                SELECT
+                <trim suffixOverrides=",">
+                    A.LOG_SN,
+                    A.HGHRK_CD_ID,
+                    A.CD_ID,
+                    A.LOG_DT,
+                    A.LOG_TYPE,
+                    A.CD_NM,
+                    A.PBADMS_STD_CD_ID,
+                    A.PBADMS_STD_CD_YN,
+                    A.UP_CD_ID,
+                    A.MTLNG_CD_NM,
+                    A.SORT_SN,
+                    A.USE_YN,
+                    A.MDFR_ID,
+                    (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.MDFR_ID) AS UPDUSR_NM
+                </trim>
+                FROM
+                    TH_CODE A
+                <include refid="incCodeHistoryWhere"/>
+                ORDER BY A.HGHRK_CD_ID ASC, A.CD_ID ASC, A.SORT_SN ASC
+            ) X
+            WHERE ROWNUM &lt;= #{paramMap.q_pagingEndNum}
+         ) Y
+         WHERE NUM &gt;= #{paramMap.q_pagingStartNum}
+    </select>
+
+    <!-- 코드이력 조회 목록 카운트 -->
+    <select id="selectCodeHistoryListCount" parameterType="codeHistoryVo" resultType="int">
+        SELECT
+            COUNT(A.LOG_DT) AS TOTAL_COUNT
+        FROM
+            TH_CODE A
+        <include refid="incCodeHistoryWhere"/>
+    </select>
+
+    <!-- 코드이력 등록 -->
+    <insert id="insertCodeHistory" parameterType="codeVo">
+        <selectKey order="BEFORE" keyProperty="logSn" resultType="int">
+            SELECT NVL(MAX(LOG_SN), 0) +1 AS logSn FROM TH_CODE
+            WHERE
+                    CD_ID = #{paramMap.q_cdId}
+                AND HGHRK_CD_ID = #{paramMap.q_hghrkCdId}
+        </selectKey>
+        INSERT INTO TH_CODE (
+        <trim suffixOverrides=",">
+            LOG_SN,
+            CD_ID,
+            HGHRK_CD_ID,
+            LOG_DT,
+            LOG_TYPE,
+            UP_CD_ID,
+            CD_NM,
+            PBADMS_STD_CD_ID,
+            PBADMS_STD_CD_YN,
+            MTLNG_CD_NM,
+            CD_EXPLN,
+            SORT_SN,
+            USE_YN,
+            MDFR_ID
+        </trim>
+        ) VALUES (
+        <trim suffixOverrides=",">
+            #{logSn},
+            #{cdId},
+            #{hghrkCdId},
+            SYSDATE,
+            #{logType},
+            #{upCdId},
+            #{cdNm},
+            #{pbadmsStdCdId},
+            <choose>
+                <when test="pbadmsStdCdYn != null and pbadmsStdCdYn != ''">#{pbadmsStdCdYn},</when>
+                <otherwise>'N',</otherwise>
+            </choose>
+            #{mtlngCdNm},
+            #{cdExpln},
+            #{sortSn},
+            #{useYn},
+            #{mdfrId}
+        </trim>
+        )
+    </insert>
+
+    <!-- 코드선택이력 조회 -->
+    <select id="selectCodeChoiceHistory" parameterType="cdChcIdHistoryVo" resultType="cdChcIdHistoryVo">
+        SELECT
+        <trim suffixOverrides=",">
+            B.LOG_SN,
+            B.CD_CHC_ID,
+            B.HGHRK_CD_ID,
+            B.CD_ID,
+            B.LWRK_CD_ID,
+            B.LOG_DT,
+            B.LOG_TYPE,
+            B.MDFR_ID,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = B.MDFR_ID) AS UPDUSR_NM
+        </trim>
+        FROM
+            TH_CODE_CHOICE B
+        WHERE
+                B.LOG_SN = #{paramMap.q_logSn}
+            AND B.CD_ID = #{paramMap.q_cdId}
+            AND B.HGHRK_CD_ID = #{paramMap.q_hghrkCdId}
+            AND B.CD_CHC_ID = #{paramMap.q_cdChcId}
+            AND B.LWRK_CD_ID = #{paramMap.q_cdChcId}
+    </select>
+
+    <!-- 코드선택이력 목록 -->
+    <sql id="incCodeChoiceHistoryWhere">
+        <where>
+            <if test="paramMap.q_cdChcId != null and paramMap.q_cdChcId != ''">
+                AND B.CD_CHC_ID = #{paramMap.q_cdChcId}
+            </if>
+            <if test="paramMap.q_searchVal != null and paramMap.q_searchVal != ''">
+                AND A.CD_NM LIKE '%' || #{paramMap.q_searchVal} || '%'
+            </if>
+        </where>
+    </sql>
+    <select id="selectCodeChoiceHistoryList" parameterType="cdChcIdHistoryVo" resultType="cdChcIdHistoryVo">
+        SELECT Y.* FROM (
+            SELECT ROWNUM NUM, X.* FROM (
+                SELECT
+                <trim suffixOverrides=",">
+                    B.LOG_DT,
+                    B.LOG_TYPE,
+                    B.CD_CHC_ID,
+                    B.CD_ID,
+                    B.HGHRK_CD_ID,
+                    B.LWRK_CD_ID,
+                    B.MDFR_ID,
+                    (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = B.MDFR_ID) AS UPDUSR_NM
+                </trim>
+                FROM
+                    TH_CODE_CHOICE B
+                <include refid="incCodeChoiceHistoryWhere"/>
+                ORDER BY B.HGHRK_CD_ID ASC, B.CD_ID ASC, B.CD_CHC_ID ASC
+            ) X
+            WHERE ROWNUM &lt;= #{paramMap.q_pagingEndNum}
+         ) Y
+         WHERE NUM &gt;= #{paramMap.q_pagingStartNum}
+    </select>
+
+    <!-- 코드선택이력 조회 목록 카운트 -->
+    <select id="selectCodeChoiceHistoryListCount" parameterType="cdChcIdHistoryVo" resultType="int">
+        SELECT
+            COUNT(B.LOG_DT) AS TOTAL_COUNT
+        FROM
+            TH_CODE_CHOICE B
+        <include refid="incCodeChoiceHistoryWhere"/>
+    </select>
+
+    <!-- 코드선택이력 등록 -->
+    <insert id="insertCodeChoiceHistory" parameterType="cdChcIdVo">
+        <selectKey order="BEFORE" keyProperty="logSn" resultType="int">
+            SELECT NVL(MAX(LOG_SN), 0) +1 AS logSn FROM TH_CODE_CHOICE
+            WHERE
+                    CD_ID = #{cdId}
+                AND HGHRK_CD_ID = #{hghrkCdId}
+                AND CD_CHC_ID = #{cdChcId}
+                AND LWRK_CD_ID = #{lwrkCdId}
+        </selectKey>
+        INSERT INTO TH_CODE_CHOICE (
+        <trim suffixOverrides=",">
+            LOG_SN,
+            CD_ID,
+            HGHRK_CD_ID,
+            CD_CHC_ID,
+            LWRK_CD_ID,
+            LOG_DT,
+            LOG_TYPE,
+            MDFR_ID
+        </trim>
+        ) VALUES (
+        <trim suffixOverrides=",">
+            #{logSn},
+            #{cdId},
+            #{hghrkCdId},
+            #{cdChcId},
+            #{lwrkCdId},
+            SYSDATE,
+            #{logType},
+            #{mdfrId}
+        </trim>
+        )
+    </insert>
+
+</mapper>

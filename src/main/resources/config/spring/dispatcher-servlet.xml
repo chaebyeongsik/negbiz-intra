@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:p="http://www.springframework.org/schema/p" xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:aop="http://www.springframework.org/schema/aop"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+                        http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
+                        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+    <context:component-scan base-package="zesinc">
+        <context:include-filter type="annotation" expression="org.springframework.stereotype.Controller" />
+        <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Service" />
+        <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Repository" />
+    </context:component-scan>
+
+    <!-- [ HandlerAdapter ] =============================================================== -->
+    <bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter">
+        <property name="customArgumentResolvers">
+            <list>
+                <bean class="zesinc.web.spring.resolver.PagingParamArgumentResolver" />
+                <bean class="zesinc.web.spring.resolver.SearchParamArgumentResolver" />
+            </list>
+        </property>
+    </bean>
+
+    <!-- [ HandlerMapping ] =============================================================== -->
+    <bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping">
+        <property name="order" value="0" />
+        <property name="alwaysUseFullPath" value="true" />
+        <property name="interceptors">
+            <list>
+                <ref bean="manageLoginCheckInterceptor" />
+                <ref bean="protectedUserInterceptor" />
+                <ref bean="userHistInterceptor" />
+            </list>
+        </property>
+    </bean>
+    <bean id="manageLoginCheckInterceptor" class="zesinc.web.spring.interceptor.ManageLoginCheckInterceptor">
+        <property name="include">
+            <list>
+                <value>/intra/**/*</value>
+                <value>/samples/**/*</value>
+                <value>/component/protectedUser/BD_processPwdCheckForm.do</value>
+            </list>
+        </property>
+    </bean>
+    <bean id="userHistInterceptor" class="zesinc.commons.interceptor.UserHistInterceptor">
+        <property name="include">
+            <list>
+                <value>/intra/user/userManage/PD_updateIndvdlUserForm.do</value>
+                <value>/intra/user/userManage/PD_updateEntrprsUserForm.do</value>
+                <value>/intra/user/accessHist/PD_selectUserAccessHist.do</value>
+            </list>
+        </property>
+    </bean>
+    <bean id="protectedUserInterceptor" class="zesinc.commons.interceptor.ProtectedUserInterceptor">
+        <property name="include">
+            <list>
+                <value>/intra/user/userManage/BD_selectUserList.do</value>
+                <value>/intra/user/hist/BD_selectUserLogList.do?q_menuSeCd=R</value>
+                <value>/intra/user/hist/BD_selectUserLogList.do?q_menuSeCd=O</value>
+                <value>/intra/user/hist/BD_selectUserLogList.do?q_menuSeCd=U</value>
+                <value>/intra/user/accessHist/BD_selectUserAccessHistList.do</value>
+            </list>
+        </property>
+    </bean>
+
+    <!-- [ LocaleResolver ] ================================================================= -->
+    <bean id="localeResolver" class="zesinc.web.spring.resolver.OpenworksLocaleResolver" />
+
+    <!-- [ CustomMultipartResolver ] ========================================================== -->
+    <bean id="multipartResolver" class="zesinc.web.spring.resolver.CustomCommonsMultipartResolver" />
+
+    <!-- [ ExceptionResolver ] =============================================================== -->
+    <bean class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
+        <property name="defaultStatusCode" value="500" />
+        <property name="defaultErrorView" value="common/errors/500" />
+        <property name="exceptionMappings">
+            <props>
+                <prop key="zesinc.web.auth.NoAuthException">common/errors/MgrNoAuth</prop>
+            </props>
+        </property>
+    </bean>
+
+    <!-- [ ViewResolver ] =============================================================== -->
+    <bean class="org.springframework.web.servlet.view.BeanNameViewResolver" p:order="0" />
+
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver"
+        p:viewClass="org.springframework.web.servlet.view.JstlView"
+        p:order="1" p:prefix="/WEB-INF/jsp/" p:suffix=".jsp" />
+
+    <!-- properties 설정 로드 -->
+    <context:property-placeholder location="classpath:/config/properties/database-${spring.profiles.active}.properties"/>
+    
+</beans>

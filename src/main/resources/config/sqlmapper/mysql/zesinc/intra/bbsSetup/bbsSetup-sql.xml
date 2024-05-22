@@ -1,0 +1,607 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="zesinc.intra.bbsSetup.BbsSetupMapper">
+
+    <!-- 사용중인 게시판 조회 -->
+    <select id="selectBbsSetupUseChck" parameterType="bbsSetupVo" resultType="int">
+        SELECT
+            COUNT(A.BBS_STNG_SN) AS CNT
+        FROM
+            TN_BBS_SETUP A
+        WHERE
+                 A.BBS_STNG_SN = #{paramMap.q_bbsStngSn}
+    </select>
+
+    <!-- 게시판환경설정 조회 -->
+    <select id="selectBbsSetup" parameterType="bbsSetupVo" resultType="bbsSetupVo">
+        SELECT
+            A.BBS_STNG_SN,
+            A.BBS_STNG_NM,
+            A.BBS_STNG_EXPLN,
+            A.USE_YN,
+            A.REG_DT,
+            A.UPDT_DT,
+            B.LYR_USE_YN,
+            B.THMB_USE_YN,
+            B.WDTH_SZ,
+            B.VRTC_SZ,
+            B.WTMK_USE_YN,
+            B.WTMK_FILE_NM,
+            B.WTMK_PSTN_NM,
+            B.WTMK_TRNSPC
+        FROM
+            TN_BBS_MAIN_SETUP A,
+            TN_BBS_GLOBAL_SETUP B,
+            TN_BBS_LIST_SETUP C,
+            TN_BBS_VIEW_SETUP D,
+            TN_BBS_FORM_SETUP E
+        WHERE
+            A.BBS_STNG_SN = #{paramMap.q_bbsStngSn}
+        AND B.BBS_STNG_SN = A.BBS_STNG_SN
+        AND C.BBS_STNG_SN = A.BBS_STNG_SN
+        AND D.BBS_STNG_SN = A.BBS_STNG_SN
+        AND E.BBS_STNG_SN = A.BBS_STNG_SN
+    </select>
+
+    <!-- 게시판환경설정 목록 -->
+    <sql id="incBbsSetupWhere">
+        <where>
+                 A.BBS_STNG_SN = B.BBS_STNG_SN
+             AND A.BBS_STNG_SN = C.BBS_STNG_SN
+             AND A.BBS_STNG_SN = D.BBS_STNG_SN
+             AND A.BBS_STNG_SN = E.BBS_STNG_SN
+            <if test="paramMap.q_searchVal != null  and paramMap.q_searchVal != ''">
+                AND A.BBS_STNG_NM LIKE CONCAT('%', #{paramMap.q_searchVal}, '%')
+             </if>
+        </where>
+    </sql>
+    <select id="selectBbsSetupList" parameterType="bbsSetupVo" resultType="bbsSetupVo">
+        SELECT Y.* FROM (
+            SELECT  X.* FROM (
+                SELECT
+                    A.BBS_STNG_SN,
+                    A.BBS_STNG_NM,
+                    A.BBS_STNG_EXPLN,
+                    A.USE_YN,
+                    A.RGTR_ID,
+                    (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.RGTR_ID) AS RGTR_NM,
+                    A.REG_DT,
+                    A.MDFR_ID,
+                    (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.MDFR_ID) AS UPDUSR_NM,
+                    A.UPDT_DT,
+                    B.LYR_USE_YN,
+                    B.THMB_USE_YN,
+                    B.WDTH_SZ,
+                    B.VRTC_SZ,
+                    B.WTMK_USE_YN,
+                    B.WTMK_FILE_NM,
+                    B.WTMK_PSTN_NM,
+                    B.WTMK_TRNSPC,
+                    C.MNGR_EDTR_USE_YN,
+                    C.USER_EDTR_USE_YN,
+                    C.ATCH_FILE_USE_YN,
+                    C.CCHA_USE_YN,
+                    C.RLS_YN,
+                    D.RCMDTN_USE_YN,
+                    D.DCLR_USE_YN,
+                    D.DGSTFN_USE_YN,
+                    D.OPNN_DOC_YN,
+                    D.BFR_AFTR_DOC_INDCT_YN
+                FROM
+                    TN_BBS_MAIN_SETUP A,
+                    TN_BBS_GLOBAL_SETUP B,
+                    TN_BBS_FORM_SETUP C,
+                    TN_BBS_VIEW_SETUP D,
+                    TN_BBS_LIST_SETUP E
+                    
+                <include refid="incBbsSetupWhere"/>
+                ORDER BY A.BBS_STNG_SN ASC
+            ) X
+         ) Y
+         LIMIT #{paramMap.q_rowPerPage}
+         OFFSET #{paramMap.q_pagingStartNum}
+    </select>
+
+    <!-- 게시판환경설정 조회 목록 카운트 -->
+    <select id="selectBbsSetupListCount" parameterType="bbsSetupVo" resultType="int">
+        SELECT
+            COUNT(A.BBS_STNG_SN) AS TOTAL_COUNT
+        FROM
+            TN_BBS_MAIN_SETUP A,
+            TN_BBS_GLOBAL_SETUP B,
+            TN_BBS_FORM_SETUP C,
+            TN_BBS_VIEW_SETUP D,
+            TN_BBS_LIST_SETUP E
+        <include refid="incBbsSetupWhere"/>
+    </select>
+
+    <!-- 게시판환경설정 등록 -->
+    <insert id="insertBbsSetup" parameterType="bbsSetupVo">
+        <selectKey order="BEFORE" keyProperty="bbsStngSn" resultType="int">
+            SELECT IFNULL(MAX(BBS_STNG_SN), 0) + 1
+            FROM TN_BBS_MAIN_SETUP
+        </selectKey>
+        INSERT INTO TN_BBS_MAIN_SETUP (
+        <trim suffixOverrides=",">
+            BBS_STNG_SN,
+            BBS_STNG_NM,
+            BBS_STNG_EXPLN,
+            USE_YN,
+            RGTR_ID,
+            REG_DT,
+        </trim>
+        ) VALUES (
+        <trim suffixOverrides=",">
+            #{bbsStngSn},
+            #{bbsStngNm},
+            #{bbsStngExpln},
+            'Y',
+            #{rgtrId},
+            NOW(),
+        </trim>
+        )
+    </insert>
+
+    <!-- 게시판환경설정 수정 -->
+    <update id="updateBbsSetup" parameterType="bbsSetupVo">
+        UPDATE TN_BBS_MAIN_SETUP 
+        <set>
+            <if test="bbsStngNm != null  and bbsStngNm != ''">
+            BBS_STNG_NM = #{bbsStngNm},
+            </if>
+            <if test="bbsStngExpln != null  and bbsStngExpln != ''">
+            BBS_STNG_EXPLN = #{bbsStngExpln},
+            </if>
+            <if test="useYn != null  and useYn != ''">
+            USE_YN = #{useYn},
+            </if>
+            MDFR_ID = #{mdfrId},
+            UPDT_DT = NOW(),
+        </set>
+        WHERE
+             BBS_STNG_SN = #{paramMap.q_bbsStngSn}
+    </update>
+
+    <!-- 게시판환경설정 삭제 -->
+    <delete id="deleteBbsSetup" parameterType="bbsSetupVo">
+        DELETE FROM TN_BBS_MAIN_SETUP
+        WHERE
+             BBS_STNG_SN = #{paramMap.q_bbsStngSn}
+    </delete>
+
+    <!-- 
+    ==================================================================
+    TN_BBS_GLOBAL_SETUP
+    -->
+    <insert id="insertBbsGlobalSetup" parameterType="bbsSetupVo">
+        INSERT INTO TN_BBS_GLOBAL_SETUP (
+            BBS_STNG_SN,
+            LYR_USE_YN,
+            THMB_USE_YN,
+            WDTH_SZ,
+            VRTC_SZ,
+            WTMK_USE_YN,
+            WTMK_FILE_NM,
+            WTMK_PSTN_NM,
+            WTMK_TRNSPC
+        ) VALUES (
+            #{bbsStngSn},
+            #{lyrUseYn},
+            #{thmbUseYn},
+            #{wdthSz},
+            #{vrtcSz},
+            #{wtmkUseYn},
+            #{wtmkFileNm},
+            #{wtmkPstnNm},
+            #{wtmkTrnspc}
+        )
+    </insert>
+
+    <update id="updateBbsGlobalSetup" parameterType="bbsSetupVo">
+        UPDATE TN_BBS_GLOBAL_SETUP
+        <set>
+            <if test="lyrUseYn != null  and lyrUseYn != ''">
+            LYR_USE_YN = #{lyrUseYn},
+            </if>
+            <if test="wtmkUseYn != null  and wtmkUseYn != ''">
+            WTMK_USE_YN = #{wtmkUseYn},
+            </if>
+            <if test="wtmkFileNm != null  and wtmkFileNm != ''">
+            WTMK_FILE_NM = #{wtmkFileNm},
+            </if>
+            <if test="wtmkPstnNm != null  and wtmkPstnNm != ''">
+            WTMK_PSTN_NM = #{wtmkPstnNm},
+            </if>
+            <if test="wtmkTrnspc != null  and wtmkTrnspc != ''">
+            WTMK_TRNSPC = #{wtmkTrnspc},
+            </if>
+            <if test="thmbUseYn != null  and thmbUseYn != ''">
+            THMB_USE_YN = #{thmbUseYn},
+            </if>
+            WDTH_SZ = #{wdthSz},
+            VRTC_SZ = #{vrtcSz}
+        </set>
+        WHERE BBS_STNG_SN = #{bbsStngSn}
+    </update>
+
+    <update id="updateBbsGlobalSetupUseYn" parameterType="bbsSetupVo">
+        UPDATE TN_BBS_GLOBAL_SETUP
+        <set>
+            <if test="colId != null  and colId == 'lyrUseYn'">
+            LYR_USE_YN = #{lyrUseYn},
+            </if>
+            <if test="colId != null  and colId == 'thmbUseYn'">
+            THMB_USE_YN = #{thmbUseYn},
+            </if>
+            BBS_STNG_SN = BBS_STNG_SN
+        </set>
+         WHERE BBS_STNG_SN = #{bbsStngSn}
+    </update>
+
+    <!-- 
+    ==================================================================
+    TN_BBS_LIST_SETUP
+    -->
+    <select id="selectBbsListSetup" parameterType="bbsSetupVo" resultType="bbsSetupVo">
+        SELECT
+            A.BBS_STNG_SN,
+            A.PAGE_PST_CNT,
+            A.TTL_AJMT_SZ,
+            A.NEW_INDCT_DAY_CNT,
+            A.PST_EMPHS_INQ_CNT,
+            A.WRTR_INDCT_SN
+        FROM
+            TN_BBS_LIST_SETUP A
+        WHERE A.BBS_STNG_SN = #{paramMap.q_bbsStngSn}
+    </select>
+
+    <insert id="insertBbsListSetup" parameterType="bbsSetupVo">
+        INSERT INTO TN_BBS_LIST_SETUP (
+            BBS_STNG_SN,
+            PAGE_PST_CNT,
+            TTL_AJMT_SZ,
+            NEW_INDCT_DAY_CNT,
+            PST_EMPHS_INQ_CNT,
+            WRTR_INDCT_SN
+        ) VALUES (
+            #{bbsStngSn},
+            #{pagePstCnt},
+            #{ttlAjmtSz},
+            #{newIndctDayCnt},
+            #{pstEmphsInqCnt},
+            #{wrtrIndctSn}
+        )
+    </insert>
+
+    <update id="updateBbsListSetup" parameterType="bbsSetupVo">
+        UPDATE TN_BBS_LIST_SETUP
+        <set>
+            <if test="pagePstCnt != 0">
+            PAGE_PST_CNT = #{pagePstCnt},
+            </if>
+            <if test="ttlAjmtSz != 0">
+            TTL_AJMT_SZ = #{ttlAjmtSz},
+            </if>
+            <if test="newIndctDayCnt != 0">
+            NEW_INDCT_DAY_CNT = #{newIndctDayCnt},
+            </if>
+            <if test="pstEmphsInqCnt != 0">
+            PST_EMPHS_INQ_CNT = #{pstEmphsInqCnt},
+            </if>
+            <if test="wrtrIndctSn != 0">
+            <!-- WRTR_INDCT_SN = #{wrtrIndctSn}, -->
+            </if>
+            BBS_STNG_SN = BBS_STNG_SN
+        </set>
+        WHERE BBS_STNG_SN = #{bbsStngSn}
+    </update>
+
+    <!-- 
+    ==================================================================
+    TN_BBS_VIEW_SETUP
+    -->
+    <select id="selectBbsViewSetup" parameterType="bbsSetupVo" resultType="bbsSetupVo">
+        SELECT
+            A.BBS_STNG_SN,
+            A.BFR_AFTR_DOC_INDCT_YN,
+            A.RCMDTN_USE_YN,
+            A.DCLR_USE_YN,
+            A.DGSTFN_USE_YN,
+            A.TAG_USE_YN,
+            A.OPNN_DOC_YN,
+            A.INQ_CNT_LMT_HR_CNT
+        FROM
+            TN_BBS_VIEW_SETUP A
+        WHERE A.BBS_STNG_SN = #{paramMap.q_bbsStngSn}
+    </select>
+
+    <insert id="insertBbsViewSetup" parameterType="bbsSetupVo">
+        INSERT INTO TN_BBS_VIEW_SETUP (
+            BBS_STNG_SN,
+            BFR_AFTR_DOC_INDCT_YN,
+            RCMDTN_USE_YN,
+            DCLR_USE_YN,
+            DGSTFN_USE_YN,
+            TAG_USE_YN,
+            OPNN_DOC_YN,
+            INQ_CNT_LMT_HR_CNT
+        ) VALUES (
+            #{bbsStngSn},
+            #{bfrAftrDocIndctYn},
+            #{rcmdtnUseYn},
+            #{dclrUseYn},
+            #{dgstfnUseYn},
+            #{tagUseYn},
+            #{opnnDocYn},
+            #{inqCntLmtHrCnt}
+        )
+    </insert>
+
+    <update id="updateBbsViewSetup" parameterType="bbsSetupVo">
+        UPDATE TN_BBS_VIEW_SETUP
+        <set>
+            <if test="bfrAftrDocIndctYn != null  and bfrAftrDocIndctYn != ''">
+            BFR_AFTR_DOC_INDCT_YN = #{bfrAftrDocIndctYn},
+            </if>
+            <if test="rcmdtnUseYn != null  and rcmdtnUseYn != ''">
+            RCMDTN_USE_YN = #{rcmdtnUseYn},
+            </if>
+            <if test="dclrUseYn != null  and dclrUseYn != ''">
+            DCLR_USE_YN = #{dclrUseYn},
+            </if>
+            <if test="dgstfnUseYn != null  and dgstfnUseYn != ''">
+            DGSTFN_USE_YN = #{dgstfnUseYn},
+            </if>
+            <if test="tagUseYn != null  and tagUseYn != ''">
+            TAG_USE_YN = #{tagUseYn},
+            </if>
+            <if test="opnnDocYn != null  and opnnDocYn != ''">
+            OPNN_DOC_YN = #{opnnDocYn},
+            </if>
+            <if test="inqCntLmtHrCnt != 0">
+            INQ_CNT_LMT_HR_CNT = #{inqCntLmtHrCnt},
+            </if>
+            BBS_STNG_SN = BBS_STNG_SN
+        </set>
+        WHERE BBS_STNG_SN = #{bbsStngSn}
+    </update>
+
+    <update id="updateBbsViewSetupUseYn" parameterType="bbsSetupVo">
+        UPDATE TN_BBS_VIEW_SETUP
+        <set>
+            <if test="colId != null  and colId == 'rcmdtnUseYn'">
+            RCMDTN_USE_YN = #{rcmdtnUseYn},
+            </if>
+            <if test="colId != null  and colId == 'dclrUseYn'">
+            DCLR_USE_YN = #{dclrUseYn},
+            </if>
+            <if test="colId != null  and colId == 'dgstfnUseYn'">
+            DGSTFN_USE_YN = #{dgstfnUseYn},
+            </if>
+            <if test="colId != null  and colId == 'opnnDocYn'">
+            OPNN_DOC_YN = #{opnnDocYn},
+            </if>
+            <if test="bfrAftrDocIndctYn != null  and bfrAftrDocIndctYn != ''">
+            BFR_AFTR_DOC_INDCT_YN = #{bfrAftrDocIndctYn},
+            </if>
+            BBS_STNG_SN = BBS_STNG_SN
+        </set>
+         WHERE BBS_STNG_SN = #{bbsStngSn}
+    </update>
+
+    <!-- 
+    ==================================================================
+    TN_BBS_FORM_SETUP
+    -->
+    <select id="selectBbsFormSetup" parameterType="bbsSetupVo" resultType="bbsSetupVo">
+        SELECT
+            A.BBS_STNG_SN,
+            A.MNGR_EDTR_USE_YN,
+            A.USER_EDTR_USE_YN,
+            A.ATCH_FILE_USE_YN,
+            A.ULD_CLSF_SN,
+            A.FILE_LMT_CNT,
+            A.LMT_FILE_SZ,
+            A.WHOL_ULD_SZ,
+            A.PRMSN_FILE_EXTN_MTTR,
+            A.CCHA_USE_YN,
+            A.RLS_YN,
+            A.PHBWD_USE_YN,
+            A.PHBWD_CD_ID
+        FROM
+            TN_BBS_FORM_SETUP A
+        WHERE A.BBS_STNG_SN = #{paramMap.q_bbsStngSn}
+    </select>
+
+    <insert id="insertBbsFormSetup" parameterType="bbsSetupVo">
+        INSERT INTO TN_BBS_FORM_SETUP (
+            BBS_STNG_SN,
+            MNGR_EDTR_USE_YN,
+            USER_EDTR_USE_YN,
+            ATCH_FILE_USE_YN,
+            ULD_CLSF_SN,
+            FILE_LMT_CNT,
+            LMT_FILE_SZ,
+            WHOL_ULD_SZ,
+            PRMSN_FILE_EXTN_MTTR,
+            CCHA_USE_YN,
+            RLS_YN,
+            PHBWD_USE_YN,
+            PHBWD_CD_ID
+        ) VALUES (
+            #{bbsStngSn},
+            #{mngrEdtrUseYn},
+            #{userEdtrUseYn},
+            #{atchFileUseYn},
+            #{uldClsfSn},
+            #{fileLmtCnt},
+            #{lmtFileSz},
+            #{wholUldSz},
+            #{prmsnFileExtnMttr},
+            #{cchaUseYn},
+            #{rlsYn},
+            #{phbwdUseYn},
+            #{phbwdCdId}
+        )
+    </insert>
+
+    <update id="updateBbsFormSetup" parameterType="bbsSetupVo">
+        UPDATE TN_BBS_FORM_SETUP
+        <set>
+            <if test="mngrEdtrUseYn != null  and mngrEdtrUseYn != ''">
+            MNGR_EDTR_USE_YN = #{mngrEdtrUseYn},
+            </if>
+            <if test="userEdtrUseYn != null  and userEdtrUseYn != ''">
+            USER_EDTR_USE_YN = #{userEdtrUseYn},
+            </if>
+            <if test="atchFileUseYn != null  and atchFileUseYn != ''">
+            ATCH_FILE_USE_YN = #{atchFileUseYn},
+            </if>
+            <if test="uldClsfSn != 0">
+            ULD_CLSF_SN = #{uldClsfSn},
+            </if>
+            <if test="cchaUseYn != null  and cchaUseYn != ''">
+            CCHA_USE_YN = #{cchaUseYn},
+            </if>
+            <if test="rlsYn != null  and rlsYn != ''">
+            RLS_YN = #{rlsYn},
+            </if>
+            FILE_LMT_CNT = #{fileLmtCnt},
+            LMT_FILE_SZ = #{lmtFileSz},
+            WHOL_ULD_SZ = #{wholUldSz},
+            PRMSN_FILE_EXTN_MTTR = #{prmsnFileExtnMttr},
+            PHBWD_USE_YN = #{phbwdUseYn},
+            PHBWD_CD_ID = #{phbwdCdId}
+        </set>
+        WHERE BBS_STNG_SN = #{bbsStngSn}
+    </update>
+
+    <update id="updateBbsFormSetupUseYn" parameterType="bbsSetupVo">
+        UPDATE TN_BBS_FORM_SETUP
+        <set>
+            <if test="colId != null  and colId == 'mngrEdtrUseYn'">
+            MNGR_EDTR_USE_YN = #{mngrEdtrUseYn},
+            </if>
+            <if test="colId != null  and colId == 'userEdtrUseYn'">
+            USER_EDTR_USE_YN = #{userEdtrUseYn},
+            </if>
+            <if test="colId != null  and colId == 'atchFileUseYn'">
+            ATCH_FILE_USE_YN = #{atchFileUseYn},
+            </if>
+            <if test="colId != null  and colId == 'cchaUseYn'">
+            CCHA_USE_YN = #{cchaUseYn},
+            </if>
+            <if test="colId != null  and colId == 'rlsYn'">
+            RLS_YN = #{rlsYn},
+            </if>
+            BBS_STNG_SN = BBS_STNG_SN
+        </set>
+         WHERE BBS_STNG_SN = #{bbsStngSn}
+    </update>
+
+    <!-- 
+    ==================================================================
+    TN_BBS_ITEM_SETUP
+    -->
+    <select id="selectBbsItemSetup" parameterType="bbsSetupVo" resultType="bbsSetupItemVo">
+        SELECT
+            A.BBS_STNG_SN,
+            A.COL_ID,
+            A.COL_NM,
+            A.SCRN_NM,
+            A.COL_TYPE_NM,
+            A.BBS_COL_EXPLN,
+            A.SRCH_TYPE,
+            A.ESNTL_YN,
+            A.SORT_SN,
+            A.LST_INDCT_YN,
+            A.INQ_INDCT_YN,
+            A.INPT_INDCT_YN
+        FROM
+            TN_BBS_ITEM_SETUP A
+        WHERE A.BBS_STNG_SN = #{paramMap.q_bbsStngSn}
+        ORDER BY A.SORT_SN ASC
+    </select>
+
+    <insert id="insertBbsItemSetup" parameterType="bbsSetupItemVo">
+        INSERT INTO TN_BBS_ITEM_SETUP (
+            BBS_STNG_SN,
+            COL_ID,
+            COL_NM,
+            SCRN_NM,
+            COL_TYPE_NM,
+            BBS_COL_EXPLN,
+            SRCH_STNG_YN,
+            SRCH_TYPE,
+            ESNTL_YN,
+            SORT_SN,
+            LST_INDCT_YN,
+            INQ_INDCT_YN,
+            INPT_INDCT_YN
+        ) VALUES (
+            #{bbsStngSn},
+            #{colId},
+            #{colNm},
+            #{scrnNm},
+            #{colTypeNm},
+            #{bbsColExpln},
+            <choose>
+                <when test="srchType != null and srchType != ''">'Y',</when>
+                <otherwise>'N',</otherwise>
+            </choose>
+            #{srchType},
+            #{esntlYn},
+            #{sortSn},
+            #{lstIndctYn},
+            #{inqIndctYn},
+            #{inptIndctYn}
+        )
+    </insert>
+
+    <update id="updateBbsItemSetup" parameterType="bbsSetupItemVo">
+        UPDATE TN_BBS_ITEM_SETUP
+           SET COL_ID = #{colId},
+               COL_NM = #{colNm},
+               SCRN_NM = #{scrnNm},
+               COL_TYPE_NM = #{colTypeNm},
+               BBS_COL_EXPLN = #{bbsColExpln},
+               SRCH_TYPE = #{srchType},
+               ESNTL_YN = #{esntlYn},
+               LST_INDCT_YN = #{lstIndctYn},
+               INQ_INDCT_YN = #{inqIndctYn},
+               INPT_INDCT_YN = #{inptIndctYn}
+         WHERE BBS_STNG_SN = #{bbsStngSn}
+           AND COL_ID = #{colId}
+    </update>
+
+    <!-- 게시판환경설정 삭제 BBS_GLOBAL_SETUP -->
+    <delete id="deleteBbsGlobalSetup" parameterType="int">
+        DELETE FROM TN_BBS_GLOBAL_SETUP
+         WHERE BBS_STNG_SN = #{bbsStngSn}
+    </delete>
+
+    <!-- 게시판환경설정 삭제 BBS_LIST_SETUP -->
+    <delete id="deleteBbsListSetup" parameterType="int">
+        DELETE FROM TN_BBS_LIST_SETUP
+         WHERE BBS_STNG_SN = #{bbsStngSn}
+    </delete>
+
+    <!-- 게시판환경설정 삭제 BBS_VIEW_SETUP -->
+    <delete id="deleteBbsViewSetup" parameterType="int">
+        DELETE FROM TN_BBS_VIEW_SETUP
+         WHERE BBS_STNG_SN = #{bbsStngSn}
+    </delete>
+
+    <!-- 게시판환경설정 삭제 BBS_FORM_SETUP -->
+    <delete id="deleteBbsFormSetup" parameterType="int">
+        DELETE FROM TN_BBS_FORM_SETUP
+         WHERE BBS_STNG_SN = #{bbsStngSn}
+    </delete>
+
+    <!-- 게시판환경설정 삭제 BBS_ITEM_SETUP -->
+    <delete id="deleteBbsItemSetup" parameterType="int">
+        DELETE FROM TN_BBS_ITEM_SETUP
+         WHERE BBS_STNG_SN = #{bbsStngSn}
+    </delete>
+
+</mapper>

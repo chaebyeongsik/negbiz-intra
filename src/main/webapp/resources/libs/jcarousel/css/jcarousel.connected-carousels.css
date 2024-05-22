@@ -1,0 +1,52 @@
+
+/* Shared carousel styles API */
+.connected-carousels .carousel{overflow:hidden;position:relative;width:638px;margin:0;padding:0;}
+.connected-carousels .carousel ul{position:relative;width:20000em;margin:0;padding:0;}
+.connected-carousels .carousel li{float:left;}
+
+/* Stage carousel specific styles API */
+.connected-carousels .stage{position:relative;width:674px;margin:0;padding:0;}
+.connected-carousels .photo-credits{position: absolute;right:0;bottom:0;font-size:13px;color:#fff;}
+.connected-carousels .photo-credits a{color:#fff;}
+.connected-carousels .carousel-stage{position:relative;width:500px;height:360px;margin:0 auto;}
+
+/* Stage carousel controls API */
+.connected-carousels .prev-stage,
+.connected-carousels .next-stage {display:block;position:absolute;top:145px;width:26px;height:52px;}
+.connected-carousels .prev-stage {left:15px;}
+.connected-carousels .next-stage {right:15px;}
+.connected-carousels .prev-stage span,
+.connected-carousels .next-stage span{display:block;width:26px;height:52px;background:#fff;text-align:center;text-indent:-9999px;}
+.connected-carousels .prev-stage span{background-image:url("../images/btn_gallery_prev.gif");background-repeat: no-repeat;background-position: 0 0;}
+.connected-carousels .next-stage span{background-image:url("../images/btn_gallery_next.gif");background-repeat: no-repeat;background-position: 0 0;}
+.connected-carousels .prev-stage:hover span,
+.connected-carousels .next-stage:hover span {display: block;}
+.connected-carousels .prev-stage:hover span{background-position: 0 -52px;}
+.connected-carousels .next-stage:hover span{background-position: 0 -52px;}
+.connected-carousels .prev-stage.inactive{background-position: 0 -52px;}
+.connected-carousels .next-stage.inactive{background-position: 0 -52px;}
+
+/* Navigation container small API */
+.connected-carousels .navigation{position:relative;width:674px;margin:0 0 30px;}
+/* Navigation carousel specific styles API */
+.connected-carousels .carousel-navigation {width:625px;height:63px;margin:0 0 0 23px;}
+.connected-carousels .carousel-navigation li{margin:0 0 0 4px;cursor:pointer;}
+.connected-carousels .carousel-navigation li img{display:block;width:83px;height:61px;border:1px solid #cfcfcf;}
+.connected-carousels .carousel-navigation li.active img {border:5px solid #ff2a00;}
+/* 원본
+.connected-carousels .carousel-navigation li.active img {width:75px;height:53px;border:5px solid #ff2a00;}
+*/
+/* Navigation carousel controls API */
+.connected-carousels .prev-navigation,
+.connected-carousels .next-navigation{display:block;position:absolute;top:0;width:26px;height:63px;background-repeat:0;text-indent:-9999px;}
+.connected-carousels .prev-navigation{left:0;background-image:url("../images/btn_gallery_s_prev2.gif");}
+.connected-carousels .next-navigation{right:0;background-image:url("../images/btn_gallery_s_next2.gif");}
+.connected-carousels .prev-navigation{background-position: 26px 0;}
+.connected-carousels .prev-navigation:hover{background-position: 52px 0;}
+.connected-carousels .next-navigation{background-position: 0 0;}
+.connected-carousels .next-navigation:hover{background-position: -26px 0;}
+.connected-carousels .prev-navigation.inactive,
+.connected-carousels .next-navigation.inactive {cursor:pointer;}
+
+.connected-carousels ul {list-style-type: none;}
+.connected-carousels .navigation {border-bottom: none;}

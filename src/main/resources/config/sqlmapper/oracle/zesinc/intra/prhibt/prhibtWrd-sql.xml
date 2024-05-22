@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="zesinc.intra.prhibt.PrhibtWrdMapper">
+
+    <!-- 금지단어 중복 체크 -->
+    <select id="selectDplctChckCode" parameterType="prhibtWrdVo" resultType="int">
+        SELECT
+        <trim suffixOverrides=",">
+            COUNT(1)
+        </trim>
+        FROM
+            TN_PRHIBT_WRD A
+        WHERE
+                 A.PHBWD_CD_ID = #{paramMap.q_phbwdCdId}
+    </select>
+
+    <!-- 금지단어 조회 -->
+    <select id="selectPrhibtWrd" parameterType="prhibtWrdVo" resultType="prhibtWrdVo">
+        SELECT
+        <trim suffixOverrides=",">
+            A.PHBWD_CD_ID,
+            A.TTL,
+            A.PHBWD_CN,
+            A.USE_YN,
+            A.RGTR_ID,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.RGTR_ID) AS RGTR_NM,
+            A.REG_DT,
+            A.MDFR_ID,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.MDFR_ID) AS UPDUSR_NM,
+            A.UPDT_DT,
+        </trim>
+        FROM
+            TN_PRHIBT_WRD A
+        WHERE
+                 A.PHBWD_CD_ID = #{paramMap.q_phbwdCdId}
+    </select>
+
+
+    <!-- 금지단어 목록 -->
+    <sql id="incPrhibtWrdWhere">
+        <where>
+            <if test="paramMap.q_searchVal != null  and paramMap.q_searchVal != ''">
+                AND (
+                    A.TTL LIKE '%' || #{paramMap.q_searchVal} || '%'
+                    OR A.PHBWD_CN LIKE '%' || #{paramMap.q_searchVal} || '%'
+                )
+            </if>
+        </where>
+    </sql>
+    <select id="selectPrhibtWrdList" parameterType="prhibtWrdVo" resultType="prhibtWrdVo">
+        SELECT Y.* FROM (
+            SELECT ROWNUM NUM, X.* FROM (
+                SELECT
+                <trim suffixOverrides=",">
+                    A.PHBWD_CD_ID,
+                    A.TTL,
+                    A.USE_YN,
+                    A.RGTR_ID,
+                    (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.RGTR_ID) AS RGTR_NM,
+                    A.REG_DT,
+                    A.MDFR_ID,
+                    (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.MDFR_ID) AS UPDUSR_NM,
+                    A.UPDT_DT,
+                </trim>
+                FROM
+                    TN_PRHIBT_WRD A
+                <include refid="incPrhibtWrdWhere"/>
+                ORDER BY A.PHBWD_CD_ID DESC
+            ) X
+            WHERE ROWNUM &lt;= #{paramMap.q_pagingEndNum}
+         ) Y
+         WHERE NUM &gt;= #{paramMap.q_pagingStartNum}
+    </select>
+
+    <!-- 금지단어 조회 목록 카운트 -->
+    <select id="selectPrhibtWrdListCount" parameterType="prhibtWrdVo" resultType="int">
+        SELECT
+            COUNT(A.PHBWD_CD_ID) AS TOTAL_COUNT
+        FROM
+            TN_PRHIBT_WRD A
+        <include refid="incPrhibtWrdWhere"/>
+    </select>
+
+    <!-- 금지단어 등록 -->
+    <insert id="insertPrhibtWrd" parameterType="prhibtWrdVo">
+        INSERT INTO TN_PRHIBT_WRD (
+        <trim suffixOverrides=",">
+            PHBWD_CD_ID,
+            TTL,
+            PHBWD_CN,
+            USE_YN,
+            RGTR_ID,
+            REG_DT,
+        </trim>
+        ) VALUES (
+        <trim suffixOverrides=",">
+            #{phbwdCdId},
+            #{ttl},
+            #{phbwdCn},
+            #{useYn},
+            #{rgtrId},
+            SYSDATE,
+        </trim>
+        )
+    </insert>
+
+    <!-- 금지단어 수정 -->
+    <update id="updatePrhibtWrd" parameterType="prhibtWrdVo">
+        UPDATE TN_PRHIBT_WRD 
+          <set>
+            TTL = #{ttl},
+            PHBWD_CN = #{phbwdCn},
+            USE_YN = #{useYn},
+            MDFR_ID = #{mdfrId},
+            UPDT_DT = SYSDATE,
+          </set>
+        WHERE
+             PHBWD_CD_ID = #{paramMap.q_phbwdCdId}
+    </update>
+
+    <!-- 금지단어 삭제 -->
+    <delete id="deletePrhibtWrd" parameterType="prhibtWrdVo">
+        DELETE FROM TN_PRHIBT_WRD
+        WHERE
+             PHBWD_CD_ID = #{paramMap.q_phbwdCdId}
+    </delete>
+
+    <!-- 금지단어이력 조회 -->
+    <select id="selectPrhibtWrdHistory" parameterType="prhibtWrdHistoryVo" resultType="prhibtWrdHistoryVo">
+        SELECT
+        <trim suffixOverrides=",">
+            B.LOG_SN,
+            B.PHBWD_CD_ID,
+            B.LOG_DT,
+            B.LOG_TYPE,
+            B.TTL,
+            B.PHBWD_CN,
+            B.USE_YN,
+            B.MDFR_ID,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = B.MDFR_ID) AS UPDUSR_NM,
+        </trim>
+        FROM
+            TH_PRHIBT_WRD B
+        WHERE
+                B.LOG_SN = #{paramMap.q_logSn}
+            AND B.PHBWD_CD_ID = #{paramMap.q_phbwdCdId}
+    </select>
+
+    <!-- 금지단어이력 목록 -->
+    <sql id="incPrhibtWrdHistoryWhere">
+        <where>
+            AND B.PHBWD_CD_ID = #{paramMap.q_phbwdCdId}
+            <if test="paramMap.q_searchVal != null  and paramMap.q_searchVal != ''">
+                AND (
+                    B.TTL LIKE '%' || #{paramMap.q_searchVal} || '%'
+                    OR B.PHBWD_CN LIKE '%' || #{paramMap.q_searchVal} || '%'
+                )
+            </if>
+        </where>
+    </sql>
+    <select id="selectPrhibtWrdHistoryList" parameterType="prhibtWrdHistoryVo" resultType="prhibtWrdHistoryVo">
+        SELECT Y.* FROM (
+            SELECT ROWNUM NUM, X.* FROM (
+                SELECT
+                <trim suffixOverrides=",">
+                    B.LOG_SN,
+                    B.PHBWD_CD_ID,
+                    B.LOG_DT,
+                    B.LOG_TYPE,
+                    B.TTL,
+                    B.USE_YN,
+                    B.MDFR_ID,
+                    (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = B.MDFR_ID) AS UPDUSR_NM,
+                </trim>
+                FROM
+                    TH_PRHIBT_WRD B
+                <include refid="incPrhibtWrdHistoryWhere"/>
+                ORDER BY B.LOG_SN DESC
+            ) X
+            WHERE ROWNUM &lt;= #{paramMap.q_pagingEndNum}
+         ) Y
+         WHERE NUM &gt;= #{paramMap.q_pagingStartNum}
+    </select>
+
+    <!-- 금지단어이력 조회 목록 카운트 -->
+    <select id="selectPrhibtWrdHistoryListCount" parameterType="prhibtWrdHistoryVo" resultType="int">
+        SELECT
+            COUNT(B.LOG_SN) AS TOTAL_COUNT
+        FROM
+            TH_PRHIBT_WRD B
+        <include refid="incPrhibtWrdHistoryWhere"/>
+    </select>
+
+    <!-- 금지단어이력 등록 -->
+    <insert id="insertPrhibtWrdHistory" parameterType="prhibtWrdVo">
+        <selectKey order="BEFORE" keyProperty="logSn" resultType="int">
+            SELECT NVL(MAX(LOG_SN), 0) + 1
+            FROM TH_PRHIBT_WRD
+            WHERE
+                PHBWD_CD_ID = #{paramMap.q_phbwdCdId}
+        </selectKey>
+        INSERT INTO TH_PRHIBT_WRD (
+        <trim suffixOverrides=",">
+            LOG_SN,
+            PHBWD_CD_ID,
+            LOG_DT,
+            LOG_TYPE,
+            TTL,
+            PHBWD_CN,
+            USE_YN,
+            MDFR_ID
+        </trim>
+        ) VALUES (
+        <trim suffixOverrides=",">
+            #{logSn},
+            #{phbwdCdId},
+            SYSDATE,
+            #{logType},
+            #{ttl},
+            #{phbwdCn},
+            #{useYn},
+            #{mdfrId}
+        </trim>
+        )
+    </insert>
+
+</mapper>

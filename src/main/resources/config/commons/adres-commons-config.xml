@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <adres-config>
+        <confmKeys>
+        	<localhost>TESTJUSOGOKR</localhost>
+        	<openworks4-zesinc-co-kr>TESTJUSOGOKR</openworks4-zesinc-co-kr>
+            <kr-localhost>TESTJUSOGOKR</kr-localhost>
+            <en-localhost>TESTJUSOGOKR</en-localhost>
+            <jp-localhost>TESTJUSOGOKR</jp-localhost>
+            <ch-localhost>TESTJUSOGOKR</ch-localhost>
+        </confmKeys>
+    </adres-config>
+</configuration>

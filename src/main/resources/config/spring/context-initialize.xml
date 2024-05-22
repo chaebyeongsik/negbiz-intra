@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!-- [Cache Init ] =============================================================== -->
+    <!-- 케시클레스 bean을 설정하고 아래 cacheList에 포함한다. -->
+    <bean id="opDomnCache" class="zesinc.common.cache.domn.impl.DomnCache" />
+    <bean id="opCodeCache" class="zesinc.common.cache.code.impl.CodeCache" />
+    <bean id="opCmsCache" class="zesinc.common.cache.cms.impl.CmsCache" />
+    <bean id="opHpcmCache" class="zesinc.common.cache.hpcm.impl.HpcmCache" />
+    <bean id="opMultilangCache" class="zesinc.common.cache.multilang.impl.MultilangCache" />
+    <bean id="opPrhibtCache" class="zesinc.common.cache.prhibt.impl.PrhibtCache" />
+    <bean id="opBbsConfigCache" class="zesinc.common.cache.bbsconfig.impl.BbsConfigCache" />
+    <bean id="opMenuCache" class="zesinc.common.cache.menu.impl.MenuCache" />
+
+    <bean class="zesinc.web.support.cache.CacheInitializerBean" init-method="initialize" destroy-method="destroy">
+        <property name="cacheMap">
+            <map key-type="java.lang.String" value-type="java.lang.String">
+                <entry key="opDomnCache" value="사이트(도메인)" />
+                <entry key="opCodeCache" value="공통코드" />
+                <entry key="opCmsCache" value="사용자메뉴정보" />
+                <entry key="opMenuCache" value="관리자메뉴정보" />
+                <entry key="opBbsConfigCache" value="게시판설정" />
+                <entry key="opPrhibtCache" value="금지단어" />
+                <entry key="opMultilangCache" value="다국어메시지" />
+                <entry key="opHpcmCache" value="관리자메뉴도움말" />
+            </map>
+        </property>
+    </bean>
+
+</beans>

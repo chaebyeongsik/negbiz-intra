@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+    <!-- 팝업관리 관리 기본 설정-->
+    <popup-config>
+        <default-values>
+            <yAxis>100</yAxis>
+            <xAxis>100</xAxis>
+            <scrollYn>N</scrollYn>
+            <popupSzChgYnY>N</popupSzChgYnY>
+            <popupRpttSeNo>3010</popupRpttSeNo>
+            <popupTypeNo>1010</popupTypeNo>
+            <wrtTypeNm>2010</wrtTypeNm>
+            <useYnY>N</useYnY>
+        </default-values>
+
+        <script>
+<![CDATA[
+    /* 공통 초기화 기능 */
+    $(document).ready(function() {
+        processPopup();
+    });
+
+    var POPUP_URL = "/component/popup/ND_selectOpenPopup.do";
+    var LAYER_URL = "/component/popup/ND_selectOpenLayer.do";
+    // 문서 로드가 끝나면 실행되어 팝업을 종류에 맞게 생성한다.
+    // 관리자단은 쿠키를 확인하지 않는다
+    var processPopup = function() {
+        if(opPopupConfigList && opPopupConfigList.length > 0) {
+            for(var i = 0 ; i < opPopupConfigList.length ; i++) {
+                var popupConf = opPopupConfigList[i];
+
+                var cookieName = popupConf.cookiePrefix + popupConf.regSn;
+                var value = Cookies.get(cookieName);
+
+                //if(!value || popupConf.popupRpttSeNo == "3040") {
+                    switch(popupConf.popupTypeNo) {
+                    case "1010":
+                        opShowPopup(popupConf);
+                        break;
+                    case "1020":
+                        opShowLayer(popupConf);
+                        break;
+                    case "1030":
+                        opShowExpand(popupConf);
+                        break;
+                    default:
+                        break;
+                    }
+               //}
+            }
+        }
+    };
+
+    // 팝업 오픈
+    var opShowPopup = function(popupConf) {
+
+        var resizable = (popupConf.popupSzChgYn == "Y" ? "yes" : "0");
+        var scrollbars = (popupConf.scrollYn == "Y" ? "yes" : "0");
+
+        var option = "chrome, centerscreen, dependent=yes, left="+ popupConf.xAxis +", top="+ popupConf.yAxis +",";
+        option += "width="+ popupConf.wdthSz +", height="+ popupConf.vrtcSz +", ";
+        option += "dialog=yes, modal=yes, resizable="+ resizable +", scrollbars="+ scrollbars +", location=0, status=0, menubar=0, toolbar=0";
+
+        var href = POPUP_URL + "?regSn=" + popupConf.regSn;
+        var popupOpenWin = window.open(href, "opShowPopup"+ popupConf.regSn, option);
+        popupOpenWin.focus();
+
+        return false;
+    };
+
+    // 레이어 오픈
+    var opShowLayer = function(popupConf) {
+        var style = "style=\"z-index:10000;position: absolute; top: "+popupConf.yAxis+"px; left: "+popupConf.xAxis+"px; width: "+popupConf.wdthSz+"px; height: "+popupConf.vrtcSz+"px;\"";
+        var layerWin = "<div id=\"opShowPopup"+popupConf.regSn+"\" "+ style +"><div>";
+
+        $("body").prepend(layerWin);
+
+        var params = {
+            regSn : popupConf.regSn
+        };
+        $("#opShowPopup"+popupConf.regSn).load(LAYER_URL, params, function(responseTxt, statusTxt, response) {
+            if(statusTxt == "success") {
+            } else {
+            }
+        });
+    };
+
+    // 상단 펼침
+    var opShowExpand = function(popupConf) {
+        var style = "style=\"display:none; z-index:10000; clear: both; margin :2px auto; width: "+popupConf.wdthSz+"px; \"";
+        var layerWin = "<div id=\"opShowPopup"+popupConf.regSn+"\" "+ style +"><div>";
+
+        $("body").prepend(layerWin);
+
+        var params = {
+            regSn : popupConf.regSn
+        };
+        $("#opShowPopup"+popupConf.regSn).load(LAYER_URL, params, function(responseTxt, statusTxt, response) {
+            if(statusTxt == "success") {
+                $(this).slideDown( "slow", function() { });
+            } else {
+            }
+        });
+    };
+
+    // 팝업 레이어 접두어
+    var prefixPopupLayerId = "opShowPopup";
+
+    /* 부모창으로 URL 이동하고 창닫기 */
+    var opPopupParent = function(aObj) {
+        var href = $(aObj).attr("href");
+        if(href) {
+            location.href = href;
+        }
+        opHidePopupLayer(aObj);
+    };
+
+    /* 새창을 열어 URL 이동하고 창닫기 */
+    var opPopupCloseWin = function(aObj) {
+        var href = $(aObj).attr("href");
+        if(href) {
+            var option = "chrome, centerscreen, dependent=yes, dialog=yes, modal=yes, ";
+            option += "resizable=yes, scrollbars=yes, location=yes, status=yes, menubar=yes, toolbar=yes";
+            var newPopupWin = window.open(href, "opPopupWin", option);
+            newPopupWin.focus();
+        }
+        opHidePopupLayer(aObj);
+    };
+
+    /* 새창을 열어 URL 이동하고 창유지 */
+    var opPopupWin = function(aObj) {
+        var href = $(aObj).attr("href");
+        if(href) {
+            var option = "chrome, centerscreen, dependent=yes, dialog=yes, modal=yes, ";
+            option += "resizable=yes, scrollbars=yes, location=yes, status=yes, menubar=yes, toolbar=yes";
+            var newPopupWin = window.open(href, "opPopupCloseWin", option);
+            newPopupWin.focus();
+        }
+    };
+
+    // 현재 클릭된 오브젝트의 팝업 레이어를 hide 시킨다.
+    var opHidePopupLayer = function(clickEl) {
+        var $popupLayerSn = null;
+        var $targetEl = $(clickEl);
+        while(!$popupLayerSn) {
+            $popupLayerSn = opFindPopupLayerId($targetEl);
+            $targetEl = $targetEl.parent();
+        }
+        $("#"+prefixPopupLayerId+$popupLayerSn).hide();
+    };
+
+    // 현재 POP 내용의 레이어 ID를 찾는다.
+    var opFindPopupLayerId = function($child) {
+        var $parent = $child.parent();
+        var parentId = $parent.attr("id");
+        if(parentId && parentId.indexOf(prefixPopupLayerId) === 0) {
+            var len = prefixPopupLayerId.length;
+            return parentId.substring(len);
+        }
+        return null;
+    };
+
+]]>
+        </script>
+    </popup-config>
+<typeAliases></typeAliases>
+</configuration>

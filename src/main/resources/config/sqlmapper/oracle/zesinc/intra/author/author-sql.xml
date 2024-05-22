@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="zesinc.intra.author.AuthorMapper">
+
+    <!-- 권한메뉴트리 목록 -->
+    <sql id="selectAuthorMenuTreeListWhere">
+        <where>
+            A.MENU_SN &gt; 0
+            <choose>
+                <when test="paramMap.q_upMenuSn != null">
+               AND A.UP_MENU_SN = #{paramMap.q_upMenuSn}
+                </when>
+                <otherwise>
+               AND A.UP_MENU_SN = 0
+                </otherwise>
+            </choose>
+             ORDER BY A.SORT_SN ASC
+        </where>
+    </sql>
+    <select id="selectAuthorMenuTreeList" parameterType="authorVo" resultType="treeVo">
+        SELECT
+            A.MENU_SN AS "key",
+            A.MENU_NM   AS title,
+            DECODE(
+                  (SELECT COUNT(MENU_SN)
+                     FROM TN_MENU
+                    WHERE UP_MENU_SN = A.MENU_SN), 0, '0', '1') AS lazy,
+            DECODE(
+                  (SELECT COUNT(MENU_SN)
+                     FROM TN_MENU
+                    WHERE UP_MENU_SN = A.MENU_SN), 0, '0', '1') AS folder,
+            A.USE_YN,
+            DECODE(
+                  (SELECT COUNT(MENU_SN)
+                     FROM TN_MENU_AUTHOR_ASGN
+                    WHERE AUTHRT_CD_ID = #{paramMap.q_authrtCdId}
+                      AND MENU_SN = A.MENU_SN), 0, '0', '1') AS selected,
+            (SELECT AUTHRT_GRNT_CD_ID FROM TN_MENU_AUTHOR_ASGN WHERE AUTHRT_CD_ID = #{paramMap.q_authrtCdId} AND MENU_SN = A.MENU_SN) AS "value"
+        FROM
+            TN_MENU A
+        <include refid="selectAuthorMenuTreeListWhere"/>
+    </select>
+
+    <!-- 권한 목록 조회 -->
+    <select id="selectAuthorList" parameterType="authorVo" resultType="authorVo">
+        /* selectAuthorList */
+        SELECT AUTHRT_CD_ID
+             , AUTHRT_NM
+             , USE_YN
+             ,(SELECT COUNT(*)
+                 FROM TN_MNGR X
+                    , TN_MNGR_AUTHOR_ASGN Y
+                WHERE X.PIC_ID  = Y.PIC_ID
+                  AND X.USE_YN      = 'Y'
+                  AND Y.AUTHRT_CD_ID = A.AUTHRT_CD_ID
+              ) AS AUTHOR_CNT
+          FROM TN_AUTHOR A
+         ORDER BY A.USE_YN DESC, A.AUTHRT_NM, A.AUTHRT_CD_ID
+    </select>
+
+    <!-- 권한 조회 -->
+    <select id="selectAuthor" parameterType="authorVo" resultType="authorVo">
+        /* selectAuthor */
+        SELECT
+        <trim suffixOverrides=",">
+            A.AUTHRT_CD_ID,
+            A.AUTHRT_NM,
+            A.AUTHRT_EXPLN,
+            A.USE_YN,
+            A.RGTR_ID,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.RGTR_ID) AS RGTR_NM,
+            A.REG_DT,
+            A.MDFR_ID,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.MDFR_ID) AS UPDUSR_NM,
+            A.UPDT_DT,
+        </trim>
+        FROM
+            TN_AUTHOR A
+        WHERE
+                 A.AUTHRT_CD_ID = #{authrtCdId}
+    </select>
+
+    <!-- 권한 등록 -->
+    <insert id="insertAuthor" parameterType="authorVo">
+        /* insertAuthor */
+        INSERT INTO TN_AUTHOR (
+        <trim suffixOverrides=",">
+            AUTHRT_CD_ID,
+            AUTHRT_NM,
+            AUTHRT_EXPLN,
+            USE_YN,
+            RGTR_ID,
+            REG_DT,
+        </trim>
+        ) VALUES (
+        <trim suffixOverrides=",">
+            #{authrtCdId},
+            #{authrtNm},
+            #{authrtExpln},
+            #{useYn},
+            #{rgtrId},
+            SYSDATE,
+        </trim>
+        )
+    </insert>
+
+    <!-- 권한 수정 -->
+    <update id="updateAuthor" parameterType="authorVo">
+        /* updateAuthor */
+        UPDATE TN_AUTHOR 
+          <set> 
+            AUTHRT_NM = #{authrtNm},
+            AUTHRT_EXPLN = #{authrtExpln},
+            USE_YN = #{useYn},
+            MDFR_ID = #{mdfrId},
+            UPDT_DT = SYSDATE,
+          </set> 
+        WHERE
+             AUTHRT_CD_ID = #{authrtCdId}
+    </update>
+
+    <!-- 권한 삭제 -->
+    <delete id="deleteAuthor" parameterType="authorVo">
+        /* deleteAuthor */
+        DELETE FROM TN_AUTHOR
+         WHERE AUTHRT_CD_ID = #{originalAuthrtCdId}
+    </delete>
+
+    <!-- 중복체크 -->
+    <select id="selectDupCheckAuthorCode" parameterType="authorVo" resultType="int">
+        /* selectDupCheckAuthorCode */
+        SELECT COUNT(*)
+          FROM TN_AUTHOR
+         WHERE AUTHRT_CD_ID = #{authrtCdId}
+        <if test="originalAuthrtCdId != null">
+           AND AUTHRT_CD_ID <![CDATA[ <> ]]> #{originalAuthrtCdId}
+        </if>
+    </select>
+
+    <!-- 권한담당자할당 수정 -->
+    <update id="updateAuthorMngrAssign" parameterType="authorVo">
+        /* updateAuthorMngrAssign */
+        UPDATE TN_MNGR_AUTHOR_ASGN
+        SET    AUTHRT_CD_ID = #{authrtCdId}
+        WHERE  AUTHRT_CD_ID = #{originalAuthrtCdId}
+    </update>
+
+    <!-- 권한메뉴할당 수정 -->
+    <update id="updateAuthorMenuAssign" parameterType="authorVo">
+        /* updateAuthorMenuAssign */
+        UPDATE TN_MENU_AUTHOR_ASGN
+        SET    AUTHRT_CD_ID = #{authrtCdId}
+        WHERE  AUTHRT_CD_ID = #{originalAuthrtCdId}
+    </update>
+
+    <!-- 메뉴조회(권한할당된개수포함) -->
+    <select id="selectMenuAsgn" parameterType="authorVo" resultType="authorVo">
+        /* selectMenuAsgn */
+        SELECT MENU_SN,
+               MENU_NM,
+               LEVEL,
+               (
+                SELECT Z.AUTHRT_GRNT_CD_ID
+                  FROM TN_MENU_AUTHOR_ASGN Z
+                 WHERE Z.AUTHRT_CD_ID = #{authrtCdId}
+                   AND Z.MENU_SN = A.MENU_SN
+               ) || '' AS ASSIGN_MENU,
+               (
+                SELECT COUNT(X.PIC_ID)
+                  FROM TN_MENU_AUTHOR_ASGN Z,
+                       TN_AUTHOR Y,
+                       TN_MNGR_AUTHOR_ASGN X,
+                       TN_MNGR W
+                 WHERE Z.MENU_SN   = A.MENU_SN
+                   AND Z.AUTHRT_CD_ID = Y.AUTHRT_CD_ID
+                   AND Y.AUTHRT_CD_ID = X.AUTHRT_CD_ID
+                   AND X.PIC_ID  = W.PIC_ID
+                   AND W.USE_YN      = 'Y'
+                ) AS AUTHOR_CNT
+          FROM (
+                SELECT A.UP_MENU_SN,
+                       A.MENU_SN,
+                       A.MENU_NM,
+                       A.SORT_SN
+                  FROM TN_MENU A
+                 WHERE A.USE_YN = 'Y'
+               ) A
+       START WITH        UP_MENU_SN = 0
+       CONNECT BY PRIOR  MENU_SN       = UP_MENU_SN
+       ORDER SIBLINGS BY SORT_SN
+     </select>
+
+    <!-- 권한코드에 의한 메뉴권한할당 삭제 -->
+    <delete id="deleteMenuAsgn" parameterType="authorVo">
+        /* deleteMenuAsgn */
+        DELETE FROM TN_MENU_AUTHOR_ASGN
+        WHERE AUTHRT_CD_ID = #{originalAuthrtCdId}
+    </delete>
+
+    <!-- 권한코드에 의한 담당자권한할당삭제 -->
+    <delete id="deleteMngrAsgn" parameterType="authorVo">
+        /* deleteMngrAsgn */
+        DELETE FROM TN_MNGR_AUTHOR_ASGN
+        WHERE AUTHRT_CD_ID = #{originalAuthrtCdId}
+    </delete>
+
+    <!-- 메뉴권한할당 등록 -->
+    <insert id="insertMenuAsgn" parameterType="authorVo">
+        /* insertMenuAsgn */
+        INSERT INTO TN_MENU_AUTHOR_ASGN (
+            MENU_SN, AUTHRT_CD_ID, AUTHRT_GRNT_CD_ID
+        )
+        VALUES (
+            #{menuSn}, #{authrtCdId}, #{authrtGrntCdId}
+        )
+    </insert>
+
+    <sql id="incMngrWhere">
+            <if test="paramMap.q_searchVal != null and paramMap.q_searchVal != ''">
+                <if test="paramMap.q_searchKey == 1001">
+                    AND A.PIC_ID LIKE '%' || #{paramMap.q_searchVal} || '%'
+                </if>
+                <if test="paramMap.q_searchKey == 1002">
+                    AND A.PIC_NM LIKE '%' || #{paramMap.q_searchVal} || '%'
+                </if>
+                <if test="paramMap.q_searchKey == null or paramMap.q_searchKey == ''">
+                    AND (A.PIC_ID LIKE '%' || #{paramMap.q_searchVal} || '%' OR A.PIC_NM LIKE '%' || #{paramMap.q_searchVal} || '%')
+                </if>
+             </if>
+    </sql>
+    <!-- 해당 권한 할당된 관리자 목록 조회 -->
+    <select id="selectMngrInAuthorList" parameterType="authorVo" resultType="mngrVo">
+        SELECT Y.* FROM (
+            SELECT ROWNUM NUM, X.* FROM (
+                SELECT A.PIC_ID,
+                       (SELECT DEPT_NM
+                          FROM TN_DEPT WHERE DEPT_CD_ID = A.DEPT_CD_ID) AS DEPT_NM,
+                       A.PIC_NM,
+                       A.JBGD_CD_ID
+                FROM TN_MNGR A
+                   , TN_MNGR_AUTHOR_ASGN B
+               WHERE A.PIC_ID  = B.PIC_ID
+                 AND B.AUTHRT_CD_ID = #{authrtCdId}
+                 AND A.USE_YN = 'Y'
+                <include refid="incMngrWhere"/>
+                ORDER BY A.DEPT_CD_ID ASC, A.PIC_NM ASC
+            ) X
+            WHERE ROWNUM &lt;= #{paramMap.q_pagingEndNum}
+         ) Y
+         WHERE NUM &gt;= #{paramMap.q_pagingStartNum}
+    </select>
+
+    <!-- 해당 권한 할당된 관리자 목록 건수 조회 -->
+    <select id="selectMngrInAuthorListCount" parameterType="authorVo" resultType="int">
+        SELECT COUNT(*) AS TOTAL_COUNT
+          FROM TN_MNGR A
+             , TN_MNGR_AUTHOR_ASGN B
+         WHERE A.PIC_ID  = B.PIC_ID
+           AND B.AUTHRT_CD_ID = #{authrtCdId}
+           AND A.USE_YN = 'Y'
+        <include refid="incMngrWhere"/>
+    </select>
+</mapper>

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="zesinc.intra.user.grad.UserGradMapper">
+
+    <select id="selectUserGradList" parameterType="userGradVo" resultType="userGradVo">
+    /* selectUserGradList */
+        SELECT
+            USER_GRD_CD_ID,
+            USER_GRD_NM,
+            USER_GRD_EXPLN,
+            USE_YN,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = GRAD.RGTR_ID) AS RGTR_NM,
+            RGTR_ID,
+            REG_DT,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = GRAD.MDFR_ID) AS UPDUSR_NM,
+            MDFR_ID,
+            UPDT_DT
+        FROM
+            TN_USER_GRAD GRAD
+        <where>
+            <if test="useYn != null and useYn != ''">
+                AND USE_YN = #{useYn}
+            </if>
+        </where>
+    </select>
+    
+    <select id="selectDplctChckGrad" parameterType="userGradVo" resultType="int">
+        /* selectDplctChckGrad */
+            SELECT COUNT(*)
+              FROM TN_USER_GRAD A
+             WHERE A.USER_GRD_CD_ID = #{userGrdCdId}
+    </select>
+    
+    <select id="selectUserGrad" parameterType="userGradVo" resultType="userGradVo">
+        /* selectUserGrad */
+        SELECT USER_GRD_CD_ID,
+               USER_GRD_NM,
+               USER_GRD_EXPLN,
+               USE_YN,
+               (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = GRAD.RGTR_ID) AS RGTR_NM,
+               RGTR_ID,
+               REG_DT,
+               (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = GRAD.MDFR_ID) AS UPDUSR_NM,
+               MDFR_ID,
+               UPDT_DT
+          FROM TN_USER_GRAD GRAD
+         WHERE USER_GRD_CD_ID = #{userGrdCdId}
+    </select>
+    
+    <insert id="insertUserGrad" parameterType="userGradVo">
+        /* insertUserGrad */
+        INSERT INTO TN_USER_GRAD (
+            USER_GRD_CD_ID,
+            USER_GRD_NM,
+            USER_GRD_EXPLN,
+            USE_YN,
+            RGTR_ID,
+            REG_DT
+        )
+        VALUES (
+            #{userGrdCdId},
+            #{userGrdNm},
+            #{userGrdExpln},
+            #{useYn},
+            #{rgtrId},
+            NOW()
+        )
+    </insert>
+    
+    <update id="updateUserGrad" parameterType="userGradVo">
+        /* updateUserGrad */
+        UPDATE TN_USER_GRAD
+           SET
+               USER_GRD_NM   = #{userGrdNm},
+               USER_GRD_EXPLN   = #{userGrdExpln},
+               USE_YN         = #{useYn},
+               MDFR_ID      = #{mdfrId},
+               UPDT_DT        = NOW()
+         WHERE USER_GRD_CD_ID = #{userGrdCdId}
+    </update>
+
+</mapper>

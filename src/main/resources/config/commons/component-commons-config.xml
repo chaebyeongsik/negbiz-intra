@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+    <!-- component 패키지 관련 환경설정 -->
+    <component-config>
+        <!-- 컨텐츠빌더 설정 -->
+        <contentbuilder>
+            <!--
+              별도로 지정되지 않은 경우 사용되는 기본 파일로 타 서버(예 :사용자단서버)처럼
+              http://user.server.kr/resources/libs/content-builder/assets/minimalist/content.css
+              위와 같이 작성하여 사용자단의 css를 불러서 사용할 수 있다.
+            -->
+            <defaultCss>/resources/libs/content-builder/assets/minimalist/content.css</defaultCss>
+            <snippetFile>/resources/libs/content-builder/snippets.html</snippetFile>
+            <imageselect>/resources/libs/content-builder/images.html</imageselect>
+            <fileselect>/resources/libs/content-builder/files.html</fileselect>
+        </contentbuilder>
+    </component-config>
+<typeAliases></typeAliases>
+</configuration>

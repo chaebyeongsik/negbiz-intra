@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="zesinc.intra.banner.BannerMapper">
+
+    <!-- 배너 조회 -->
+    <select id="selectBanner" parameterType="bannerVo" resultType="bannerVo">
+        SELECT
+        <trim suffixOverrides=",">
+            A.REG_SN,
+            A.TTL,
+            DATE_FORMAT(A.BGNG_YMD, '%Y-%m-%d') AS BGNG_YMD,
+            DATE_FORMAT(A.END_YMD, '%Y-%m-%d') AS END_YMD,
+            A.USE_YN,
+            A.LINK_TYPE_NM,
+            A.BNN_TYPE_NM,
+            A.BNN_DTL_TYPE_NM,
+            A.LINK_URL_ADDR,
+            A.IMG_ALTRTV_NM,
+            A.LINK_EXPLN,
+            A.FILE_PATH_NM,
+            A.SORT_SN,
+            A.RGTR_ID,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.RGTR_ID) AS RGTR_NM,
+            A.REG_DT,
+            A.MDFR_ID,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.MDFR_ID) AS UPDUSR_NM,
+            A.UPDT_DT,
+        </trim>
+        FROM
+            TN_BANNER A
+        WHERE
+                 A.REG_SN = #{paramMap.q_regSn}
+    </select>
+
+    <!-- 배너 목록 -->
+    <sql id="incBannerWhere">
+        <where>
+             <if test="paramMap.q_siteSn != null and paramMap.q_siteSn != ''" >
+                 AND A.REG_SN IN (SELECT REG_SN FROM TN_BANNER_DOMN WHERE SITE_SN = #{paramMap.q_siteSn})
+             </if>
+             <if test="paramMap.q_bnnTypeNm != null and paramMap.q_bnnTypeNm != ''">
+                AND A.BNN_TYPE_NM = #{paramMap.q_bnnTypeNm}
+             </if>
+             <if test="paramMap.q_searchVal != null and paramMap.q_searchVal != ''">
+                AND A.TTL LIKE CONCAT('%', #{paramMap.q_searchVal}, '%')
+             </if>
+             <if test="paramMap.q_startDt != null and paramMap.q_startDt != ''">
+                AND A.BGNG_YMD = REPLACE(#{paramMap.q_startDt}, '-', '')
+             </if>
+        </where>
+    </sql>
+    <select id="selectBannerList" parameterType="bannerVo" resultType="bannerVo">
+        SELECT
+            Y.*,
+            DATE_FORMAT(Y.BGNG_YMD_TMP, '%Y-%m-%d') AS BGNG_YMD,
+            DATE_FORMAT(Y.END_YMD_TMP,'%Y-%m-%d') AS END_YMD,
+            (STR_TO_DATE(DATE_FORMAT(NOW(), '%Y%m%d'),'%Y%m%d')) - STR_TO_DATE(Y.BGNG_YMD_TMP, '%Y%m%d') AS STATUS_BEGIN,
+            (STR_TO_DATE(DATE_FORMAT(NOW(), '%Y%m%d'),'%Y%m%d')) - STR_TO_DATE(Y.END_YMD_TMP, '%Y%m%d') AS STATUS_END
+        FROM (
+            SELECT  X.* FROM (
+                SELECT
+                <trim suffixOverrides=",">
+                    A.REG_SN,
+                    A.TTL,
+                    A.BGNG_YMD AS BGNG_YMD_TMP,
+                    A.END_YMD AS END_YMD_TMP,
+                    A.USE_YN,
+                    A.LINK_TYPE_NM,
+                    A.BNN_TYPE_NM,
+                    A.LINK_URL_ADDR,
+                    A.IMG_ALTRTV_NM,
+                    A.LINK_EXPLN,
+                    A.FILE_PATH_NM,
+                    A.SORT_SN,
+                    A.RGTR_ID,
+                    (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.RGTR_ID) AS RGTR_NM,
+                    A.REG_DT,
+                    A.MDFR_ID,
+                    (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.MDFR_ID) AS UPDUSR_NM,
+                    A.UPDT_DT,
+                </trim>
+                FROM
+                    TN_BANNER A
+                <include refid="incBannerWhere"/>
+                ORDER BY A.SORT_SN ASC, A.REG_DT DESC
+            ) X
+         ) Y
+         LIMIT #{paramMap.q_rowPerPage}
+         OFFSET #{paramMap.q_pagingStartNum}
+    </select>
+
+    <!-- 배너 조회 목록 카운트 -->
+    <select id="selectBannerListCount" parameterType="bannerVo" resultType="int">
+        SELECT
+            COUNT(A.REG_SN) AS TOTAL_COUNT
+        FROM
+            TN_BANNER A
+        <include refid="incBannerWhere"/>
+    </select>
+
+    <!-- 배너 목록(정렬순서 변경용 -->
+    <select id="selectBannerSortSnList" parameterType="bannerVo" resultType="bannerVo">
+        SELECT
+        <trim suffixOverrides=",">
+            A.REG_SN,
+            A.TTL,
+            A.BGNG_YMD AS BGNG_YMD_TMP,
+            A.END_YMD AS END_YMD_TMP,
+            A.USE_YN,
+            A.LINK_TYPE_NM,
+            A.BNN_TYPE_NM,
+            A.BNN_DTL_TYPE_NM,
+            A.LINK_URL_ADDR,
+            A.IMG_ALTRTV_NM,
+            A.LINK_EXPLN,
+            A.FILE_PATH_NM,
+            A.SORT_SN,
+            A.RGTR_ID,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.RGTR_ID) AS RGTR_NM,
+            A.REG_DT,
+            A.MDFR_ID,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.MDFR_ID) AS UPDUSR_NM,
+            A.UPDT_DT,
+        </trim>
+        FROM
+            TN_BANNER A
+        <where>
+             <if test="paramMap.q_siteSn != null and paramMap.q_siteSn != ''" >
+                 AND A.REG_SN IN (SELECT REG_SN FROM TN_BANNER_DOMN WHERE SITE_SN = #{paramMap.q_siteSn})
+             </if>
+             <if test="paramMap.q_bnnTypeNm != null and paramMap.q_bnnTypeNm != ''">
+                AND A.BNN_TYPE_NM = #{paramMap.q_bnnTypeNm}
+             </if>
+        </where>
+        ORDER BY A.SORT_SN ASC
+    </select>
+
+    <!-- 배너 등록 -->
+    <insert id="insertBanner" parameterType="bannerVo">
+        <selectKey order="BEFORE" keyProperty="regSn" resultType="int">
+            SELECT IFNULL(MAX(REG_SN), 0) + 1
+            FROM TN_BANNER
+        </selectKey>
+        INSERT INTO TN_BANNER (
+        <trim suffixOverrides=",">
+            REG_SN,
+            TTL,
+            BGNG_YMD,
+            END_YMD,
+            USE_YN,
+            LINK_TYPE_NM,
+            BNN_TYPE_NM,
+            BNN_DTL_TYPE_NM,
+            LINK_URL_ADDR,
+            IMG_ALTRTV_NM,
+            LINK_EXPLN,
+            FILE_PATH_NM,
+            SORT_SN,
+            RGTR_ID,
+            REG_DT,
+        </trim>
+        ) VALUES (
+        <trim suffixOverrides=",">
+            #{regSn},
+            #{ttl},
+            #{bgngYmd},
+            #{endYmd},
+            #{useYn},
+            #{linkTypeNm},
+            #{bnnTypeNm},
+            #{bnnDtlTypeNm},
+            #{linkUrlAddr},
+            #{imgAltrtvNm},
+            #{linkExpln},
+            #{filePathNm},
+            (SELECT SORT_SN FROM
+            	(SELECT IFNULL(MAX(SORT_SN), 1) + 1 AS SORT_SN FROM TN_BANNER WHERE BNN_TYPE_NM = #{bnnTypeNm})A),
+            #{rgtrId},
+            NOW(),
+        </trim>
+        )
+    </insert>
+
+    <!-- 배너 수정 -->
+    <update id="updateBanner" parameterType="bannerVo">
+        UPDATE TN_BANNER 
+          <set>
+            TTL = #{ttl},
+            BGNG_YMD = #{bgngYmd},
+            END_YMD = #{endYmd},
+            USE_YN = #{useYn},
+            LINK_TYPE_NM = #{linkTypeNm},
+            BNN_TYPE_NM = #{bnnTypeNm},
+            BNN_DTL_TYPE_NM = #{bnnDtlTypeNm},
+            LINK_URL_ADDR = #{linkUrlAddr},
+            IMG_ALTRTV_NM = #{imgAltrtvNm},
+            LINK_EXPLN = #{linkExpln},
+            <if test="filePathNm != null and filePathNm != ''">
+            FILE_PATH_NM = #{filePathNm},
+            </if>
+            MDFR_ID = #{mdfrId},
+            UPDT_DT = NOW(),
+          </set>
+        WHERE
+             REG_SN = #{paramMap.q_regSn}
+    </update>
+
+    <!-- 배너정렬순 수정 -->
+    <update id="updateBannerSortSn" parameterType="bannerVo">
+        UPDATE TN_BANNER 
+          <set>
+            SORT_SN = #{sortSn}
+          </set>
+        WHERE
+                REG_SN = #{regSn}
+            AND BNN_TYPE_NM = #{bnnTypeNm}
+    </update>
+
+    <!-- 배너 삭제 -->
+    <delete id="deleteBanner" parameterType="bannerVo">
+        DELETE FROM TN_BANNER
+        WHERE
+             REG_SN = #{paramMap.q_regSn}
+    </delete>
+
+    <!-- 배너 도메인 목록 -->
+    <select id="selectBannerDomnList" parameterType="bannerVo" resultType="bannerDomnVo">
+        SELECT
+            A.REG_SN,
+            A.SITE_SN,
+            B.SITE_NM,
+            B.SITE_EXPLN
+        FROM
+            TN_BANNER_DOMN A, TN_DOMN B
+        WHERE
+                A.SITE_SN = B.SITE_SN
+            AND A.REG_SN = #{regSn}
+    </select>
+
+    <!-- 배너 도메인 등록 -->
+    <insert id="insertBannerDomn" parameterType="bannerDomnVo">
+        INSERT INTO TN_BANNER_DOMN (
+            REG_SN,
+            SITE_SN
+        ) VALUES (
+            #{regSn},
+            #{siteSn}
+        )
+    </insert>
+
+    <!-- 배너 도메인 삭제 -->
+    <delete id="deleteBannerDomn" parameterType="bannerVo">
+         DELETE FROM TN_BANNER_DOMN
+         WHERE
+                REG_SN = #{regSn}
+    </delete>
+
+</mapper>

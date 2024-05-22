@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context" xmlns:task="http://www.springframework.org/schema/task"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                        http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd
+                        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <!-- cron 설정 방법은 동일 위치의 context-scheduled-readme.txt 참조 -->
+
+    <task:scheduled-tasks>
+        <!-- 10 * * * * ? : 10초, 매분, 매시, 매일, 매주, 매월 마다 실행. 즉 매분 10초에 실행 -->
+        <!-- 0 0 5 * * * ? : 0초, 0분, 5시, 매일, 매주, 매월 마다 실행. 즉 매일 새벽 5시에 구동 -->
+        <task:scheduled ref="sampleProcessor" method="process" cron="0 0 0 * * ?" />
+    </task:scheduled-tasks>
+
+    <!-- 배치 샘플 -->
+    <bean id="sampleProcessor" class="zesinc.commons.schedule.sample.SampleProcessor" />
+
+</beans>

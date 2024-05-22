@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+    <passwd-config>
+        <!-- 비밀번호 갱신주기 일단위로 기록. 비밀번호 최종변경일 기준-->
+        <changePasswordTerm>90</changePasswordTerm>
+        <!-- 자동생성시 비밀번호 기본 길이 -->
+        <defaultPasswdLength>8</defaultPasswdLength>
+        <!-- 비밀번호 최소 길이 -->
+        <passwdMinLength>8</passwdMinLength>
+        <!-- 비밀번호 최대 길이 -->
+        <passwdMaxLength>32</passwdMaxLength>
+        <!-- 공백문자 허용여부 -->
+        <passwdAllowWhiteSpace>false</passwdAllowWhiteSpace>
+        <!-- 숫자만인 경우 허용여부 -->
+        <passwdAllowAllDigit>false</passwdAllowAllDigit>
+        <!-- 동일문자 제한 횟수 -->
+        <passwdAllowRepeat>6</passwdAllowRepeat>
+        <!-- 이전비밀번호 재사용가능여부 -->
+        <passwdAllowPrvPwd>false</passwdAllowPrvPwd>
+
+        <!-- 비밀번호 사용가능 문자 집합 (비밀번호 자동생성시 사용됨) '\' 문자는 특수문자 변환문자임 -->
+        <passwdChars>
+            <chars>abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ</chars>
+            <numbers>0123456789</numbers>
+            <specials><![CDATA[~!”#$%&’()*+,-./:;>=<?@[]^_`{}|~]]></specials>
+        </passwdChars>
+
+        <!-- 평문전송방지를 위한 암호화설정값 (웹페이지에서 암호화하고 자바단에서 복호화해야해서 js의 설정값과 맞춰줘야함) -->
+        <!-- 비밀번호 salt          (/resources/openworks4/js/openworks.password.js의 PASS_SALT값과 동일하게 셋팅) -->
+        <passwdSalt>97f2fde29cd4493f199c2f3e9b7df120</passwdSalt>
+        <!-- 비밀번호 iv            (/resources/openworks4/js/openworks.password.js의 PASS_IV값과 동일하게 셋팅) -->
+        <passwordIv>4c1f89c42e9f06036385e90aadd7389f</passwordIv>
+        <!-- 비밀번호 passPhrase    (/resources/openworks4/js/openworks.password.js의 PASS_PHRASE값과 동일하게 셋팅) -->
+        <passwordPassPhrase>v4.0</passwordPassPhrase>
+        <!-- 비밀번호 iteration     (/resources/openworks4/js/openworks.password.js의 PASS_ITERATION값과 동일하게 셋팅) -->
+        <passwdIteration>1000</passwdIteration>
+        <!-- 비밀번호 keySize       (/resources/openworks4/js/openworks.password.js의 PASS_KEY_SIZE값과 동일하게 셋팅) -->
+        <passwdKeySize>128</passwdKeySize>
+    </passwd-config>
+</configuration>

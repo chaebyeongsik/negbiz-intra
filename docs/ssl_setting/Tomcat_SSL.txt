@@ -1,0 +1,57 @@
+CMD dos 창을 띄운 후 아래와 같이 진행한다.
+
+1. UTF-8 설정
+
+    set keytool="java -Dfile.encoding=utf8 sun.security.tools.KeyTool"
+
+2. keystore 파일 생성 (아래 순서로 DOS 창에 입력)
+
+    keytool -genkey -alias server -keyalg RSA -keystore server.keystore -validity 365 입력후 엔터
+
+    keystore 암호를 입력하십시오: 암호입력
+
+    새 암호를 다시 입력하십시오: 암호재입력
+
+    이름과 성을 입력하십시오.
+        [Unknown]:  영문 이름 예:Gil-dong, Hong
+
+    조직 단위 이름을 입력하십시오.
+        [Unknown]:  영문 팀이름 예: Dev Team
+
+    조직 이름을 입력하십시오.
+        [Unknown]:  영문 회사이름 예: Zesinc
+
+    구/군/시 이름을 입력하십시오?
+        [Unknown]:  영문 시/군/구 이름 예: Guro-gu
+
+    시/도 이름을 입력하십시오.
+        [Unknown]:  영문 시/도 미름 예: Seoul
+
+    이 조직의 두 자리 국가 코드를 입력하십시오.
+        [Unknown]:  KR  (한국코드)
+
+    CN=Name Name, OU="Org Name", O="Org Name", L=Guro-gu, ST=SEOUL, C=KR이(가) 맞습니까?
+        [아니오]:  예 또는 Y
+
+    <server>에 대한 키 암호를 입력하십시오. (keystore 암호와 같은 경우 Enter를 누르십시오):  
+
+  * 위의 절차를 거치면 현재 디렉토리에 server.keystore 파일이 생성되어 있으며 이 파일을 사용한다.
+
+3. 참고 
+
+    -genkey 옵션은 최근에 -genkeypair로 바뀌었으나 둘 다 사용가능합니다.
+    -alias 옵션을 입력하지 않으면 mykey 라는 값이 default 로 사용됩니다.
+    -keyalg 옵션을 입력하지 않으면 DSA가 default로 사용됩니다. 하지만 RSA가 흔히 사용됩니다.
+    -keystore 옵션을 입력하지 않으면 ~/.keystore 파일이 default 로 사용됩니다. (맥의 경우) 
+    -storetype 옵션을 입력하지 않으면 JKS 타입이 default로 사용됩니다.
+    -validity 옵션을 입력하지 않으면 default로 1년간의 유효기간이 설정됩니다.
+
+4. Tomcat 서버 설정
+
+    Tomcat 설치경로로 이동하고, server.xml 설정파일에서 다음의 내용을 수정한다.
+    (Eclipse Plugin으로 사용시 프로젝트 내에 Servers 항목을 펼치고, 구성된 서버명 폴더 안의 server.xml 파일을 수정한다.)
+    
+    <Connector port="443" maxThreads="100" scheme="https" secure="true" SSLEnabled="true"
+        keystoreFile="파일경로/server.keystore" keystorePass="생성시입력한 비밀번호"
+        clientAuth="false" sslProtocol="TLS"/>
+

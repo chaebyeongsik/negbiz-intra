@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+    <!-- 개인정보 필터링 정규표현식 -->
+    <privacy-config>
+        <privacyRegexp attr="주민등록번호"><![CDATA[ ([01]\d{5}[\-~\.\s][1-4]\d{6}|[2-9]\d{5}[\-~\.\s]+[1-2]\d{6}) ]]></privacyRegexp>
+        <privacyRegexp attr="여권번호"><![CDATA[ [a-zA-Z]{2}[\-~\.\s]\d{7} ]]></privacyRegexp>
+        <privacyRegexp attr="운전면허번호"><![CDATA[ \d{2}[\-~\.\s]\d{6}[\-~\.\s]\d{2} ]]></privacyRegexp>
+        <privacyRegexp attr="휴대전화번호"><![CDATA[ 01[016789][\-~\.\s]\d{3,4}[\-~\.\s]\d{4} ]]></privacyRegexp>
+        <privacyRegexp attr="신용카드번호"><![CDATA[ [34569]\d{3}[\-~\.\s]\d{4}[\-~\.\s]\d{4}[\-~\.\s]\d{4} ]]></privacyRegexp>
+        <privacyRegexp attr="건강보험번호"><![CDATA[ [1257][\-~\.\s]\d{10} ]]></privacyRegexp>
+        <privacyRegexp attr="은행계좌번호">
+            <![CDATA[ 
+            (
+                \d{2}[\-~\.\s]\d{2}[\-~\.\s]\d{6}|
+                \d{3}[\-~\.\s]
+                (
+                    \d{5,6}[\-~\.\s]\d{3}|
+                    \d{6}[\-~\.\s]\d{5}|
+                    \d{2,3}[\-~\.\s]\d{6}|
+                    \d{2}[\-~\.\s]\d{7}|
+                    \d{2}[\-~\.\s]\d{4,6}[\-~\.\s]\d|
+                    \d{5}[\-~\.\s]\d{3}[\-~\.\s]\d{2}
+                    \d{2}[\-~\.\s]\d{5}[\-~\.\s]\d{3}|
+                    \d{4}[\-~\.\s]\d{4}[\-~\.\s]\d{3}|
+                    \d{6}[\-~\.\s]\d{2}[\-~\.\s]\d{3}|
+                    \d{2}[\-~\.\s]\d{2}[\-~\.\s]\d{7}|
+                    \d{4}[\-~\.\s]\d{3}[\-~\.\s]\d{6}|
+                    \d{2}[\-~\.\s]\d{6}[\-~\.\s]\d
+                )|
+                \d{5}[\-~\.\s]\d{2}[\-~\.\s]\d{6}|
+                \d{6}[\-~\.\s]\d{2}[\-~\.\s]\d{5,6}
+            )
+            ]]>
+        </privacyRegexp>
+    </privacy-config>
+</configuration>

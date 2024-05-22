@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+
+    <userExcelDown-config>
+
+        <user-list>
+            <queryId>zesinc.intra.user.userManage.UserManageMapper.selectUserListExcel</queryId>
+            <headerId>REG_SN,USER_IDNTF_NM,USER_NM,REG_DT,LAST_CNTN_DT,LGN_NMTM,USER_GRD_CD_DSCTN,JOIN_TYPE_SN_NM</headerId>
+            <headerNm>순번,사용자ID,사용자명,가입일시,최근접속일시,로그인건수,사용자등급,사용자가입유형</headerNm>
+            <fileNm>사용자목록</fileNm>
+            <menuNm>사용자관리</menuNm>
+            <menuSn>83</menuSn>
+            <listType>리스트</listType>
+        </user-list>
+
+        <user-access-list>
+            <queryId>zesinc.intra.user.accessHist.UserAccessHistMapper.selectUserAccessHistExcel</queryId>
+            <headerId>LGN_DT,SBSCRB_NM,LOGIN_RESULT,LGN_IP_ADDR</headerId>
+            <headerNm>접속일시,인증방식,결과,아이피</headerNm>
+            <fileNm>사용자접속이력상세목록</fileNm>
+            <menuNm>사용자접속이력관리</menuNm>
+            <menuSn>87</menuSn>
+            <listType>상세</listType>
+        </user-access-list>
+
+        <user-access-list-all>
+            <queryId>zesinc.intra.user.accessHist.UserAccessHistMapper.selectUserAccessHistListExcel</queryId>
+            <headerId>USER_IDNTF_NM,USER_NM,REG_DT,LAST_CNTN_DT,LGN_NMTM,USER_GRD_CD_DSCTN,SBSCRB_NM</headerId>
+            <headerNm>사용자ID,사용자명,가입일시,최근접속일시,로그인건수,사용자등급,가입유형</headerNm>
+            <fileNm>사용자접속이력목록</fileNm>
+            <menuNm>사용자접속이력관리</menuNm>
+            <menuSn>87</menuSn>
+            <listType>리스트</listType>
+        </user-access-list-all>
+
+        <user-hist-list-O>
+            <queryId>zesinc.intra.user.hist.UserHistMapper.selectUserLogListExcel</queryId>
+            <headerId>MENU_NM,OTPT_NM,DT,PIC_NM,PIC_ID,LOG_CN</headerId>
+            <headerNm>메뉴명,출력내용,출력일시,출력자,출력자ID,출력사유</headerNm>
+            <fileNm>사용자정보출력이력목록</fileNm>
+            <menuNm>사용자정보출력이력관리</menuNm>
+            <menuSn>89</menuSn>
+            <listType>리스트</listType>
+        </user-hist-list-O>
+
+        <user-hist-list-R>
+            <queryId>zesinc.intra.user.hist.UserHistMapper.selectUserLogListExcel</queryId>
+            <headerId>SRCH_STNG_CN,RESULT_CO,MENU_NM,WHO_IS,DT,PIC_NM,PIC_ID,LOG_CN</headerId>
+            <headerNm>검색조건,결과건수,메뉴명,사용자명(ID),검색일시,검색자명,검색자ID,검색사유</headerNm>
+            <fileNm>사용자정보조회이력목록</fileNm>
+            <menuNm>사용자정보조회이력관리</menuNm>
+            <menuSn>88</menuSn>
+            <listType>리스트</listType>
+        </user-hist-list-R>
+
+        <user-hist-list-U>
+            <queryId>zesinc.intra.user.hist.UserHistMapper.selectUserLogListExcel</queryId>
+            <headerId>USER_IDNTF_NM,USER_NM,DT,PIC_NM,PIC_ID,CHG_AFTR_CN,LOG_CN</headerId>
+            <headerNm>사용자ID,사용자명,변경일시,변경자,변경자ID,변경내용,변경사유</headerNm>
+            <fileNm>사용자정보변경이력목록</fileNm>
+            <menuNm>사용자정보변경이력관리</menuNm>
+            <menuSn>90</menuSn>
+            <listType>리스트</listType>
+        </user-hist-list-U>
+
+    </userExcelDown-config>
+
+<typeAliases></typeAliases>
+</configuration>

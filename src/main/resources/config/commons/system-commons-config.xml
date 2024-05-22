@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+    <system-config>
+
+        <!-- 시스템 명칭 -->
+        <systemName>Openworks 4 포털관리시스템</systemName>
+
+        <!-- 시스템 구분 : 관리자 -->
+        <system-kind>intra</system-kind>
+
+        <!-- Spring framework Context 명칭(수정시 web.xml 설정과 동일한 이름을 사용해야 함) -->
+        <springframeworks>
+            <dispatcherServletContextAttrName>org.springframework.web.servlet.FrameworkServlet.CONTEXT.dispatcher</dispatcherServletContextAttrName>
+        </springframeworks>
+
+        <!-- 기본 케릭터 인코딩 -->
+        <defaultCharset>utf-8</defaultCharset>
+
+        <!-- 기본암호화 유형 -->
+        <defaultEnctype>ARIA</defaultEnctype>
+
+        <!-- 기본 압축/해제 유형 -->
+        <defaultCompressType>zip</defaultCompressType>
+
+        <!-- 이미지 파일 확장자(CmsUploadHelper파일 등록시 CSS_FILE업로드시 허용확장자로 css가 추가되어 있어야 함) -->
+        <imageFileExts>bmp,gif,jpe,jpg,jpeg,jfif,pcx,png,tiff,wbmp,css</imageFileExts>
+
+        <!-- 업로드 불가 파일 확장자 -->
+        <notAllowFileExts>jsp,java,exe,asp,ascx,aspx,php,php3,php5,bat,sh,cgi,reg,dll,pl,cfc,cfm</notAllowFileExts>
+
+        <!-- 파일 업로드 기본 설정 -->
+        <fileUpload>
+            <view>basic</view>
+            <name>fileInput</name>
+            <count>1</count>
+            <size>2048000</size>
+            <maxSize>5120000</maxSize>
+            <fileExts>jpg,jpeg,gif,png</fileExts>
+        </fileUpload>
+
+        <globalInfo>
+            <!-- 기본 날짜 포멧 패턴 -->
+            <datePattern>YYYY-MM-DD</datePattern>
+            <!-- 기본 날짜시간 포멧 패턴 -->
+            <dateTimePattern>YYYY-MM-DD HH24:MI:SS</dateTimePattern>
+        </globalInfo>
+
+        <session>
+            <!-- 세션 키 -->
+            <mgrSessionKey>__msk</mgrSessionKey>
+            <!-- 로그인시도 제한 횟수 -->
+            <mgrLoginTryCnt>5</mgrLoginTryCnt>
+            <!-- 로그인시도 제한 횟수 초기화 시간 분으로 설정 -->
+            <mgrLoginTryTime>10</mgrLoginTryTime>
+        </session>
+
+        <paging>
+            <rowPerPage>10</rowPerPage>
+            <pagePerPage>10</pagePerPage>
+            <pageNums>5, 10, 15, 30, 50, 100, 200, 300</pageNums>
+        </paging>
+
+        <!-- 관리자 문의 정보. 시스템 오류나 권한등에 따른 접근 차단등의 경우 사용되는 정보 -->
+        <adminInfo>
+            <deptNm>전산부서</deptNm>
+            <name>홍길동</name>
+            <telNo>02-111-2222</telNo>
+        </adminInfo>
+
+        <transmitInfo>
+            <mailServer>smtp.test.com</mailServer>
+            <mailPort>465</mailPort>
+            <isSsl>true</isSsl>
+            <isDebug>false</isDebug>
+            <senderNm>관리자</senderNm>
+            <senderEmail>admin@test.com</senderEmail>
+            <senderTel>02-222-3333</senderTel>
+
+            <mailId>zesinc@gmail.com</mailId>
+            <mailPassword>aprkqpscu</mailPassword>
+            <smsTitle>시스템 장애가 발생되었습니다. 장애관리서버에서 확인 바랍니다.</smsTitle>
+            <smsContent>시스템 장애가 발생되었습니다. 장애관리서버에서 확인 바랍니다.</smsContent>
+            <mailTitle>시스템 장애가 발생되었습니다. 장애관리서버에서 확인 바랍니다.</mailTitle>
+            <mailContent>시스템 장애가 발생되었습니다. 장애관리서버에서 확인 바랍니다.</mailContent>
+        </transmitInfo>
+
+    </system-config>
+<typeAliases></typeAliases>
+</configuration>

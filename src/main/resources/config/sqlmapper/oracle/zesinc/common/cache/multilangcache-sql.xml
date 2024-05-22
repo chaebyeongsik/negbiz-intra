@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="zesinc.common.cache.multilang.MultilangCacheMapper">
+
+    <select id="selectMultilangList" parameterType="multilangCacheVo" resultType="multilangCacheVo">
+        SELECT
+        <trim suffixOverrides=",">
+            B.LANG_CD_ID || '.' || A.MTLNG_CD_NM AS MTLNG_UNQ_CD_NM,
+            A.MTLNG_CD_NM,
+            B.LANG_CD_ID,
+            B.MULTI_LANG_MSG_CN,
+        </trim>
+        FROM
+            TN_MULTI_LANG A, TN_MULTI_LANG_GROUP B
+        WHERE
+                A.MTLNG_CD_NM = B.MTLNG_CD_NM
+            AND A.USE_YN = #{useYn}
+    </select>
+
+</mapper>

@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="zesinc.intra.user.accessHist.UserAccessHistMapper">
+
+
+    <!-- 사용자 목록 -->
+    <sql id="incUserAccessHistWhere">
+        <where>
+        <if test="paramMap.q_searchKey0 != null and paramMap.q_searchKey0 != ''">AND
+            A.USER_TYPE_NM = #{paramMap.q_searchKey0}
+        </if>
+        <if test="paramMap.q_searchKey1 != null and paramMap.q_searchKey1 != ''">AND
+            A.JOIN_TYPE_SN = #{paramMap.q_searchKey1}
+        </if>
+        <if test="paramMap.q_searchKey2 != null and paramMap.q_searchKey2 != ''">AND
+            A.USER_GRD_CD_DSCTN LIKE '%' || #{paramMap.q_searchKey2} || '%'
+        </if>
+        <if test="paramMap.q_searchVal != null and paramMap.q_searchVal != ''">AND
+            <if test="paramMap.q_searchKey == 1001">
+                (A.USER_IDNTF_NM LIKE '%' || #{paramMap.q_searchVal} || '%' OR A.USER_NM LIKE '%' || #{paramMap.q_searchVal} || '%')
+            </if>
+            <if test="paramMap.q_searchKey == 1002">
+                A.USER_NM LIKE '%' || #{paramMap.q_searchVal} || '%'
+            </if>
+            <if test="paramMap.q_searchKey == 1003">
+                A.USER_IDNTF_NM LIKE '%' || #{paramMap.q_searchVal} || '%'
+            </if>
+        </if>
+        <if test="paramMap.q_startDt != null and paramMap.q_startDt != ''">
+            <if test="paramMap.q_endDt != null and paramMap.q_endDt != ''">AND
+                SUBSTR(TO_CHAR(A.LAST_CNTN_DT,'YYYY-MM-DD HH24:MI:SS'), 0,19) BETWEEN #{paramMap.q_startDt} || ' 00:00:00'
+                AND #{paramMap.q_endDt} || ' 23:59:59'
+            </if>
+        </if>
+        </where>
+    </sql>
+    <select id="selectUserAccessHistList" parameterType="userAccessHistVo" resultType="userAccessHistVo">
+        SELECT Y.* FROM (
+            SELECT ROWNUM NUM, X.* FROM (
+                SELECT
+                <trim suffixOverrides=",">
+                    A.USER_ID,
+                    A.USER_NM,
+                    A.USER_IDNTF_NM,
+                    A.JOIN_TYPE_SN,
+                    A.LAST_CNTN_DT,
+                    A.LGN_NMTM,
+                    A.USER_TYPE_NM,
+                    A.USER_GRD_CD_DSCTN,
+                    A.RGTR_ID,
+                    (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.RGTR_ID) AS RGTR_NM,
+                    A.REG_DT,
+                </trim>
+                FROM TN_USER A
+                <include refid="incUserAccessHistWhere"/>
+                ORDER BY REG_DT DESC
+            ) X
+            WHERE ROWNUM &lt;= #{paramMap.q_pagingEndNum}
+         ) Y
+         WHERE NUM &gt;= #{paramMap.q_pagingStartNum}
+    </select>
+
+    <!-- 사용자 조회 목록 카운트 -->
+    <select id="selectUserAccessHistListCount" parameterType="userAccessHistVo" resultType="int">
+        SELECT COUNT(A.USER_ID) AS TOTAL_COUNT
+        FROM TN_USER A
+        <include refid="incUserAccessHistWhere"/>
+    </select>
+
+    <select id="selectAccessStatistics" parameterType="userAccessHistStatisticsVo" resultType="userAccessHistStatisticsVo">
+        SELECT (WHOL_MBR_CNT - LGN_MBR_CNT) AS notLoginUserCount
+             , (GPIN_CNTN_NMTM + CERT_CNTN_NMTM + RNAME_CERT_CNTN_NMTM + ETC_CNTN_NMTM) AS memberTypeCount
+             , (TEENS_CNTN_NMTM + TWENTY_CNTN_NMTM + THIRTY_CNTN_NMTM + FORTY_CNTN_NMTM + FIFTY_CNTN_NMTM + SIXTY_CNTN_NMTM
+                + SVNT_ABOVE_CNTN_NMTM) AS ageTypeCount
+             , (MALE_CNTN_NMTM + FEMALE_CNTN_NMTM + ETC_GNDR_CNTN_NMTM ) AS sexTypeCount
+             , CNTN_YR
+             , CNTN_MM
+             , CNTN_DAY
+             , WHOL_MBR_CNT
+             , LGN_MBR_CNT
+             , GPIN_CNTN_NMTM
+             , CERT_CNTN_NMTM
+             , RNAME_CERT_CNTN_NMTM
+             , ETC_CNTN_NMTM
+             , TEENS_CNTN_NMTM
+             , TWENTY_CNTN_NMTM
+             , THIRTY_CNTN_NMTM
+             , FORTY_CNTN_NMTM
+             , FIFTY_CNTN_NMTM
+             , SIXTY_CNTN_NMTM
+             , SVNT_ABOVE_CNTN_NMTM
+             , MALE_CNTN_NMTM
+             , FEMALE_CNTN_NMTM
+             , ETC_GNDR_CNTN_NMTM
+        FROM TS_USER_CONECT A
+       WHERE A.CNTN_YR = TO_CHAR(SYSDATETIME, 'YYYY')
+         AND A.CNTN_MM = TO_CHAR(SYSDATETIME, 'MM')
+         AND A.CNTN_DAY = TO_CHAR(SYSDATETIME, 'DD')<!-- '02' -->
+    </select>
+
+    <!-- 개별 회원 접속 이력 리스트 -->
+    <select id="selectUserAccessHist" parameterType="userAccessHistVo" resultType="userAccessHistVo">
+        SELECT Y.* FROM (
+            SELECT ROWNUM NUM, X.* FROM (
+                    SELECT LGN_IP_ADDR
+                         , LGN_RSLT_NO
+                         , LGN_DT
+                         , (SELECT JOIN_TYPE_SN FROM TN_USER WHERE USER_ID = A.USER_ID) AS JOIN_TYPE_SN
+                      FROM TH_USER_CONECT A
+                     WHERE USER_ID = #{paramMap.q_userId}
+                    <if test="paramMap.q_startDt != null and paramMap.q_startDt != ''">
+                        <if test="paramMap.q_endDt != null and paramMap.q_endDt != ''">
+                            AND TO_CHAR(LGN_DT,'YYYYMMDD') BETWEEN REPLACE(#{paramMap.q_startDt},'-') AND REPLACE(#{paramMap.q_endDt},'-')
+                        </if>
+                    </if>
+                    ORDER BY LGN_DT DESC
+                ) X
+                WHERE ROWNUM &lt;= #{paramMap.q_pagingEndNum}
+           ) Y
+         WHERE NUM &gt;= #{paramMap.q_pagingStartNum}
+    </select>
+
+    <select id="selectUserAccessHistCount" parameterType="userAccessHistVo" resultType="int">
+        SELECT COUNT(USER_ID)
+          FROM TH_USER_CONECT A
+         WHERE USER_ID = #{paramMap.q_userId}
+        <if test="paramMap.q_startDt != null and paramMap.q_startDt != ''">
+            <if test="paramMap.q_endDt != null and paramMap.q_endDt != ''">
+                AND TO_CHAR(LGN_DT,'YYYYMMDD') BETWEEN REPLACE(#{paramMap.q_startDt},'-') AND REPLACE(#{paramMap.q_endDt},'-')
+            </if>
+        </if>
+    </select>
+    
+    <select id="selectUserLoginIpTotal" parameterType="userAccessHistVo" resultType="int">
+        SELECT COUNT(LGN_IP_ADDR)
+          FROM TH_USER_CONECT
+         WHERE USER_ID = #{paramMap.q_userId}
+    </select>
+    
+    <select id="selectUserLoginIp" parameterType="userAccessHistVo" resultType="userAccessHistVo">
+        SELECT A.LGN_IP_ADDR
+             , A.IP_COUNT
+          FROM (SELECT LGN_IP_ADDR
+                     , COUNT(LGN_IP_ADDR) AS IP_COUNT
+                  FROM TH_USER_CONECT
+                 WHERE USER_ID = #{paramMap.q_userId}
+                 GROUP BY LGN_IP_ADDR
+                 ORDER BY IP_COUNT DESC, LGN_IP_ADDR DESC) A
+         WHERE ROWNUM &lt;= 3
+        UNION ALL
+        SELECT '기타'          AS LGN_IP_ADDR
+             , COUNT(LGN_IP_ADDR) AS IP_COUNT
+          FROM TH_USER_CONECT
+         WHERE USER_ID = #{paramMap.q_userId}
+           AND LGN_IP_ADDR NOT IN (
+                                SELECT LGN_IP_ADDR
+                                  FROM (SELECT LGN_IP_ADDR
+                                             , COUNT(LGN_IP_ADDR) AS IP_COUNT
+                                          FROM TH_USER_CONECT
+                                         WHERE USER_ID = #{paramMap.q_userId}
+                                         GROUP BY LGN_IP_ADDR
+                                         ORDER BY IP_COUNT DESC
+                                                , LGN_IP_ADDR DESC
+                                       ) A
+                                 WHERE ROWNUM &lt;= 3
+                               )
+    </select>
+
+    <!-- 사용자 목록 엑셀조회 -->
+    <select id="selectUserAccessHistExcel" parameterType="excelDownloadVo" resultType="hmap">
+        SELECT LGN_IP_ADDR
+             , (SELECT CD_NM
+                  FROM TC_CODE
+                 WHERE HGHRK_CD_ID = 'loginResult'
+                   AND CD_ID = A.LGN_RSLT_NO) LOGIN_RESULT
+             , TO_CHAR(A.LGN_DT, 'YYYY-MM-DD HH24:MI') AS LGN_DT
+             , (
+                SELECT CD_NM
+                  FROM TC_CODE
+                 WHERE HGHRK_CD_ID = 'joinTypeSn'
+                   AND CD_ID = (SELECT TO_CHAR(JOIN_TYPE_SN)
+                                 FROM TN_USER
+                                WHERE USER_ID = A.USER_ID)
+               ) AS SBSCRB_NM
+          FROM TH_USER_CONECT A
+         WHERE USER_ID = #{paramMap.q_userId}
+        <if test="paramMap.q_startDt != null and paramMap.q_startDt != ''">
+            <if test="paramMap.q_endDt != null and paramMap.q_endDt != ''">
+                AND TO_CHAR(LGN_DT,'YYYYMMDD') BETWEEN REPLACE(#{paramMap.q_startDt},'-') AND REPLACE(#{paramMap.q_endDt},'-')
+            </if>
+        </if>
+        ORDER BY LGN_DT DESC
+    </select>
+
+    <!-- 사용자 전체 목록 엑셀조회 -->
+    <select id="selectUserAccessHistListExcel" parameterType="excelDownloadVo" resultType="hmap">
+         SELECT
+        <trim suffixOverrides=",">
+            A.USER_IDNTF_NM,
+            A.USER_NM,
+            TO_CHAR(A.REG_DT, 'YYYY-MM-DD HH24:MI') AS REG_DT,
+            TO_CHAR(A.LAST_CNTN_DT, 'YYYY-MM-DD HH24:MI') AS LAST_CNTN_DT,
+            A.LGN_NMTM,
+            A.USER_GRD_CD_DSCTN || NVL2(A.USER_GRD_CD_DSCTN, '_USER_GRAD_CODE_LIST', '') AS USER_GRD_CD_DSCTN,
+            (
+                SELECT CD_NM
+                  FROM TC_CODE
+                 WHERE HGHRK_CD_ID = 'joinTypeSn'
+                   AND CD_ID = (SELECT TO_CHAR(JOIN_TYPE_SN)
+                                 FROM TN_USER
+                                WHERE USER_ID = A.USER_ID)
+            ) AS SBSCRB_NM,
+            A.USER_TYPE_NM,
+        </trim>
+        FROM TN_USER A
+        <include refid="incUserAccessHistWhere"/>
+    </select>
+</mapper>

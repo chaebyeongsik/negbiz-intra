@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="zesinc.intra.authorAsgn.AuthorAsgnMapper">
+
+    <!-- 담당자권한할당 조회 -->
+    <select id="selectAuthorAsgn" parameterType="authorAsgnVo" resultType="authorAsgnVo">
+        SELECT
+        <trim suffixOverrides=",">
+            A.AUTHRT_CD_ID,
+            A.PIC_ID,
+            A.USE_YN,
+            A.RGTR_ID,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.RGTR_ID) AS RGTR_NM,
+            A.REG_DT,
+            A.MDFR_ID,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.MDFR_ID) AS UPDUSR_NM,
+            A.UPDT_DT,
+        </trim>
+        FROM
+            TN_MNGR_AUTHOR_ASGN A
+        WHERE A.AUTHRT_CD_ID = #{authrtCdId}
+          AND A.PIC_ID = #{picId}
+    </select>
+
+    <!-- 담당자권한할당 목록 -->
+    <sql id="incAuthorAsgnWhere">
+        <where>
+            <if test="paramMap.q_searchKey != null">
+                 A.AUTHRT_CD_ID = #{paramMap.q_searchVal}
+                AND   A.PIC_ID = #{paramMap.q_searchVal}
+            </if>
+        </where>
+    </sql>
+    <select id="selectAuthorAsgnList" parameterType="authorAsgnVo" resultType="authorAsgnVo">
+        SELECT Y.* FROM (
+            SELECT ROWNUM NUM, X.* FROM (
+                SELECT
+                <trim suffixOverrides=",">
+                    A.AUTHRT_CD_ID,
+                    A.PIC_ID,
+                    A.USE_YN,
+                    A.RGTR_ID,
+                    (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.RGTR_ID) AS RGTR_NM,
+                    A.REG_DT,
+                    A.MDFR_ID,
+                    (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.MDFR_ID) AS UPDUSR_NM,
+                    A.UPDT_DT,
+                </trim>
+                FROM
+                    TN_MNGR_AUTHOR_ASGN A
+                <include refid="incAuthorAsgnWhere"/>
+                ORDER BY A.PIC_ID ASC
+            ) X
+            WHERE ROWNUM &lt;= #{paramMap.q_pagingEndNum}
+         ) Y
+         WHERE NUM &gt;= #{paramMap.q_pagingStartNum}
+    </select>
+
+    <!-- 담당자권한할당 조회 목록 카운트 -->
+    <select id="selectAuthorAsgnListCount" parameterType="authorAsgnVo" resultType="int">
+        SELECT
+            COUNT(A.AUTHRT_CD_ID) AS TOTAL_COUNT
+        FROM
+            TN_MNGR_AUTHOR_ASGN A
+        <include refid="incAuthorAsgnWhere"/>
+    </select>
+
+    <!-- 담당자권한할당 등록 -->
+    <insert id="insertAuthorAsgn" parameterType="authorAsgnVo">
+        INSERT INTO TN_MNGR_AUTHOR_ASGN (
+        <trim suffixOverrides=",">
+            AUTHRT_CD_ID,
+            PIC_ID,
+            USE_YN,
+            RGTR_ID,
+            REG_DT,
+        </trim>
+        ) VALUES (
+        <trim suffixOverrides=",">
+            #{authrtCdId},
+            #{picId},
+            'Y',
+            #{rgtrId},
+            SYSDATETIME,
+        </trim>
+        )
+    </insert>
+
+    <!-- 담당자 목록 -->
+    <resultMap id="authorList" type="authorAsgnVo">
+        <result property="picId" column="PIC_ID" />
+        <result property="picNm" column="PIC_NM" />
+        <result property="deptNm" column="DEPT_NM" />
+        <result property="clsfNm" column="CLSF_NM" />
+        <association property="authorAsgnList" select="zesinc.intra.authorAsgn.AuthorAsgnMapper.selectAuthorList" column="{picId=PIC_ID}">
+        </association>
+    </resultMap>
+
+    <!-- 담당자 목록 -->
+    <select id="selectMngrList" parameterType="mngrVo" resultMap="authorList">
+        SELECT A.PIC_ID,
+               A.PIC_NM,
+               (SELECT DEPT_NM 
+                  FROM TN_DEPT
+                 WHERE DEPT_CD_ID = A.DEPT_CD_ID) AS DEPT_NM,
+               (SELECT CD_NM
+                  FROM TC_CODE
+                 WHERE UP_CD_ID = 'ofcps'
+                   AND CD_ID = A.JBGD_CD_ID) AS CLSF_NM
+          FROM TN_MNGR A
+         WHERE A.PIC_ID IN ( <foreach collection="picIdArray" item="item" separator=", ">#{item}</foreach> )
+    </select>
+    
+    <!-- 담당자별 권한 목록 -->
+    <select id="selectAuthorList" parameterType="authorAsgnVo" resultType="authorAsgnVo">
+        SELECT A.AUTHRT_CD_ID,
+               (SELECT AUTHRT_NM
+                  FROM TN_AUTHOR
+                 WHERE AUTHRT_CD_ID = A.AUTHRT_CD_ID) AS AUTHRT_NM,
+               A.PIC_ID,
+               A.USE_YN,
+               A.RGTR_ID,
+               A.REG_DT,
+               A.MDFR_ID,
+               A.UPDT_DT
+          FROM TN_MNGR_AUTHOR_ASGN A
+         WHERE PIC_ID = #{picId}
+    </select>
+    
+    <!-- 지정권한별 메뉴 목록 -->
+    <select id="selectAuthorMenuList" parameterType="authorAsgnVo" resultType="authorAsgnVo">
+        SELECT B.MENU_NM,
+               A.AUTHRT_GRNT_CD_ID,
+               A.MENU_SN
+          FROM TN_MENU_AUTHOR_ASGN A, TN_MENU B
+         WHERE A.AUTHRT_CD_ID = #{paramMap.q_authrtCdId}
+           AND A.MENU_SN = B.MENU_SN
+         START WITH B.SORT_SN > 0
+       CONNECT BY A.MENU_SN = B.UP_MENU_SN
+    </select>
+    
+    
+    <!-- 권한별 담당자 목록 맵 -->
+    <resultMap id="authorMngrList" type="authorAsgnVo">
+        <result property="picId" column="PIC_ID" />
+        <result property="picNm" column="PIC_NM" />
+        <result property="deptNm" column="DEPT_NM" />
+        <result property="clsfNm" column="CLSF_NM" />
+        <result property="useYn" column="USE_YN" />
+        <association property="authorAsgnList" select="zesinc.intra.authorAsgn.AuthorAsgnMapper.selectAuthorList" column="{picId=PIC_ID}">
+        </association>
+    </resultMap>
+    
+    <sql id="incAuthorMngrWhere">
+        WHERE 1 = 1
+        <if test="authrtCdIdArray != null">
+            AND A.PIC_ID IN (
+                    SELECT PIC_ID
+                      FROM TN_MNGR_AUTHOR_ASGN
+                     WHERE AUTHRT_CD_ID IN ( <foreach collection="authrtCdIdArray" item="item" separator=", ">#{item}</foreach> )
+                )
+        </if>
+        <if test="paramMap.q_searchKey == 'picNm'">
+            AND A.PIC_NM LIKE '%' || #{paramMap.q_searchVal} || '%'
+        </if>
+        <if test="paramMap.q_searchKey == 'picId'">
+            AND A.PIC_ID LIKE '%' || #{paramMap.q_searchVal} || '%'
+        </if>
+    </sql>
+    <!-- 권한별 담당자 목록 -->
+    <select id="selectAuthorMngrList" parameterType="authorAsgnVo" resultMap="authorMngrList">
+        SELECT Y.* FROM (
+            SELECT ROWNUM NUM, X.* FROM (
+                SELECT
+                    A.PIC_ID,
+                    A.PIC_NM,
+                    (SELECT DEPT_NM FROM TN_DEPT WHERE DEPT_CD_ID = A.DEPT_CD_ID) AS DEPT_NM,
+                    (SELECT CD_NM FROM TC_CODE WHERE UP_CD_ID = 'ofcps' AND CD_ID = A.JBGD_CD_ID) AS CLSF_NM,
+                    A.USE_YN
+                FROM
+                    TN_MNGR A
+                <include refid="incAuthorMngrWhere"/>
+                ORDER BY A.PIC_ID ASC
+            ) X
+            WHERE ROWNUM &lt;= #{paramMap.q_pagingEndNum}
+         ) Y
+         WHERE NUM &gt;= #{paramMap.q_pagingStartNum}
+    </select>
+    
+    <!-- 권한별 담당자 목록 건수 -->
+    <select id="selectAuthorMngrListCount" parameterType="authorAsgnVo" resultType="int">
+        SELECT
+            COUNT(A.PIC_ID) AS TOTAL_COUNT
+        FROM
+            TN_MNGR A
+        <include refid="incAuthorMngrWhere"/>
+    </select>
+
+</mapper>

@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="zesinc.intra.hpcm.HpcmMapper">
+
+    <!-- 도움말 조회 -->
+    <select id="selectHpcm" parameterType="hpcmVo" resultType="hpcmVo">
+        SELECT
+        <trim suffixOverrides=",">
+            REG_SN,
+            MENU_SN,
+            (SELECT MENU_NM FROM TN_MENU WHERE MENU_SN = A.MENU_SN) AS MENU_NM,
+            DOC_CN,
+        </trim>
+        FROM
+            TN_HPCM A
+        WHERE
+            REG_SN = #{regSn}
+    </select>
+
+
+    <!-- 도움말 목록 -->
+    <sql id="incHpcmWhere">
+        <where>
+            A.MENU_SN = B.MENU_SN
+            <if test="paramMap.q_searchVal != null">
+                <if test="paramMap.q_searchKey == null or paramMap.q_searchKey == ''">
+                    AND (B.MENU_NM LIKE CONCAT('%', #{paramMap.q_searchVal}, '%') OR A.DOC_CN LIKE CONCAT('%', #{paramMap.q_searchVal}, '%'))
+                </if>
+                <if test="paramMap.q_searchKey == 1001">
+                    AND B.MENU_NM LIKE CONCAT('%', #{paramMap.q_searchVal}, '%')
+                </if>
+                <if test="paramMap.q_searchKey == 1002">
+                    AND A.DOC_CN LIKE CONCAT('%', #{paramMap.q_searchVal}, '%')
+                </if>
+            </if>
+        </where>
+    </sql>
+    <select id="selectHpcmList" parameterType="hpcmVo" resultType="hpcmVo">
+        SELECT Y.* FROM (
+            SELECT  X.* FROM (
+                SELECT
+                <trim suffixOverrides=",">
+                    A.REG_SN,
+                    A.MENU_SN,
+                    B.USE_YN AS MENU_USE_YN,
+                    A.DOC_CN,
+                </trim>
+                FROM
+                    TN_HPCM A, TN_MENU B
+                <include refid="incHpcmWhere"/>
+                ORDER BY REG_SN DESC
+            ) X
+         ) Y
+         LIMIT #{paramMap.q_rowPerPage}
+         OFFSET #{paramMap.q_pagingStartNum}
+    </select>
+
+    <!-- 도움말 조회 목록 카운트 -->
+    <select id="selectHpcmListCount" parameterType="hpcmVo" resultType="int">
+        SELECT
+            COUNT(A.REG_SN) AS TOTAL_COUNT
+        FROM
+            TN_HPCM A, TN_MENU B 
+        <include refid="incHpcmWhere"/>
+    </select>
+
+    <!-- 도움말 등록 -->
+    <insert id="insertHpcm" parameterType="hpcmVo">
+        <selectKey order="BEFORE" keyProperty="regSn" resultType="int">
+            SELECT IFNULL(MAX(REG_SN), 0) + 1
+            FROM TN_HPCM
+        </selectKey>
+        INSERT INTO TN_HPCM (
+        <trim suffixOverrides=",">
+            REG_SN,
+            MENU_SN,
+            DOC_CN,
+        </trim>
+        ) VALUES (
+        <trim suffixOverrides=",">
+            #{regSn},
+            #{menuSn},
+            #{docCn},
+        </trim>
+        )
+    </insert>
+
+    <!-- 도움말 수정 -->
+    <update id="updateHpcm" parameterType="hpcmVo">
+        UPDATE TN_HPCM 
+          <set>
+            MENU_SN = #{menuSn},
+            DOC_CN = #{docCn},
+          </set>
+        WHERE REG_SN = #{regSn}
+    </update>
+
+    <!-- 도움말 삭제 -->
+    <delete id="deleteHpcm" parameterType="hpcmVo">
+        DELETE FROM TN_HPCM
+        WHERE REG_SN = #{regSn}
+    </delete>
+
+    <select id="selectHpcmByMenuSnCount" resultType="int" parameterType="hpcmVo">
+        SELECT COUNT(*)
+          FROM TN_HPCM
+         WHERE MENU_SN = #{menuSn}
+    </select>
+</mapper>

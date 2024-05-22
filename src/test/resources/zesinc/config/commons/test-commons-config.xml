@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+
+    <system>
+        <appNm>openworks</appNm>
+        <appVersion>1.0</appVersion>
+        <appBuild></appBuild>
+        <systemNm>포털관리시스템</systemNm>
+        <clientNm>zesinc</clientNm>
+        <adminDeptNm>전산부서</adminDeptNm>
+        <adminMgrNm>홍길동</adminMgrNm>
+        <adminTelNo>02-111-2222</adminTelNo>
+        <adminInnerNo></adminInnerNo>
+    </system>
+
+    <sender>
+        <mailServer>smtp.gmail.com</mailServer>
+        <mailPort>465</mailPort>
+        <isSsl>true</isSsl>
+        <isDebug>false</isDebug>
+        <senderNm>관리자</senderNm>
+        <senderEmail>zesinc@gmail.com</senderEmail>
+        <senderTel>02-222-3333</senderTel>
+        <mailId>zesinc@gmail.com</mailId>
+        <mailPassword>aprkqpscu</mailPassword>
+        <smsTitle>시스템 장애가 발생되었습니다. 장애관리서버에서 확인 바랍니다.</smsTitle>
+        <smsContent>시스템 장애가 발생되었습니다. 장애관리서버에서 확인 바랍니다.</smsContent>
+        <mailTitle>시스템 장애가 발생되었습니다. 장애관리서버에서 확인 바랍니다.</mailTitle>
+        <mailContent>시스템 장애가 발생되었습니다. 장애관리서버에서 확인 바랍니다.</mailContent>
+    </sender>
+
+    <locations>
+        <!-- web.xml 파일내의 webAppRootKey 키의 값을 설정(WAS 서버의 루트 경로 정보를 획득시 사용됨) -->
+        <webAppRootKey>openworks.root</webAppRootKey>
+
+        <!-- was 서버 root 경로 설정 : 운영시 값을 삭제하여 빈값으로 만듬 -->
+        <webapproot></webapproot>
+
+        <!-- 첨부파일 저장 위치 : 값이 없는 경우 was 서버 root 경로를 자동으로 사용 -->
+        <uploadRoot></uploadRoot>
+
+        <!-- 정적컨텐츠 저장 위치 : 값이 없는 경우 was 서버 root 경로를 자동으로 사용 -->
+        <resourceRoot></resourceRoot>
+
+        <!-- 일반 첨부 저장 최상위 폴더명 -->
+        <uploadFolderPath>upload</uploadFolderPath>
+
+        <!-- 정적컨텐츠 저장 최상위 경로(웹서버에서 직접 접근) -->
+        <resourceFolderPath>webcontent</resourceFolderPath>
+
+        <!-- 프로그램별 별도 폴더 미 지정시 사용되는 폴더명 -->
+        <defaultUploadFolderPath>default</defaultUploadFolderPath>
+
+        <!-- taglib에서 사용되는 view 화면 jsp 위치 -->
+        <includeTaglibRoot>/WEB-INF/pages/common/taglib/</includeTaglibRoot>
+    </locations>
+
+    <global>
+        <!-- 서비스 모드 (dev: 개발 모드, real: 운영모드) -->
+        <serviceMode>dev</serviceMode>
+        <!-- 기본 인코딩 -->
+        <encoding>utf-8</encoding>
+        <!-- 기본 날짜 포멧 패턴 -->
+        <datePattern>YYYY-MM-DD</datePattern>
+        <!-- 기본 날짜시간 포멧 패턴 -->
+        <dateTimePattern>YYYY-MM-DD HH24:MI:SS</dateTimePattern>
+        <!-- 기본암호화 -->
+        <crypto>DES</crypto>
+        <!-- 기본 검색 파라미터 Prefix -->
+        <prefixSearchParam>q_</prefixSearchParam>
+        <!-- 기본 form 네임(html form 태그의 id 값) -->
+        <defaultForm>dataForm</defaultForm>
+        <!-- 관리자 테마 -->
+        <adminTheme>/resources/openworks/theme/default</adminTheme>
+        <!-- 사용자 테마 -->
+        <webTheme>/resources/web/theme/default</webTheme>
+    </global>
+
+    <default>
+        <!-- 트리 최상위 기본 코드 -->
+        <highTreeCd>0</highTreeCd>
+        <!-- 메뉴 최상위 기본 코드 -->
+        <highMenuCd>0</highMenuCd>
+        <!-- 부서 최상위 기본 코드 -->
+        <hightDeptCd>0</hightDeptCd>
+    </default>
+
+    <url>
+        <!-- 서버 동기화 URL -->
+        <syncUrl>/component/synchronize/ND_Synchronize.do</syncUrl>
+        <!-- 관리자 URL Prefix -->
+        <mgrUrlPrefix>/intra/</mgrUrlPrefix>
+        <!-- 사용자 URL Prefix -->
+        <userUrlPrefix>/web/</userUrlPrefix>
+
+        <!-- 관리자 로그인 -->
+        <mgrLogin>/login/mgr/ND_index.do</mgrLogin>
+        <mgrLoginAction>/login/mgr/ND_loginAction.do</mgrLoginAction>
+        <mgrLogout>/login/mgr/ND_logoutAction.do</mgrLogout>
+        <mgrLostSession>/login/mgr/ND_LostSession.do</mgrLostSession>
+        <!-- 사용자 로그인 -->
+        <userLogin>/login/user/BD_index.do</userLogin>
+        <userLoginAction>/login/user/ND_loginAction.do</userLoginAction>
+        <userLogout>/login/user/ND_logoutAction.do</userLogout>
+        <userLostSession>/login/user/ND_LostSession.do</userLostSession>
+
+        <!-- 관리자 메인페이지 -->
+        <mgrMain>/intra/explorer/ND_index.do</mgrMain>
+        <!-- 사용자 메인페이지 -->
+        <userMain>/index.do</userMain>
+    </url>
+
+    <session>
+        <!-- 관리자 세션 키 -->
+        <mgrSessionKey>__msk</mgrSessionKey>
+        <!-- 사용자 세션 키 -->
+        <userSessionKey>__usk</userSessionKey>
+    </session>
+
+    <jspView>
+        <alertAndBack>common/actions/ND_AlertAndBack</alertAndBack>
+        <alertAndClose>common/actions/ND_AlertAndClose</alertAndClose>
+        <alertAndRedirect>common/actions/ND_AlertAndRedirect</alertAndRedirect>
+        <confirmAndRedirect>common/actions/ND_ConfirmAndRedirect</confirmAndRedirect>
+        <sendScript>common/actions/ND_Script</sendScript>
+    </jspView>
+
+    <html>
+        <!-- select tag의 첫번째 기본 문자 -->
+        <selectText>-- 선택 --</selectText>
+    </html>
+
+    <webapp-config>
+        <pagging>
+            <rowPerPage>10</rowPerPage>
+            <pagePerPage>10</pagePerPage>
+            <pageNums>5, 10, 15, 30, 50, 100, 200, 300</pageNums>
+        </pagging>
+    </webapp-config>
+
+</configuration>

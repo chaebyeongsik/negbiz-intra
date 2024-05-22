@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="zesinc.intra.mssage.MssageMapper">
+
+    <!-- 메시지 조회 -->
+    <select id="selectMssage" parameterType="mssageVo" resultType="mssageVo">
+        SELECT
+        <trim suffixOverrides=",">
+            A.REG_SN,
+            A.PIC_ID,
+            A.MSG_CN,
+            A.SNDPTY_ID,
+            A.RCPTN_DT,
+            A.RCVR_DEL_YN,
+            A.SNDPTY_DEL_YN,
+            A.DSPTCH_YN,
+            A.FILE_SN,
+            A.REG_DT,
+        </trim>
+        FROM
+            TN_MSSAGE A
+        WHERE
+             A.REG_SN = #{regSn}
+            AND   A.PIC_ID = #{picId}
+    </select>
+
+    <!-- 메시지 목록 -->
+    <sql id="incMssageWhere">
+        <where>
+            <!-- R:reception = 수신 / T:transmition = 송신 -->
+            <if test="flag == 'R'.toString() or flag == null">
+                AND A.PIC_ID = #{picId}
+                AND A.SNDPTY_ID = B.PIC_ID
+                AND A.RCVR_DEL_YN = 'N'
+            </if>
+            <if test="flag == 'T'.toString()">
+                AND A.SNDPTY_ID = #{picId}
+                AND A.PIC_ID = B.PIC_ID
+                AND A.SNDPTY_DEL_YN = 'N'
+            </if>
+            <if test="paramMap.q_searchVal != null and paramMap.q_searchVal != ''">
+               <if test="paramMap.q_searchKey == 1001">
+                   AND A.MSG_CN LIKE '%' || #{paramMap.q_searchVal} || '%'
+               </if>
+               <if test="paramMap.q_searchKey == 1002">
+                   <if test="flag == 'T'.toString()">
+                       AND B.PIC_NM LIKE '%' || #{paramMap.q_searchVal} || '%'
+                   </if>
+                   <if test="flag == 'R'.toString()">
+                       AND (SELECT PIC_NM
+                              FROM TN_MNGR
+                             WHERE PIC_ID = A.SNDPTY_ID) LIKE '%' || #{paramMap.q_searchVal} || '%'
+                   </if>
+               </if>
+               <if test="paramMap.q_searchKey == null or paramMap.q_searchKey == ''">
+                   <if test="flag == 'T'.toString()">
+                       AND (B.PIC_NM LIKE '%' || #{paramMap.q_searchVal} || '%' OR A.MSG_CN LIKE '%' || #{paramMap.q_searchVal} || '%')
+                   </if>
+                   <if test="flag == 'R'.toString()">
+                       AND ((SELECT PIC_NM
+                               FROM TN_MNGR
+                              WHERE PIC_ID = A.SNDPTY_ID) LIKE '%' || #{paramMap.q_searchVal} || '%'
+                             OR
+                             A.MSG_CN LIKE '%' || #{paramMap.q_searchVal} || '%')
+                   </if>
+               </if>
+            </if>
+        </where>
+    </sql>
+    <select id="selectMssageList" parameterType="mssageVo" resultType="mssageVo">
+        SELECT Y.* FROM (
+            SELECT ROWNUM NUM, X.* FROM (
+                SELECT
+                <trim suffixOverrides=",">
+                    A.REG_SN,
+                    A.PIC_ID,
+                    (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.PIC_ID) AS picNm,
+                    A.MSG_CN,
+                    A.SNDPTY_ID,
+                    (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.SNDPTY_ID) AS trnsmiterNm,
+                    A.RCPTN_DT,
+                    A.RCVR_DEL_YN,
+                    A.SNDPTY_DEL_YN,
+                    A.DSPTCH_YN,
+                    A.FILE_SN,
+                    (SELECT COUNT(FILE_SN) FROM TN_FILE WHERE FILE_SN = A.FILE_SN) AS FILE_CNT,
+                    A.REG_DT,
+                </trim>
+                FROM
+                    TN_MSSAGE A, TN_MNGR B
+                <include refid="incMssageWhere"/>
+                ORDER BY A.REG_DT DESC
+            ) X
+            WHERE ROWNUM &lt;= #{paramMap.q_pagingEndNum}
+         ) Y
+         WHERE NUM &gt;= #{paramMap.q_pagingStartNum}
+    </select>
+
+    <!-- 메시지 조회 목록 카운트 -->
+    <select id="selectMssageListCount" parameterType="mssageVo" resultType="int">
+        SELECT
+            COUNT(A.REG_SN) AS TOTAL_COUNT
+        FROM
+            TN_MSSAGE A, TN_MNGR B
+        <include refid="incMssageWhere"/>
+    </select>
+
+    <!-- 메시지 등록 -->
+    <insert id="insertMssage" parameterType="mssageVo">
+        <selectKey order="BEFORE" keyProperty="regSn" resultType="int">
+            SELECT NVL(MAX(REG_SN), 0) + 1
+            FROM TN_MSSAGE
+        </selectKey>
+        INSERT INTO TN_MSSAGE (
+        <trim suffixOverrides=",">
+            REG_SN,
+            PIC_ID,
+            MSG_CN,
+            SNDPTY_ID,
+            SNDPTY_DEL_YN,
+            <if test="fileSn != null">
+            	FILE_SN,
+            </if>
+            REG_DT,
+        </trim>
+        ) VALUES (
+        <trim suffixOverrides=",">
+            #{regSn},
+            #{picId},
+            #{msgCn},
+            #{sndptyId},
+            #{sndptyDelYn},
+           	<if test="fileSn != null">
+            #{fileSn},
+            </if>
+            SYSDATE,
+        </trim>
+        )
+    </insert>
+
+    <!-- 메시지 수정 -->
+    <update id="updateRcptnDt" parameterType="mssageVo">
+        UPDATE TN_MSSAGE 
+          <set> 
+            RCPTN_DT = SYSDATE
+          </set> 
+        WHERE REG_SN = #{regSn}
+          AND PIC_ID = #{picId}
+    </update>
+
+    <!-- 메시지 삭제 -->
+    <update id="updateMssageDeleteAt" parameterType="mssageVo">
+        UPDATE TN_MSSAGE
+          <set> 
+             <if test="flag == 'R'.toString()">
+                 RCVR_DEL_YN = 'Y'
+             </if>
+             <if test="flag == 'T'.toString()">
+                 SNDPTY_DEL_YN = 'Y'
+             </if>
+          </set> 
+        WHERE
+             REG_SN = #{regSn}
+             <if test="flag == 'R'.toString()">
+                 AND PIC_ID = #{picId}
+             </if>
+             <if test="flag == 'T'.toString()">
+                 AND SNDPTY_ID = #{picId}
+             </if>
+    </update>
+
+    <select id="selectReceptionChargerList" parameterType="mssageVo" resultType="mssageVo">
+        /* zesinc.intra.mssage.MssageMapper.selectReceptionChargerList */
+        SELECT A.PIC_ID,
+               ((SELECT DEPT_NM FROM TN_DEPT WHERE DEPT_CD_ID = A.DEPT_CD_ID) || '/' || A.PIC_NM) AS label,
+               A.PIC_NM AS value
+          FROM TN_MNGR A
+         WHERE A.PIC_NM LIKE '%' || #{paramMap.q_searchVal} || '%'
+         ORDER BY A.PIC_NM ASC
+    </select>
+
+</mapper>

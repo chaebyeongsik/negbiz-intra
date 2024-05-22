@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="zesinc.intra.bbstmplat.BbsTmplatMapper">
+
+    <!-- 게시판템플릿 조회 -->
+    <select id="selectBbsTmplat" parameterType="bbsTmplatVo" resultType="bbsTmplatVo">
+        SELECT
+        <trim suffixOverrides=",">
+            A.TMPLT_TYPE_CD,
+            A.TMPLT_ID,
+            A.TMPLT_NM,
+            A.TMPLT_CN,
+            A.TMPLT_FILE_PATH_NM,
+            A.TMPLT_SCRN_PATH_NM,
+            A.DATA_FILE_SN,
+            A.FILE_SN,
+            A.RGTR_ID,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.RGTR_ID) AS RGTR_NM,
+            A.REG_DT,
+            A.MDFR_ID,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.MDFR_ID) AS UPDUSR_NM,
+            A.UPDT_DT,
+            (SELECT COUNT(BBS_SN) FROM TN_BBS_DOMN WHERE LST_TMPLT_NM = A.TMPLT_ID) AS LIST_APPLC_BBS_CO,
+            (SELECT COUNT(BBS_SN) FROM TN_BBS_DOMN WHERE PST_TMPLT_NM = A.TMPLT_ID) AS REDNG_APPLC_BBS_CO,
+            (SELECT COUNT(BBS_SN) FROM TN_BBS_DOMN WHERE INPT_TMPLT_NM = A.TMPLT_ID) AS FORM_APPLC_BBS_CO,
+        </trim>
+        FROM
+            TN_BBS_TMPLAT A
+        WHERE
+                 A.TMPLT_TYPE_CD = #{paramMap.q_tmpltTypeCd}
+                AND   A.TMPLT_ID = #{paramMap.q_tmpltId}
+    </select>
+
+
+    <!-- 게시판템플릿 목록 -->
+    <sql id="incBbsTmplatWhere">
+        WHERE USE_YN = 'Y'
+        <if test="paramMap.q_tmpltTypeCd == null  and paramMap.q_tmpltTypeCd == ''">
+             AND A.TMPLT_TYPE_CD = 'L'
+        </if>
+        <if test="paramMap.q_tmpltTypeCd != null  and paramMap.q_tmpltTypeCd != ''">
+             AND A.TMPLT_TYPE_CD = #{paramMap.q_tmpltTypeCd}
+        </if>
+    </sql>
+    <select id="selectBbsTmplatList" parameterType="bbsTmplatVo" resultType="bbsTmplatVo">
+        SELECT Y.* FROM (
+            SELECT ROWNUM NUM, X.* FROM (
+                SELECT
+                <trim suffixOverrides=",">
+                    A.TMPLT_TYPE_CD,
+                    A.TMPLT_ID,
+                    A.TMPLT_NM,
+                    A.TMPLT_CN,
+                    A.TMPLT_FILE_PATH_NM,
+                    A.TMPLT_SCRN_PATH_NM,
+                    A.DATA_FILE_SN,
+                    A.FILE_SN,
+                    A.RGTR_ID,
+                    (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.RGTR_ID) AS RGTR_NM,
+                    A.REG_DT,
+                    A.MDFR_ID,
+                    (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.MDFR_ID) AS UPDUSR_NM,
+                    A.UPDT_DT,
+                    (SELECT COUNT(BBS_SN) FROM TN_BBS_DOMN WHERE LST_TMPLT_NM = A.TMPLT_ID) AS LIST_APPLC_BBS_CO,
+                    (SELECT COUNT(BBS_SN) FROM TN_BBS_DOMN WHERE PST_TMPLT_NM = A.TMPLT_ID) AS REDNG_APPLC_BBS_CO,
+                    (SELECT COUNT(BBS_SN) FROM TN_BBS_DOMN WHERE INPT_TMPLT_NM = A.TMPLT_ID) AS FORM_APPLC_BBS_CO,
+                </trim>
+                FROM
+                    TN_BBS_TMPLAT A
+                <include refid="incBbsTmplatWhere"/>
+                ORDER BY A.TMPLT_NM ASC
+            ) X
+            WHERE ROWNUM &lt;= #{paramMap.q_pagingEndNum}
+         ) Y
+         WHERE NUM &gt;= #{paramMap.q_pagingStartNum}
+    </select>
+
+    <!-- 게시판템플릿 조회 목록 카운트 -->
+    <select id="selectBbsTmplatListCount" parameterType="bbsTmplatVo" resultType="int">
+        SELECT
+            COUNT(A.TMPLT_ID) AS TOTAL_COUNT
+        FROM
+            TN_BBS_TMPLAT A
+        <include refid="incBbsTmplatWhere"/>
+    </select>
+
+    <!-- 게시판템플릿 등록 -->
+    <insert id="insertBbsTmplat" parameterType="bbsTmplatVo">
+        INSERT INTO TN_BBS_TMPLAT (
+        <trim suffixOverrides=",">
+            TMPLT_TYPE_CD,
+            TMPLT_ID,
+            TMPLT_NM,
+            TMPLT_CN,
+            TMPLT_FILE_PATH_NM,
+            TMPLT_SCRN_PATH_NM,
+            DATA_FILE_SN,
+            FILE_SN,
+            RGTR_ID,
+            REG_DT,
+        </trim>
+        ) VALUES (
+        <trim suffixOverrides=",">
+            #{tmpltTypeCd},
+            #{tmpltId},
+            #{tmpltNm},
+            #{tmpltCn},
+            #{tmpltFilePathNm},
+            #{tmpltScrnPathNm},
+            #{dataFileSn},
+            #{fileSn},
+            #{rgtrId},
+            SYSDATE,
+        </trim>
+        )
+    </insert>
+
+    <!-- 게시판템플릿 수정 -->
+    <update id="updateBbsTmplat" parameterType="bbsTmplatVo">
+        UPDATE TN_BBS_TMPLAT 
+          <set>
+            TMPLT_NM = #{tmpltNm},
+            TMPLT_CN = #{tmpltCn},
+            TMPLT_FILE_PATH_NM = #{tmpltFilePathNm},
+            TMPLT_SCRN_PATH_NM = #{tmpltScrnPathNm},
+            DATA_FILE_SN = #{dataFileSn},
+            FILE_SN = #{fileSn},
+            MDFR_ID = #{mdfrId},
+            UPDT_DT = SYSDATE,
+          </set>
+        WHERE
+             TMPLT_TYPE_CD = #{paramMap.q_tmpltTypeCd}
+            AND   TMPLT_ID = #{paramMap.q_tmpltId}
+    </update>
+
+    <!-- 게시판템플릿 삭제(FLAG처리) -->
+    <delete id="deleteBbsTmplat" parameterType="bbsTmplatVo">
+        DELETE FROM TN_BBS_TMPLAT
+        WHERE
+             TMPLT_TYPE_CD = #{paramMap.q_tmpltTypeCd}
+            AND   TMPLT_ID = #{paramMap.q_tmpltId}
+    </delete>
+    
+    <!-- 게시판템플릿 ID 중복체크 -->
+    <select id="selectDplctChckId" resultType="int" parameterType="bbsTmplatVo">
+        SELECT COUNT(1) AS CNT
+          FROM TN_BBS_TMPLAT A
+         WHERE A.TMPLT_TYPE_CD = #{tmpltTypeCd}
+           AND A.TMPLT_ID = #{tmpltId}
+    </select>
+
+</mapper>

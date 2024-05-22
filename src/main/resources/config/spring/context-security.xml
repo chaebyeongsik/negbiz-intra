@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/security" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:beans="http://www.springframework.org/schema/beans"
+    xsi:schemaLocation="http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd
+                        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!-- 확장자를 이용해 패턴을 걸때는 /**/*.해당 확장자 로 할 것(Ant Pattern 규칙) -->
+    <http pattern="/favicon.ico" security="none" />
+    <http pattern="/resources/**" security="none" />
+    <http pattern="/gpkisecureweb/**" security="none" />
+    <http pattern="/**/*.jsp" security="none" />
+    <http pattern="/component/js/**" security="none" />
+    <http pattern="/login/ND_loginForm.do" security="none" />
+
+    <http auto-config="true" disable-url-rewriting="true" use-expressions="true">
+    	<headers>
+    		<frame-options policy="SAMEORIGIN" /> 
+    	</headers>
+    	<csrf disabled="true"/>
+    	
+        <custom-filter before="FILTER_SECURITY_INTERCEPTOR" ref="filterSecurityInterceptor" />
+
+        <form-login username-parameter="encPicId" password-parameter="encPicPswd" login-page="/login/ND_loginForm.do"
+            default-target-url="/intra/dashboard/BD_selectDashBoard.do" always-use-default-target="false"
+            authentication-success-handler-ref="openworksAuthenticationSuccessHandler"
+            authentication-failure-handler-ref="openworksAuthenticationFailureHandler"
+             />
+
+        <logout logout-url="/login/ND_processLogout.do" success-handler-ref="openworksLogoutSuccessHandler"
+             invalidate-session="true" delete-cookies="true" />
+
+        <session-management invalid-session-url="/login/ND_LostSession.do" >
+            <concurrency-control max-sessions="1" error-if-maximum-exceeded="true" />
+        </session-management>
+
+        <access-denied-handler error-page="/login/ND_accessDenied.do"/>
+
+    </http>
+
+    <!-- 로그인성공시 부가 처리 -->
+    <beans:bean id="openworksAuthenticationSuccessHandler" class="zesinc.login.support.OpenworksAuthenticationSuccessHandler" />
+    <!-- 로그인실패시 부가 처리 -->
+    <beans:bean id="openworksAuthenticationFailureHandler" class="zesinc.login.support.OpenworksAuthenticationFailureHandler">
+        <beans:property name="defaultFailureUrl" value="/login/ND_loginForm.do?loginFail=true" />
+    </beans:bean>
+    <!-- 로그아웃성공시 부가 처리 -->
+    <beans:bean id="openworksLogoutSuccessHandler" class="zesinc.login.support.OpenworksLogoutSuccessHandler">
+        <beans:property name="defaultTargetUrl" value="/login/ND_loginForm.do" />
+    </beans:bean>
+
+    <beans:bean id="passwordEncoder" class="zesinc.web.spring.security.support.OpenworksPasswordEncoder" />
+
+    <authentication-manager>
+        <authentication-provider user-service-ref="authJdbcDaoImpl-${jdbc.dbtype}">
+            <password-encoder ref="passwordEncoder" hash="bcrypt" />
+        </authentication-provider>
+    </authentication-manager>
+
+    <beans:bean id="authJdbcDaoImpl-mysql" class="zesinc.login.AuthJdbcDaoImpl">
+        <beans:property name="dataSource" ref="dataSource-${jdbc.dbtype}" />
+        <beans:property name="rolePrefix" value="OPENWORKS_" />
+
+        <beans:property name="usersByUsernameQuery"
+            value="SELECT
+                    B.UP_DEPT_CD_ID,
+                    (SELECT DEPT_NM FROM TN_DEPT WHERE DEPT_CD_ID = B.UP_DEPT_CD_ID) AS UPPER_DEPT_NM,
+                    A.DEPT_CD_ID,
+                    (SELECT DEPT_NM FROM TN_DEPT WHERE DEPT_CD_ID = A.DEPT_CD_ID) AS DEPT_NM,
+                    A.PIC_ID,A.PIC_NM,A.RGN_TELNO,A.TELOFC_TELNO,A.INDIV_TELNO,A.LGN_DT,A.STTS_SN,A.USE_YN,
+                    CASE WHEN 'SERIAL' != ? THEN A.PIC_PSWD ELSE 'KzNMbjBJcFlwWkNFYnhXUWlQei9VQmtLa0Y5TFQvWHZtbVArZXlCNEhPTT0=' END AS PIC_PSWD,
+                    A.PSWD_CHG_DT,
+                    CASE WHEN 'SERIAL' != ? THEN A.ACNT_NM ELSE '' END AS ACNT_NM,
+                    CASE WHEN (STR_TO_DATE (DATE_FORMAT(A.PSWD_CHG_DT, '%Y%m%d'), '%Y%m%d') + ? &lt; NOW()) THEN 'Y' ELSE 'N' END AS PSWD_END_AT
+                 FROM
+                    TN_MNGR A, TN_DEPT B
+                WHERE
+                        A.DEPT_CD_ID = B.DEPT_CD_ID
+                    AND (A.PIC_ID = ? OR A.ACNT_NM = ?)" />
+
+        <beans:property name="authoritiesByUsernameQuery"
+            value="SELECT CONCAT(MENU_SN, '_', AUTHRT_GRNT_CD_ID), PIC_ID FROM (
+                          SELECT   A.MENU_SN,MAX(A.AUTHRT_GRNT_CD_ID) AS AUTHRT_GRNT_CD_ID, B.PIC_ID
+                          FROM   TN_MENU_AUTHOR_ASGN A, TN_MNGR_AUTHOR_ASGN B
+                          WHERE A.AUTHRT_CD_ID = B.AUTHRT_CD_ID AND USE_YN = 'Y' AND PIC_ID = ?
+                          GROUP BY A.MENU_SN, B.PIC_ID
+                      )a" />
+
+        <beans:property name="authorGroupCodeQuery"
+            value="SELECT DISTINCT AUTHRT_CD_ID
+                          FROM TN_MNGR_AUTHOR_ASGN A
+                          WHERE A.USE_YN = 'Y' AND A.PIC_ID = ? " />
+
+    </beans:bean>
+    
+    <beans:bean id="authJdbcDaoImpl-oracle" class="zesinc.login.AuthJdbcDaoImpl">
+        <beans:property name="dataSource" ref="dataSource-${jdbc.dbtype}" />
+        <beans:property name="rolePrefix" value="OPENWORKS_" />
+
+        <beans:property name="usersByUsernameQuery"
+            value="SELECT
+                    B.UP_DEPT_CD_ID,
+                    (SELECT DEPT_NM FROM TN_DEPT WHERE DEPT_CD_ID = B.UP_DEPT_CD_ID) AS UPPER_DEPT_NM,
+                    A.DEPT_CD_ID,
+                    (SELECT DEPT_NM FROM TN_DEPT WHERE DEPT_CD_ID = A.DEPT_CD_ID) AS DEPT_NM,
+                    A.PIC_ID,A.PIC_NM,A.RGN_TELNO,A.TELOFC_TELNO,A.INDIV_TELNO,A.LGN_DT,A.STTS_SN,A.USE_YN,
+                    CASE WHEN 'SERIAL' != ? THEN A.PIC_PSWD ELSE 'KzNMbjBJcFlwWkNFYnhXUWlQei9VQmtLa0Y5TFQvWHZtbVArZXlCNEhPTT0=' END AS PIC_PSWD,
+                    A.PSWD_CHG_DT,
+                    CASE WHEN 'SERIAL' != ? THEN A.ACNT_NM ELSE '' END AS ACNT_NM,
+                    CASE WHEN (TO_DATE (TO_CHAR(A.PSWD_CHG_DT, 'YYYYMMDD'), 'YYYYMMDD') + ? &lt; SYSDATE) THEN 'Y' ELSE 'N' END AS PSWD_END_AT
+                 FROM
+                    TN_MNGR A, TN_DEPT B
+                WHERE
+                        A.DEPT_CD_ID = B.DEPT_CD_ID
+                    AND (A.PIC_ID = ? OR A.ACNT_NM = ?)" />
+
+        <beans:property name="authoritiesByUsernameQuery"
+            value="SELECT MENU_SN || '_' || AUTHRT_GRNT_CD_ID, PIC_ID FROM (
+                          SELECT   A.MENU_SN,MAX(A.AUTHRT_GRNT_CD_ID) AS AUTHRT_GRNT_CD_ID, B.PIC_ID
+                          FROM   TN_MENU_AUTHOR_ASGN A, TN_MNGR_AUTHOR_ASGN B
+                          WHERE A.AUTHRT_CD_ID = B.AUTHRT_CD_ID AND USE_YN = 'Y' AND PIC_ID = ?
+                          GROUP BY A.MENU_SN, B.PIC_ID
+                      )" />
+
+        <beans:property name="authorGroupCodeQuery"
+            value="SELECT DISTINCT AUTHRT_CD_ID
+                          FROM TN_MNGR_AUTHOR_ASGN A
+                          WHERE A.USE_YN = 'Y' AND A.PIC_ID = ? " />
+    </beans:bean>
+
+	<beans:bean id="authJdbcDaoImpl-cubrid" class="zesinc.login.AuthJdbcDaoImpl">
+        <beans:property name="dataSource" ref="dataSource-${jdbc.dbtype}" />
+        <beans:property name="rolePrefix" value="OPENWORKS_" />
+
+        <beans:property name="usersByUsernameQuery"
+            value="SELECT
+                    B.UP_DEPT_CD_ID,
+                    (SELECT DEPT_NM FROM TN_DEPT WHERE DEPT_CD_ID = B.UP_DEPT_CD_ID) AS UPPER_DEPT_NM,
+                    A.DEPT_CD_ID,
+                    (SELECT DEPT_NM FROM TN_DEPT WHERE DEPT_CD_ID = A.DEPT_CD_ID) AS DEPT_NM,
+                    A.PIC_ID,A.PIC_NM,A.RGN_TELNO,A.TELOFC_TELNO,A.INDIV_TELNO,A.LGN_DT,A.STTS_SN,A.USE_YN,
+                    CASE WHEN 'SERIAL' != ? THEN A.PIC_PSWD ELSE 'KzNMbjBJcFlwWkNFYnhXUWlQei9VQmtLa0Y5TFQvWHZtbVArZXlCNEhPTT0=' END AS PIC_PSWD,
+                    A.PSWD_CHG_DT,
+                    CASE WHEN 'SERIAL' != ? THEN A.ACNT_NM ELSE '' END AS ACNT_NM,
+                    CASE WHEN (TO_DATETIME (TO_CHAR(A.PSWD_CHG_DT, 'YYYYMMDD'), 'YYYYMMDD') + ? &lt; SYSDATE) THEN 'Y' ELSE 'N' END AS PSWD_END_AT
+                 FROM
+                    TN_MNGR A, TN_DEPT B
+                WHERE
+                        A.DEPT_CD_ID = B.DEPT_CD_ID
+                    AND (A.PIC_ID = ? OR A.ACNT_NM = ?)" />
+
+        <beans:property name="authoritiesByUsernameQuery"
+            value="SELECT MENU_SN || '_' || AUTHRT_GRNT_CD_ID, PIC_ID FROM (
+                          SELECT   A.MENU_SN,MAX(A.AUTHRT_GRNT_CD_ID) AS AUTHRT_GRNT_CD_ID, B.PIC_ID
+                          FROM   TN_MENU_AUTHOR_ASGN A, TN_MNGR_AUTHOR_ASGN B
+                          WHERE A.AUTHRT_CD_ID = B.AUTHRT_CD_ID AND USE_YN = 'Y' AND PIC_ID = ?
+                          GROUP BY A.MENU_SN, B.PIC_ID
+                      )" />
+
+        <beans:property name="authorGroupCodeQuery"
+            value="SELECT DISTINCT AUTHRT_CD_ID
+                          FROM TN_MNGR_AUTHOR_ASGN A
+                          WHERE A.USE_YN = 'Y' AND A.PIC_ID = ? " />
+    </beans:bean>
+    
+    <beans:bean id="filterSecurityInterceptor" class="org.springframework.security.web.access.intercept.FilterSecurityInterceptor">
+        <beans:property name="authenticationManager" ref="org.springframework.security.authenticationManager" />
+        <beans:property name="accessDecisionManager" ref="accessDecisionManager" />
+        <beans:property name="securityMetadataSource" ref="openworksFilterInvocationSecurityMetadataSource" />
+    </beans:bean>
+
+    <beans:bean id="openworksFilterInvocationSecurityMetadataSource" class="zesinc.web.spring.security.OpenworksFilterInvocationSecurityMetadataSource">
+        <beans:constructor-arg ref="matcherMap" />
+        <beans:property name="securedObjectService" ref="securedObjectService" />
+    </beans:bean>
+
+    <beans:bean id="securedObjectService" class="zesinc.web.spring.security.impl.OpenworksSecuredObjectServiceImpl">
+        <beans:property name="secureObjectDao" ref="securedObjectDao" />
+    </beans:bean>
+
+    <beans:bean id="matcherMap" class="zesinc.web.spring.security.support.OpenworksMatcherMap" init-method="init">
+        <beans:property name="securedObjectService" ref="securedObjectService" />
+    </beans:bean>
+
+    <beans:bean id="securedObjectDao" class="zesinc.web.spring.security.OpenworksSecuredObjectDao">
+        <beans:property name="rolePrefix" value="OPENWORKS_" />
+        <beans:property name="dataSource" ref="dataSource-${jdbc.dbtype}" />
+        <beans:property name="sqlRolesAndUrl"
+            value="SELECT B.MENU_SN, B.MENU_URL_ADDR, A.PRMTT_NM1, A.PRMTT_NM2, A.PRMTT_NM3, B.GRNT_CD_ID
+                FROM TN_MENU A, TN_MENU_URL B
+                WHERE A.USE_YN = 'Y' AND A.MENU_SN = B.MENU_SN
+                    AND B.MENU_URL_ADDR IS NOT NULL
+                ORDER BY B.MENU_SN, B.MENU_URL_ADDR, B.GRNT_CD_ID DESC" />
+    </beans:bean>
+
+    <beans:bean id="accessDecisionManager" class="org.springframework.security.access.vote.AffirmativeBased">
+        <beans:constructor-arg>
+            <beans:list>
+                <beans:bean class="zesinc.web.spring.security.support.OpenworksRoleVoter">
+                    <beans:property name="rolePrefix" value="OPENWORKS_" />
+                </beans:bean>
+                <beans:bean class="org.springframework.security.access.vote.AuthenticatedVoter" />
+            </beans:list>
+        </beans:constructor-arg>
+        <beans:property name="allowIfAllAbstainDecisions" value="true" />
+    </beans:bean>
+
+</beans:beans>

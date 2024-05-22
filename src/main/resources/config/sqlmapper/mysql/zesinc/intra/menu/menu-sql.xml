@@ -1,0 +1,394 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="zesinc.intra.menu.MenuMapper">
+
+    <!-- 메뉴URL 중복 체크 -->
+    <select id="selectDplctMenuUrlList" parameterType="menuVo" resultType="menuVo">
+        SELECT
+            A.MENU_NM,
+            A.MENU_SN,
+            B.MENU_URL_ADDR AS MENU_URL_ADDR_STR,
+            A.PRMTT_NM1,
+            A.PRMTT_NM2,
+            A.PRMTT_NM3
+        FROM
+            TN_MENU A, TN_MENU_URL B
+        WHERE
+                A.MENU_SN = B.MENU_SN
+            AND A.MENU_SN != #{menuSn}
+            AND B.MENU_URL_ADDR = #{menuUrlAddrStr}
+    </select>
+
+    <sql id="selectMenuIem">
+        SELECT
+            A.MENU_SN,
+            A.UP_MENU_SN,
+            A.MENU_NM,
+            A.PRGRM_NM,
+            A.SORT_SN,
+            A.USE_YN,
+            A.REG_DT,
+            A.UPDT_DT,
+            A.MENU_DTL_EXPLN,
+            A.PRMTT_NM1,
+            A.PRMTT_NM2,
+            A.PRMTT_NM3,
+            A.INDCT_YN
+    </sql>
+
+    <!-- 메뉴 조회 -->
+    <select id="selectMenu" parameterType="menuVo" resultType="menuVo">
+    /* zesinc.intra.menu.MenuMapper.selectMenu */
+        <include refid="selectMenuIem" />
+        FROM
+            TN_MENU A
+        <where>
+            <if test="paramMap.q_menuSn != null">
+                A.MENU_SN = #{paramMap.q_menuSn}
+            </if>
+        </where>
+    </select>
+    
+    <select id="selectMenuUrlList" parameterType="menuVo" resultType="menuVo">
+    /* zesinc.intra.menu.MenuMapper.selectMenuUrlList */
+        SELECT
+            MENU_URL_ADDR AS menuUrlAddrStr,
+            MPG_URL_YN,
+            GRNT_CD_ID AS grntCdIdStr
+          FROM TN_MENU_URL
+         WHERE MENU_SN = #{paramMap.q_menuSn}
+         ORDER BY REG_SN
+    </select>
+    
+    <select id="selectMenuUrlListByMainUrlAt " parameterType="menuVo" resultType="menuVo">
+    /* zesinc.intra.menu.MenuMapper.selectMenuUrlListByMainUrlAt  */
+        SELECT
+            MENU_URL_ADDR AS menuUrlAddrStr,
+            MPG_URL_YN,
+            GRNT_CD_ID AS grntCdIdStr
+          FROM TN_MENU_URL
+         WHERE MENU_SN = #{menuSn}
+           AND MPG_URL_YN = 'Y'
+    </select>
+
+    <!-- 메뉴 조회 목록 -->
+    <sql id="incWhere">
+        <where>
+            <if test="upMenuSn != null">
+                A.UP_MENU_SN = #{upMenuSn}
+            </if>
+        </where>
+    </sql>
+
+    <!-- 트리 메뉴 조회 목록 -->
+    <sql id="treeIncWhere">
+        <where>
+            A.MENU_SN &gt; 0
+            <choose>
+                <when test="paramMap.q_upMenuSn != null">
+               AND A.UP_MENU_SN = #{paramMap.q_upMenuSn}
+                </when>
+                <otherwise>
+               AND A.UP_MENU_SN = 0
+                </otherwise>
+            </choose>
+             ORDER BY A.SORT_SN ASC
+        </where>
+    </sql>
+
+    <select id="selectMenuList" parameterType="menuVo" resultType="treeVo">
+    /* zesinc.intra.menu.MenuMapper.selectMenuList */
+        <include refid="selectMenuIem" />
+        FROM
+            TN_MENU A
+        <include refid="incWhere"/>
+    </select>
+    
+    <select id="selectMenuTreeList" parameterType="menuVo" resultType="treeVo">
+    /* zesinc.intra.menu.MenuMapper.selectMenuTreeList */
+        SELECT
+            A.MENU_SN AS "key",
+            A.MENU_NM   AS title,
+            IF(
+                  (SELECT COUNT(MENU_SN)
+                     FROM TN_MENU
+                    WHERE UP_MENU_SN = A.MENU_SN)= 0, '0', '1') AS lazy,
+            IF(
+                  (SELECT COUNT(MENU_SN)
+                     FROM TN_MENU
+                    WHERE UP_MENU_SN = A.MENU_SN)= 0, '0', '1') AS folder,
+            A.USE_YN
+            <if test="paramMap.q_authrtCdId != null">
+            ,
+            IF(
+                  (SELECT COUNT(MENU_SN)
+                     FROM TN_MENU_AUTHOR_ASGN
+                    WHERE AUTHRT_CD_ID = #{paramMap.q_authrtCdId}
+                      AND MENU_SN = A.MENU_SN)= 0, 'N', 'Y') AS checkAt
+            , (SELECT AUTHRT_GRNT_CD_ID FROM TN_MENU_AUTHOR_ASGN WHERE AUTHRT_CD_ID = #{paramMap.q_authrtCdId} AND MENU_SN = A.MENU_SN) AS value
+            </if>
+        FROM
+            TN_MENU A
+        <include refid="treeIncWhere"/>
+    </select>
+
+    <!-- 메뉴 조회 목록 카운트 -->
+    <select id="selectMenuListCount" parameterType="menuVo" resultType="menuVo">
+    /* zesinc.intra.menu.MenuMapper.selectMenuListCount */
+        SELECT
+            COUNT(A.MENU_SN) AS TOTAL_COUNT
+        FROM
+            TN_MENU A
+        <include refid="incWhere"/>
+    </select>
+
+    <!-- 메뉴 등록 -->
+    <insert id="insertMenu" parameterType="menuVo">
+    /* zesinc.intra.menu.MenuMapper.insertMenu */
+        <selectKey order="BEFORE" keyProperty="menuSn" resultType="int">
+            SELECT IFNULL(MAX(MENU_SN), 0) + 1
+            FROM TN_MENU
+        </selectKey>
+        INSERT INTO TN_MENU (
+            MENU_SN,
+            UP_MENU_SN,
+            MENU_NM,
+            SORT_SN,
+            REG_DT
+        ) VALUES (
+            #{menuSn},
+            #{upMenuSn},
+            #{menuNm},
+            (SELECT SORT_SN FROM (SELECT IFNULL(MAX(SORT_SN), 0) + 1 AS SORT_SN
+              FROM TN_MENU
+             WHERE UP_MENU_SN = #{upMenuSn})A),
+            NOW()
+        )
+    </insert>
+
+    <!-- 메뉴 수정 -->
+    <update id="updateMenu" parameterType="menuVo">
+    /* zesinc.intra.menu.MenuMapper.updateMenu */
+        UPDATE TN_MENU SET 
+            MENU_NM         = #{menuNm},
+            PRGRM_NM       = #{prgrmNm},
+            SORT_SN       = #{sortSn},
+            USE_YN          = #{useYn},
+            INDCT_YN       = #{indctYn},
+            UPDT_DT         = NOW(),
+            MENU_DTL_EXPLN  = #{menuDtlExpln},
+            PRMTT_NM1        = #{prmttNm1},
+            PRMTT_NM2        = #{prmttNm2},
+            PRMTT_NM3        = #{prmttNm3}
+        WHERE
+            MENU_SN = #{menuSn}
+    </update>
+
+    <delete id="deleteLowerPartUrl" parameterType="menuVo">
+    /* zesinc.intra.menu.MenuMapper.deleteLowerPartUrl */
+        DELETE FROM TN_MENU_URL
+         WHERE MENU_SN IN (
+               WITH RECURSIVE WITH_TAB (MENU_SN) AS 
+					(SELECT MENU_SN FROM TN_MENU WHERE MENU_SN = #{menuSn}
+				UNION ALL 
+					SELECT A.MENU_SN FROM TN_MENU A, WITH_TAB B
+						WHERE B.MENU_SN = A.UP_MENU_SN
+				)
+				SELECT MENU_SN FROM WITH_TAB
+		)
+    </delete>
+
+    <delete id="deleteLowerPartMenu" parameterType="menuVo">
+    /* zesinc.intra.menu.MenuMapper.deleteLowerPartMenu */
+        DELETE FROM TN_MENU
+         WHERE MENU_SN IN (
+               WITH RECURSIVE WITH_TAB (MENU_SN) AS 
+					(SELECT MENU_SN FROM TN_MENU WHERE MENU_SN = #{menuSn}
+				UNION ALL 
+					SELECT A.MENU_SN FROM TN_MENU A, WITH_TAB B
+						WHERE B.MENU_SN = A.UP_MENU_SN
+				)
+				SELECT MENU_SN FROM WITH_TAB
+		)
+    </delete>
+
+    <!-- 메뉴 삭제 -->
+    <delete id="deleteMenu" parameterType="menuVo">
+    /* zesinc.intra.menu.MenuMapper.deleteMenu */
+        DELETE FROM TN_MENU
+        WHERE
+            MENU_SN = #{menuSn}
+    </delete>
+
+    <select id="selectAuthorAsgnList" parameterType="menuVo" resultType="string">
+    /* zesinc.intra.menu.MenuMapper.selectAuthorAsgnList */
+        SELECT C.AUTHRT_NM AS authNms 
+          FROM TN_MENU A
+             , TN_MENU_AUTHOR_ASGN B
+             , TN_AUTHOR C 
+         WHERE A.MENU_SN   = B.MENU_SN
+           AND B.AUTHRT_CD_ID = C.AUTHRT_CD_ID
+           AND A.MENU_SN   = #{paramMap.q_menuSn}
+         ORDER BY MENU_NM ASC
+    </select>
+
+    <insert id="insertUrl" parameterType="menuVo">
+        <selectKey order="BEFORE" keyProperty="regSn" resultType="int">
+            SELECT IFNULL(MAX(REG_SN), 0) + 1
+            FROM TN_MENU_URL
+            WHERE
+                MENU_SN = #{menuSn}
+        </selectKey>
+        INSERT INTO TN_MENU_URL (
+            MENU_SN,
+            REG_SN,
+            MENU_URL_ADDR,
+            MPG_URL_YN,
+            GRNT_CD_ID
+        ) VALUES (
+            #{menuSn},
+            #{regSn},
+            #{menuUrlAddrStr},
+            #{mpgUrlYn},
+            #{grntCdIdStr}
+        )
+    </insert>
+
+    <delete id="deleteUrl" parameterType="menuVo">
+    /* zesinc.intra.menu.MenuMapper.deleteUrl */
+        DELETE FROM TN_MENU_URL
+         WHERE MENU_SN = #{menuSn}
+    </delete>
+
+    <update id="updateSimpleSortSn" parameterType="menuVO">
+    /* zesinc.intra.menu.MenuMapper.updateSimpleSortSn */
+        UPDATE TN_MENU
+           SET SORT_SN = #{sortSn},
+               UP_MENU_SN = #{upMenuSn}
+         WHERE MENU_SN = #{menuSn}
+    </update>
+
+    <update id="updateCurrentGroupAllSortSn" parameterType="menuVo">
+    /* zesinc.intra.menu.MenuMapper.updateCurrentGroupAllSortSn */
+        UPDATE TN_MENU A
+           SET SORT_SN = (
+                                SELECT RN
+                                  FROM (
+                                        SELECT ROW_NUMBER() OVER (ORDER BY SORT_SN ASC, MENU_NM) AS RN,
+                                               MENU_SN
+                                          FROM TN_MENU
+                                         WHERE UP_MENU_SN = (SELECT UP_MENU_SN FROM TN_MENU WHERE MENU_SN = #{menuSn})
+                                         ORDER BY SORT_SN
+                                       ) B
+                                 WHERE B.MENU_SN = A.MENU_SN
+                            )
+        WHERE A.UP_MENU_SN = (SELECT UP_MENU_SN FROM TN_MENU WHERE MENU_SN = #{menuSn})
+    </update>
+
+    <update id="updateSortSn" parameterType="menuVo">
+    /* zesinc.intra.menu.MenuMapper.updateSortSn */
+        UPDATE TN_MENU A
+           SET SORT_SN = (
+                                SELECT RN
+                                  FROM (
+                                        SELECT ROW_NUMBER() OVER (ORDER BY SORT_SN ASC, MENU_NM) + #{sortSn} AS RN,
+                                               MENU_SN
+                                          FROM TN_MENU
+                                         WHERE UP_MENU_SN = #{upMenuSn}
+                                           AND SORT_SN      >= #{sortSn}
+                                           AND MENU_SN       != #{menuSn}
+                                         ORDER BY SORT_SN
+                                       ) B
+                                 WHERE B.MENU_SN = A.MENU_SN
+                            )
+        WHERE A.UP_MENU_SN = #{upMenuSn}
+          AND A.SORT_SN      >= #{sortSn}
+          AND A.MENU_SN       != #{menuSn}
+    </update>
+
+    <update id="updateSortSn2" parameterType="menuVo">
+    /* zesinc.intra.menu.MenuMapper.updateSortSn2 */
+        UPDATE TN_MENU A
+           SET SORT_SN = (
+                                SELECT RN
+                                  FROM (
+                                        SELECT ROW_NUMBER() OVER (ORDER BY SORT_SN) + #{sortSn} - 1 AS RN,
+                                               MENU_SN
+                                          FROM TN_MENU
+                                         WHERE UP_MENU_SN = #{upMenuSn}
+                                           AND SORT_SN      BETWEEN #{sortSn} AND #{sortSn2}
+                                           AND MENU_SN       != #{menuSn}
+                                         ORDER BY SORT_SN
+                                       ) B
+                                 WHERE B.MENU_SN = A.MENU_SN
+                            )
+        WHERE A.UP_MENU_SN = #{upMenuSn}
+          AND A.SORT_SN BETWEEN #{sortSn} AND #{sortSn2}
+          AND A.MENU_SN       != #{menuSn}
+    </update>
+
+    <update id="updateAllSortSn" parameterType="menuVo">
+    /* zesinc.intra.menu.MenuMapper.updateAllSortSn */
+        UPDATE TN_MENU A
+           SET SORT_SN = (
+                                SELECT RN
+                                  FROM (
+                                        SELECT ROW_NUMBER() OVER (ORDER BY SORT_SN ASC, MENU_NM) AS RN,
+                                               MENU_SN
+                                          FROM TN_MENU
+                                         WHERE UP_MENU_SN = #{upMenuSn}
+                                         ORDER BY SORT_SN
+                                       ) B
+                                 WHERE B.MENU_SN = A.MENU_SN
+                            )
+        WHERE A.UP_MENU_SN = #{upMenuSn}
+    </update>
+
+    <select id="selectMenuNmAndUpperMenuNm" parameterType="menuVo" resultType="menuVo">
+    /* zesinc.intra.menu.MenuMapper.selectMenuNmAndUpperMenuNm */
+        SELECT MENU_NM
+             , MENU_SN
+             , (SELECT CASE
+                           WHEN MENU_SN = 0
+                                THEN CONCAT(#{homeStr}, #{delimiter})
+                           WHEN UP_MENU_SN = 0
+                                THEN CONCAT(#{homeStr}, #{delimiter}, MENU_NM)
+                           ELSE MENU_NM
+                       END
+                  FROM TN_MENU
+                 WHERE MENU_SN = A.UP_MENU_SN
+               ) AS UPPER_MENU_NM
+             , (SELECT MENU_SN
+                  FROM TN_MENU
+                 WHERE MENU_SN = A.UP_MENU_SN
+               ) AS UP_MENU_SN
+        FROM TN_MENU A
+        WHERE MENU_SN = #{menuSn}
+    </select>
+
+    <select id="selectMenuUpperInfo" parameterType="menuVo" resultType="menuVo">
+        /* zesinc.intra.menu.MenuMapper.selectMenuUpperInfo */
+       WITH RECURSIVE WITH_TAB (MENU_SN, LVL) AS 
+					(SELECT MENU_SN, 1 FROM TN_MENU WHERE MENU_SN = 100
+				UNION ALL 
+					SELECT A.MENU_SN, B.LVL+1 AS LVL FROM TN_MENU A, WITH_TAB B
+						WHERE B.MENU_SN = A.UP_MENU_SN
+						AND B.MENU_SN != 0
+				)
+				SELECT MENU_SN, LVL FROM WITH_TAB
+				ORDER BY LVL DESC
+    </select>
+    
+    <delete id="deleteMenuInAuthorAsgn" parameterType="menuVo">
+        /* zesinc.intra.menu.MenuMapper.deleteMenuInAuthorAsgn */
+        DELETE FROM TN_MENU_AUTHOR_ASGN
+         WHERE MENU_SN = #{menuSn}
+    </delete>
+    
+    <select id="selectMenuProgramNmIsNotnullList" resultType="menuVo">
+        /* zesinc.intra.menu.MenuMapper.selectMenuProgramNmIsNotnullList */
+        <include refid="selectMenuIem" />
+          FROM TN_MENU A
+         WHERE PRGRM_NM IS NOT NULL
+    </select>
+</mapper>

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+
+    <excel-config>
+
+        <crud>
+            <queryId>zesinc.samples.crud.CrudMapper.selectCrudListExcel</queryId>
+            <headerId>REG_SN,TTL,CLSF_NO,RGTR_NM,REG_DT,INQ_CNT,RLS_YN</headerId>
+            <headerNm>일련번호,제목,분류코드,등록자명,작성일,조회수,공개여부</headerNm>
+            <fileNm>게시판목록</fileNm>
+        </crud>
+
+        <dept>
+            <queryId>zesinc.intra.dept.DeptMapper.selectDeptListExcel</queryId>
+            <headerId>UPPER_DEPT_NM,DEPT_NM,DEPT_CD_ID,TELNO,FXNUM,TKCG_TASK_NM,USE_YN</headerId>
+            <headerNm>상위부서명,부서명,부서코드,전화번호,팩스번호,주요업무,사용여부</headerNm>
+            <fileNm>부서관리목록</fileNm>
+        </dept>
+
+        <mngr>
+            <queryId>zesinc.intra.mngr.MngrMapper.selectMngrListExcel</queryId>
+            <headerId>PIC_ID,PIC_NM,CLSF_NM,DEPT_NM,RGN_TELNO,TELOFC_TELNO,INDIV_TELNO,RGN_FXNO,TELOFC_FXNO,INDIV_FXNO,MBL_RGN_TELNO,MBL_TELOFC_TELNO,MBL_INDIV_TELNO,EMAIL,TASK_CN,USE_YN</headerId>
+            <headerNm>아이디,이름,직급,부서,전화번호1,전화번호2,전화번호3,팩스번호1,팩스번호2,팩스번호3,휴대폰번호1,휴대폰번호2,휴대폰번호3,이메일,담당업무,사용여부</headerNm>
+            <fileNm>담당자목록</fileNm>
+        </mngr>
+
+        <code>
+            <queryId>zesinc.intra.code.CodeMapper.selectCodeExcelList</queryId>
+            <headerId>LOGSN,CD_ID,CD_NM,UP_CD_ID,UPPER_CODE_NM,CD_EXPLN,USE_YN,RGTR_NM,REG_DT_STR,UPDUSR_NM,UPDT_DT_STR</headerId>
+            <headerNm>순번,코드,코드명,상위코드,상위코드명,코드설명,사용여부,등록자,등록일시,수정자,수정일시</headerNm>
+            <fileNm>코드검색목록</fileNm>
+        </code>
+        
+        <formResponse>
+            <queryId>zesinc.intra.form.FormMapper.selectFormResponseExcel</queryId>
+            <headerId>RSPNS_HEAD_NO,RSPNS_DT,RSPNS_NM,EML,TELNO</headerId>
+            <headerNm>응답헤더,응답일시,응답자명,응답자이메일,전화번호</headerNm>
+            <fileNm>폼응답목록</fileNm>
+        </formResponse>
+
+    </excel-config>
+
+<typeAliases></typeAliases>
+</configuration>

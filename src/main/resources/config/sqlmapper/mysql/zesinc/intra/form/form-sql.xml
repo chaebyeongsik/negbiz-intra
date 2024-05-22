@@ -1,0 +1,948 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="zesinc.intra.form.FormMapper">
+
+
+	<!-- 폼 목록 -->
+	<sql id="incFormWhere">
+		<where>
+			<if test="paramMap.q_siteSn != null and paramMap.q_siteSn != ''">
+				AND A.FORM_SN IN (SELECT FORM_SN FROM TN_FORM_DOMN WHERE SITE_SN = #{paramMap.q_siteSn})
+			</if>
+			<if
+				test="paramMap.q_searchVal != null and paramMap.q_searchVal != ''">
+				AND A.FORM_TTL LIKE CONCAT('%', #{paramMap.q_searchVal}, '%')
+			</if>
+			<if test="paramMap.q_bgngYmd != null and paramMap.q_bgngYmd != ''">
+				AND A.BGNG_YMD &gt;= STR_TO_DATE(CONCAT(#{paramMap.q_bgngYmd}, '000000'),
+				'%Y-%m-%d %H%i%s')
+			</if>
+			<if test="paramMap.q_endYmd != null and paramMap.q_endYmd != ''">
+				AND A.END_YMD &lt;= STR_TO_DATE(CONCAT(#{paramMap.q_endYmd}, '235959'),
+				'%Y-%m-%d %H%i%s')
+			</if>
+			<if
+				test="paramMap.q_searchKey != null and paramMap.q_searchKey != ''">
+				<choose>
+					<when test="paramMap.q_searchKey == '1001'">
+						AND A.BGNG_YMD &gt; NOW()
+						AND A.PSTG_YN = 'Y'
+						AND A.DATA_YN = 'Y'
+					</when>
+					<when test="paramMap.q_searchKey == '1002'">
+						AND (A.BGNG_YMD &lt;= NOW()
+						AND A.END_YMD &gt;= NOW())
+						AND A.PSTG_YN = 'Y'
+						AND A.DATA_YN = 'Y'
+					</when>
+					<when test="paramMap.q_searchKey == '1003'">
+						AND A.END_YMD &lt; NOW()
+						AND A.PSTG_YN = 'Y'
+					</when>
+					<when test="paramMap.q_searchKey == '1004'">
+						AND A.PSTG_YN = 'N'
+					</when>
+					<when test="paramMap.q_searchKey == '1005'">
+						AND A.PSTG_YN = 'Y'
+						AND A.DATA_YN = 'N'
+					</when>
+				</choose>
+			</if>
+			AND A.DEL_YN = 'N'
+		</where>
+	</sql>
+	<select id="selectFormList" parameterType="formInfoVo"
+		resultType="formInfoVo">
+		SELECT
+		Y.*,
+		(DATE_FORMAT(NOW(),'%Y%m%d%H%i%s') - DATE_FORMAT(Y.BGNG_YMD,'%Y%m%d%H%i%s')) AS STATUS_BEGIN,
+		(DATE_FORMAT(NOW(),'%Y%m%d%H%i%s') - DATE_FORMAT(Y.END_YMD,'%Y%m%d%H%i%s')) AS STATUS_END
+		FROM (
+		SELECT  X.* FROM (
+			SELECT
+			<trim suffixOverrides=",">
+				A.FORM_SN,
+				A.FORM_TTL,
+				A.FORM_EXPLN,
+				A.BGNG_YMD,
+				A.END_YMD,
+				A.RSPNS_NOPE,
+				A.LMT_NOPE,
+				A.FRSTCM_YN,
+				A.PSTG_YN,
+				A.DEL_YN,
+				A.REG_DT,
+				A.DATA_YN
+			</trim>
+			FROM TN_FORM_INFO A
+			<include refid="incFormWhere" />
+			ORDER BY A.REG_DT DESC
+			) X
+		) Y
+		LIMIT #{paramMap.q_rowPerPage}
+		OFFSET #{paramMap.q_pagingStartNum}
+	</select>
+
+
+	<!-- 폼 조회 목록 카운트 -->
+	<select id="selectFormListCount" parameterType="formInfoVo"
+		resultType="int">
+		SELECT
+		COUNT(A.FORM_SN) AS TOTAL_COUNT
+		FROM
+		TN_FORM_INFO A
+		<include refid="incFormWhere" />
+	</select>
+
+	<!-- 폼 상세 조회 -->
+	<select id="selectForm" parameterType="formInfoVo"
+		resultType="formInfoVo">
+		SELECT
+		<trim suffixOverrides=",">
+			A.FORM_SN,
+			A.FORM_TTL,
+			A.FORM_EXPLN,
+			A.BGNG_YMD,
+			A.END_YMD,
+			A.RSPNS_NOPE,
+			A.LMT_NOPE,
+			A.FILE_SN,
+			A.FILE_PATH_NM,
+			A.FRSTCM_YN,
+			A.PSTG_YN,
+			A.WRTR_INFO_CLCT_STTS_NO,
+			A.PRVC_CLCT_AGRE_CN,
+			A.DEL_YN,
+			A.DEL_DT,
+			A.RGTR_ID,
+			A.MDFR_ID,
+			A.UPDT_DT,
+			A.END_HR,
+			A.BGNG_HR,
+			A.DATA_YN,
+			<!-- SUBSTR(STR_TO_DATE(A.END_YMD,'%Y-%m-%d %H:%i:%s'),11,16), -->
+			<!-- (SUBSTR(END_YMD,11,16)) AS END_HR, -->
+			<!-- A.END_HR, -->
+		</trim>
+		FROM
+		TN_FORM_INFO A
+		WHERE
+		A.FORM_SN = #{paramMap.q_formSn}
+	</select>
+
+	<!-- 응답관리 목록 -->
+	 <sql id="incFormResponseWhere">
+        <where>
+            <if test="paramMap.q_searchVal != null  and paramMap.q_searchVal != ''">
+                <if test="paramMap.q_searchKey == 1001">
+                    AND A.RSPNS_NM LIKE CONCAT('%', #{paramMap.q_searchVal}, '%')
+                </if>
+                <if test="paramMap.q_searchKey == 1002">
+                    AND A.RSPNS_HEAD_ANS_CN LIKE CONCAT('%', #{paramMap.q_searchVal}, '%')
+                </if>
+             </if>
+             AND A.FORM_SN = #{paramMap.q_formSn}
+        </where>
+    </sql>
+	<select id="selectFormResponseList"
+		parameterType="formResponseVo" resultType="formResponseVo">
+		SELECT Y.* FROM (
+			SELECT X.* FROM (
+				SELECT
+				<trim suffixOverrides=",">
+					A.RSPNS_HEAD_NO,
+					A.RSPNS_DT,
+					IFNULL(A.RSPNS_NM,'수집안함') AS RSPNS_NM,
+					IFNULL(CONCAT(
+						A.RSPNS_EML_ID,
+						(CASE WHEN A.RSPNS_EML_SITE_NM IS NULL THEN '@' ELSE '' END),
+						A.RSPNS_EML_SITE_NM,
+						(CASE WHEN A.RSPNS_EML_SITE_NM IS NULL THEN '' ELSE '' END)),
+						'수집안함') AS RSPNS_EML_ID,
+					IFNULL (CONCAT(
+						A.RGN_TELNO,
+						(CASE WHEN A.TELOFC_TELNO IS NULL THEN '-' ELSE '' END),
+						A.TELOFC_TELNO,
+						(CASE WHEN A.INDIV_TELNO IS NULL THEN '-' ELSE '' END),
+						A.INDIV_TELNO),'수집안함') AS RGN_TELNO,
+					A.RSPNS_ARTCL_NM,
+					A.RSPNS_HEAD_ANS_CN
+				</trim>
+				FROM TN_FORM_RSPNS_OPT_HEAD A
+				<include refid="incFormResponseWhere"/>
+				ORDER BY A.RSPNS_DT DESC, A.RSPNS_HEAD_NO DESC
+			) X
+         ) Y
+		LIMIT #{paramMap.q_rowPerPage}
+		OFFSET #{paramMap.q_pagingStartNum}
+	</select>
+
+	<!-- 폼 응답관리 조회 목록 카운트 -->
+	<select id="selectFormResponseListCount"
+		parameterType="formResponseVo" resultType="int">
+		SELECT
+		COUNT(*) AS TOTAL_COUNT
+		FROM TN_FORM_RSPNS_OPT_HEAD A
+		WHERE A.FORM_SN = #{paramMap.q_formSn}
+	</select>
+
+	<!-- 폼 그룹 목록 -->
+	<sql id="incFormGroupWhere">
+		<where>
+			A.FORM_SN = #{paramMap.q_formSn}
+		</where>
+	</sql>
+	<select id="selectFormGroupList" parameterType="formGroupVo"
+		resultType="formGroupVo">
+		SELECT
+		<trim suffixOverrides=",">
+			A.GROUP_SN,
+			A.GROUP_NM,
+			A.GROUP_EXPLN,
+			A.FORM_SN,
+			(SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.RGTR_ID) AS RGTR_NM,
+			A.REG_DT,
+			A.USE_YN,
+			A.SORT_SN
+		</trim>
+		FROM
+		TN_FORM_GROUP A
+		<include refid="incFormGroupWhere" />
+		ORDER BY A.SORT_SN ASC
+	</select>
+
+	<!-- 폼 그룹 항목 목록 -->
+	<sql id="incFormGroupIemWhere">
+		<where>
+			A.FORM_SN = B.FORM_SN
+			AND A.GROUP_SN = B.GROUP_SN
+			AND A.FORM_SN = #{formSn}
+		</where>
+	</sql>
+	<select id="selectFormGroupIemList"
+		parameterType="formGroupIemVo" resultType="formGroupIemVo">
+		SELECT
+		<trim suffixOverrides=",">
+			A.GROUP_SN,
+			A.GROUP_NM,
+			A.GROUP_EXPLN,
+			A.FORM_SN,
+			A.USE_YN,
+			(SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.RGTR_ID) AS RGTR_NM,
+			A.SORT_SN AS GRP_SORT_SN,
+			B.ARTCL_SN,
+			B.ARTCL_NM,
+			B.ARTCL_EXPLN,
+			B.ARTCL_TYPE_CD,
+			B.FORM_SN,
+			B.GROUP_SN,
+			B.ESNTL_YN,
+			B.LMT_VL,
+			B.INIT_VL,
+			B.LMT_FILE_SZ,
+			B.PRMSN_FILE_EXTN_MTTR,
+			B.PL_CHC_CNT,
+			(SELECT PIC_NM FROM TN_MNGR WHERE
+			PIC_ID = A.RGTR_ID) AS RGTR_NM,
+			B.REG_DT,
+			A.REG_DT,
+			B.USE_YN AS IEM_USE_YN,
+			B.SORT_SN AS IEM_SORT_SN
+		</trim>
+		FROM
+		TN_FORM_GROUP A, TN_FORM_GROUP_ITEM B
+		<include refid="incFormGroupIemWhere" />
+		ORDER BY GRP_SORT_SN ASC, IEM_SORT_SN ASC
+	</select>
+
+	<sql id="incFormIemOptWhere">
+		<where>
+			A.FORM_SN = #{formSn}
+		</where>
+	</sql>
+	<select id="selectFormIemOptList" parameterType="formIemOptVo"
+		resultType="formIemOptVo">
+		SELECT
+		<trim suffixOverrides=",">
+			A.ARTCL_SN,
+			A.OPT_SN,
+			A.OPT_CN,
+			A.FORM_SN,
+			A.GROUP_SN
+		</trim>
+		FROM
+		TN_FORM_ITEM_OPT A
+		<include refid="incFormIemOptWhere" />
+		ORDER BY A.ARTCL_SN ASC, A.OPT_SN ASC
+	</select>
+
+	<!-- 폼 응답관리 항목 목록 -->
+	<sql id="incRspnsIemWhere">
+		<where>
+			A.FORM_SN = B.FORM_SN
+			AND A.GROUP_SN = B.GROUP_SN
+			AND A.FORM_SN = #{formSn}
+			AND A.USE_YN = 'Y'			
+			AND B.USE_YN = 'Y'
+		</where>
+	</sql>
+	<select id="selectRspnsIemList"
+		parameterType="formGroupIemVo" resultType="formGroupIemVo">
+		SELECT
+		<trim suffixOverrides=",">
+			A.GROUP_SN,
+			A.FORM_SN,
+			A.USE_YN,
+			A.SORT_SN AS GRP_SORT_SN,
+			B.ARTCL_SN,
+			B.ARTCL_NM,
+			B.ARTCL_TYPE_CD,
+			B.FORM_SN,
+			B.GROUP_SN,
+			B.USE_YN AS IEM_USE_YN,
+			B.SORT_SN AS IEM_SORT_SN
+		</trim>
+		FROM
+		TN_FORM_GROUP A, TN_FORM_GROUP_ITEM B
+		<include refid="incRspnsIemWhere" />
+		ORDER BY GRP_SORT_SN ASC, IEM_SORT_SN ASC
+	</select>
+
+	<!-- 폼 등록 -->
+	<insert id="insertForm" parameterType="formInfoVo">
+		<selectKey order="BEFORE" keyProperty="formSn"
+			resultType="int">
+			SELECT IFNULL(MAX(FORM_SN), 0) + 1
+			FROM TN_FORM_INFO
+		</selectKey>
+		INSERT INTO TN_FORM_INFO (
+		<trim suffixOverrides=",">
+			FORM_SN,
+			FORM_TTL,
+			FORM_EXPLN,
+			BGNG_YMD,
+			END_YMD,
+			RSPNS_NOPE,
+			LMT_NOPE,
+			FILE_PATH_NM,
+			FILE_SN,
+			FRSTCM_YN,
+			PSTG_YN,
+			WRTR_INFO_CLCT_STTS_NO,
+			PRVC_CLCT_AGRE_CN,
+			DEL_YN,
+			DEL_DT,
+			RGTR_ID,
+			REG_DT,
+			UPDT_DT,
+			END_HR,
+			BGNG_HR,
+		</trim>
+		) VALUES (
+		<trim suffixOverrides=",">
+			#{formSn},
+			#{formTtl},
+			#{formExpln},
+			STR_TO_DATE(#{bgngYmdStr}, '%Y-%m-%d %H:%i:%s'),
+			STR_TO_DATE(#{endYmdStr}, '%Y-%m-%d %H:%i:%s'),
+			#{rspnsNope},
+			<choose>
+				<when test="lmtNope == ''">
+					NULL,
+				</when>
+				<otherwise>
+					#{lmtNope},
+				</otherwise>
+			</choose>
+			#{filePathNm},
+			#{fileSn},
+			#{frstcmYn},
+			#{pstgYn},
+			#{wrtrInfoClctSttsNo},
+			#{prvcClctAgreCn},
+			'N',
+			#{delDt},
+			#{rgtrId},
+			NOW(),
+			#{updtDt},
+			#{endHr},
+			#{bgngHr},
+		</trim>
+		)
+	</insert>
+
+	<!-- 폼 그룹 등록  -->
+	<insert id="insertFormGroup" parameterType="formGroupVo">
+		<selectKey order="BEFORE" keyProperty="groupSn"
+			resultType="int">
+			SELECT IFNULL(MAX(GROUP_SN), 0) + 1
+			FROM TN_FORM_GROUP
+			WHERE
+			FORM_SN = #{formSn}
+		</selectKey>
+		INSERT INTO TN_FORM_GROUP (
+		<trim suffixOverrides=",">
+			GROUP_SN,
+			GROUP_NM,
+			GROUP_EXPLN,
+			FORM_SN,
+			RGTR_ID,
+			USE_YN,
+			SORT_SN,
+		</trim>
+		) VALUES (
+		<trim suffixOverrides=",">
+			#{groupSn},
+			#{groupNm},
+			#{groupExpln},
+			#{formSn},
+			#{rgtrId},
+			#{useYn},
+			(SELECT SORT_SN FROM 
+				(SELECT IFNULL(MAX(SORT_SN), 0) + 1 AS SORT_SN FROM TN_FORM_GROUP WHERE FORM_SN = #{formSn})A),
+		</trim>
+		)
+	</insert>
+
+	<!-- 폼 그룹 항목 등록  -->
+	<insert id="insertFormGroupIem" parameterType="formGroupIemVo">
+		<selectKey order="BEFORE" keyProperty="artclSn"
+			resultType="int">
+			SELECT IFNULL(MAX(ARTCL_SN), 0) + 1
+			FROM TN_FORM_GROUP_ITEM
+			WHERE
+			FORM_SN = #{formSn}
+			AND GROUP_SN = #{groupSn}
+		</selectKey>
+		INSERT INTO TN_FORM_GROUP_ITEM (
+		<trim suffixOverrides=",">
+			ARTCL_SN,
+			ARTCL_NM,
+			ARTCL_EXPLN,
+			ARTCL_TYPE_CD,
+			FORM_SN,
+			GROUP_SN,
+			ESNTL_YN,
+			LMT_VL,
+			INIT_VL,
+			LMT_FILE_SZ,
+			PRMSN_FILE_EXTN_MTTR,
+			PL_CHC_CNT,
+			RGTR_ID,
+			USE_YN,
+			SORT_SN,
+		</trim>
+		) VALUES (
+		<trim suffixOverrides=",">
+			#{artclSn},
+			#{artclNm},
+			#{artclExpln},
+			#{artclTypeCd},
+			#{formSn},
+			#{groupSn},
+			#{esntlYn},
+			<choose>
+            	<when test="lmtVl == '' ">
+            		NULL,
+            	</when>
+            	<otherwise>
+             		#{lmtVl},          	
+            	</otherwise>
+            </choose>
+			<choose>
+            	<when test="initVl == '' ">
+            		NULL,
+            	</when>
+            	<otherwise>
+             		#{initVl},          	
+            	</otherwise>
+            </choose>
+			#{lmtFileSz},
+			#{prmsnFileExtnMttr},
+			#{plChcCnt},
+			#{rgtrId},
+			#{useYn},
+			(SELECT SORT_SN FROM 
+				(SELECT IFNULL(MAX(SORT_SN), 0) + 1 AS SORT_SN FROM TN_FORM_GROUP_ITEM WHERE FORM_SN = #{formSn} AND GROUP_SN = #{groupSn})A),
+		</trim>
+		)
+	</insert>
+
+	<!-- 항목 수정 시 추가 -->
+	<insert id="formGroupIemUpdate" parameterType="formGroupIemVo">
+		INSERT INTO TN_FORM_GROUP_ITEM (
+		<trim suffixOverrides=",">
+			ARTCL_SN,
+			ARTCL_NM,
+			ARTCL_EXPLN,
+			ARTCL_TYPE_CD,
+			FORM_SN,
+			GROUP_SN,
+			ESNTL_YN,
+			LMT_VL,
+			INIT_VL,
+			LMT_FILE_SZ,
+			PRMSN_FILE_EXTN_MTTR,
+			PL_CHC_CNT,
+			RGTR_ID,
+			USE_YN,
+			SORT_SN,
+		</trim>
+		) VALUES (
+		<trim suffixOverrides=",">
+			#{artclSn},
+			#{artclNm},
+			#{artclExpln},
+			#{artclTypeCd},
+			#{formSn},
+			#{groupSn},
+			#{esntlYn},
+			#{lmtVl},
+			#{initVl},
+			#{lmtFileSz},
+			#{prmsnFileExtnMttr},
+			#{plChcCnt},
+			#{rgtrId},
+			#{useYn},
+			#{sortSn},
+		</trim>
+		)
+	</insert>
+
+	<!-- 항목 수정 시 옵션 추가 -->
+	<insert id="formGroupIemOptUpdate" parameterType="formIemOptVo">
+		INSERT INTO TN_FORM_ITEM_OPT (
+		<trim suffixOverrides=",">
+			OPT_SN,
+			ARTCL_SN,
+			OPT_CN,
+			FORM_SN,
+			GROUP_SN
+		</trim>
+		) VALUES (
+		<trim suffixOverrides=",">
+			#{optSn},
+			#{artclSn},
+			#{optCn},
+			#{formSn},
+			#{groupSn}
+		</trim>
+		)
+	</insert>
+
+
+
+	<!-- 폼 항목 옵션 추가 -->
+	<insert id="insertFormGroupIemOpt" parameterType="formIemOptVo">
+		<selectKey order="BEFORE" keyProperty="optSn"
+			resultType="int">
+			SELECT IFNULL(MAX(OPT_SN), 0) + 1
+			FROM TN_FORM_ITEM_OPT
+			WHERE
+			FORM_SN = #{formSn}
+			AND GROUP_SN = #{groupSn}
+			AND ARTCL_SN = #{artclSn}
+		</selectKey>
+		INSERT INTO TN_FORM_ITEM_OPT (
+		<trim suffixOverrides=",">
+			OPT_SN,
+			ARTCL_SN,
+			OPT_CN,
+			FORM_SN,
+			GROUP_SN,
+		</trim>
+		) VALUES (
+		<trim suffixOverrides=",">
+			#{optSn},
+			#{artclSn},
+			#{optCn},
+			#{formSn},
+			#{groupSn},
+		</trim>
+		)
+	</insert>
+
+
+
+	<!-- 폼 수정 -->
+	<update id="updateForm" parameterType="formInfoVo">
+		UPDATE TN_FORM_INFO
+		<set>
+			FORM_SN = #{formSn},
+			FORM_TTL = #{formTtl},
+			FORM_EXPLN = #{formExpln},
+			BGNG_YMD = STR_TO_DATE(#{bgngYmdStr}, '%Y-%m-%d %H:%i:%s'),
+			END_YMD = STR_TO_DATE(#{endYmdStr}, '%Y-%m-%d %H:%i:%s'),
+			<choose>
+				<when test="lmtNope == ''">
+					LMT_NOPE = NULL,
+				</when>
+				<otherwise>
+					LMT_NOPE = #{lmtNope},
+				</otherwise>
+			</choose>
+			<if test="fileSn != null">
+				FILE_SN = #{fileSn},
+			</if>
+			<if test="filePathNm != null">
+				FILE_PATH_NM = #{filePathNm},
+			</if>
+			FRSTCM_YN = #{frstcmYn},
+			PSTG_YN = #{pstgYn},
+			WRTR_INFO_CLCT_STTS_NO = #{wrtrInfoClctSttsNo},
+			PRVC_CLCT_AGRE_CN = #{prvcClctAgreCn},
+			DEL_YN = 'N',
+			DEL_DT = #{delDt},
+			MDFR_ID = #{mdfrId},
+			UPDT_DT = NOW(),
+			END_HR = #{endHr},
+			BGNG_HR = #{bgngHr},
+		</set>
+		WHERE
+		FORM_SN = #{paramMap.q_formSn}
+	</update>
+
+	<!-- 폼 그룹 수정 -->
+	<update id="updateFormGroup" parameterType="formGroupVo">
+		UPDATE TN_FORM_GROUP
+		<set>
+			FORM_SN = #{formSn},
+			GROUP_SN = #{groupSn},
+			GROUP_NM = #{groupNm},
+			GROUP_EXPLN = #{groupExpln},
+			RGTR_ID = #{rgtrId},
+			USE_YN = #{useYn},
+			SORT_SN = #{sortSn},
+		</set>
+		WHERE
+		FORM_SN = #{paramMap.q_formSn}
+		AND GROUP_SN = #{paramMap.q_groupSn}
+	</update>
+
+	<!-- 폼 삭제 -->
+	<update id="deleteForm" parameterType="formInfoVo">
+		UPDATE TN_FORM_INFO
+		<set>
+			DEL_YN = 'Y',
+			DEL_DT = NOW()
+		</set>
+		WHERE
+		FORM_SN = #{paramMap.q_formSn}
+	</update>
+
+	<!-- 폼 그룹 삭제 -->
+	<delete id="deleteFormGroup" parameterType="int">
+		DELETE FROM TN_FORM_GROUP
+		WHERE FORM_SN = #{formSn}
+	</delete>
+
+	<!-- 폼 그룹 항목 삭제 -->
+	<delete id="deleteFormGroupItem" parameterType="int">
+		DELETE FROM TN_FORM_GROUP_ITEM
+		WHERE FORM_SN = #{formSn}
+	</delete>
+
+	<!-- 폼 그룹 항목 삭제 -->
+	<delete id="deleteFormItemOpt" parameterType="int">
+		DELETE FROM TN_FORM_ITEM_OPT
+		WHERE FORM_SN = #{formSn}
+	</delete>
+
+
+	<!-- 폼 응답 헤더 삭제 -->
+	<delete id="deleteFormResponseHead" parameterType="int">
+		DELETE FROM TN_FORM_RSPNS_OPT_HEAD A
+		WHERE A.FORM_SN = #{formSn}
+	</delete>
+
+	<!-- 폼 응답 삭제 -->
+	<delete id="deleteFormResponse" parameterType="int">
+		DELETE FROM TN_FORM_RSPNS A
+		WHERE A.FORM_SN = #{formSn}
+	</delete>
+
+
+	<!-- 폼 그룹 삭제 -->
+	<delete id="delIndivGroup" parameterType="formGroupVo">
+		DELETE FROM TN_FORM_GROUP
+		WHERE FORM_SN = #{paramMap.q_formSn}
+		AND GROUP_SN = #{paramMap.q_groupSn}
+	</delete>
+
+	<!-- 폼 그룹 삭제 > 폼 그룹 항목 삭제 -->
+	<delete id="delIndivGroupIem" parameterType="formGroupVo">
+		DELETE FROM TN_FORM_GROUP_ITEM
+		WHERE
+		FORM_SN = #{paramMap.q_formSn}
+		AND GROUP_SN = #{paramMap.q_groupSn}
+	</delete>
+
+
+	<!-- 폼 그룹 삭제 > 폼 그룹 항목 옵션 삭제 -->
+	<delete id="delIndivGroupIemOpt" parameterType="formGroupVo">
+		DELETE FROM TN_FORM_ITEM_OPT
+		WHERE FORM_SN = #{paramMap.q_formSn}
+		AND GROUP_SN = #{paramMap.q_groupSn}
+	</delete>
+
+	<!-- 폼 그룹 삭제 > 폼 그룹 응답헤더 삭제 -->
+<!-- 	<delete id="delIndivGroupRspnsHead" parameterType="formGroupVo">
+		DELETE FROM TN_FORM_RSPNS_OPT_HEAD A
+		WHERE EXISTS (
+		SELECT B.RSPNS_HEAD_NO FROM TN_FORM_RSPNS B
+		WHERE B.FORM_SN = #{paramMap.q_groupSn}
+		AND B.GROUP_SN = #{paramMap.q_groupSn}
+		AND A.RSPNS_HEAD_NO = B.RSPNS_HEAD_NO
+		)
+	</delete> -->
+
+	<!-- 폼 그룹 삭제 > 폼 그룹 응답 삭제 -->
+	<delete id="delIndivGroupRspns" parameterType="formGroupVo">
+		DELETE FROM TN_FORM_RSPNS A
+		WHERE A.FORM_SN = #{paramMap.q_formSn}
+		AND GROUP_SN = #{paramMap.q_groupSn}
+	</delete>
+
+
+
+
+	<!-- 폼 항목 삭제 -->
+	<delete id="delIndivItem" parameterType="formGroupIemVo">
+		DELETE FROM TN_FORM_GROUP_ITEM
+		WHERE FORM_SN = #{paramMap.q_formSn}
+		AND GROUP_SN = #{paramMap.q_groupSn}
+		AND ARTCL_SN = #{paramMap.q_artclSn}
+	</delete>
+
+	<!-- 폼 항목 삭제 > 폼 항목 옵션 삭제 -->
+	<delete id="delIndivIemOpt" parameterType="formGroupIemVo">
+		DELETE FROM TN_FORM_ITEM_OPT
+		WHERE FORM_SN = #{paramMap.q_formSn}
+		AND GROUP_SN = #{paramMap.q_groupSn}
+		AND ARTCL_SN = #{paramMap.q_artclSn}
+	</delete>
+
+	<!-- 폼 항목 삭제 > 폼 그룹 응답헤더 삭제 -->
+<!-- 	<delete id="delIndivIemRspnsHead" parameterType="formGroupIemVo">
+		DELETE FROM TN_FORM_RSPNS_OPT_HEAD A
+		WHERE EXISTS (
+		SELECT B.RSPNS_HEAD_NO FROM TN_FORM_RSPNS B
+		WHERE B.FORM_SN = #{paramMap.q_groupSn}
+		AND B.GROUP_SN = #{paramMap.q_groupSn}
+		AND ARTCL_SN = #{paramMap.q_artclSn}
+		AND A.RSPNS_HEAD_NO = B.RSPNS_HEAD_NO
+		)
+	</delete> -->
+
+	<!-- 폼 항목 삭제 > 폼 그룹 응답 삭제 -->
+	<delete id="delIndivIemRspns" parameterType="formGroupIemVo">
+		DELETE FROM TN_FORM_RSPNS A
+		WHERE A.FORM_SN = #{paramMap.q_formSn}
+		AND GROUP_SN = #{paramMap.q_groupSn}
+		AND ARTCL_SN = #{paramMap.q_artclSn}
+	</delete>
+
+
+
+
+	<!-- 폼 응답관리 > 폼 응답자 헤더 삭제 -->
+	<delete id="deleteIndivResponseHead"
+		parameterType="formResponseVo">
+		DELETE FROM TN_FORM_RSPNS_OPT_HEAD A
+		WHERE A.RSPNS_HEAD_NO = #{paramMap.q_rspnsHeadNo}
+	</delete>
+
+
+	<!-- 폼 응답관리 > 폼 응답자 삭제 -->
+	<delete id="deleteIndivResponse" parameterType="int">
+		DELETE FROM TN_FORM_RSPNS A
+		WHERE EXISTS (
+		SELECT * FROM TN_FORM_RSPNS_OPT_HEAD B
+		WHERE A.RSPNS_HEAD_NO = B.RSPNS_HEAD_NO
+		AND A.RSPNS_HEAD_NO = #{rspnsHeadNo}
+		)
+	</delete>
+
+
+	<!-- 폼 도메인 목록 -->
+	<select id="selectFormDomnList" parameterType="formInfoVo"
+		resultType="formDomnVo">
+		SELECT
+		A.FORM_SN,
+		A.SITE_SN,
+		B.SITE_NM,
+		B.SITE_EXPLN
+		FROM
+		TN_FORM_DOMN A, TN_DOMN B
+		WHERE
+		A.SITE_SN = B.SITE_SN
+		AND A.FORM_SN = #{formSn}
+	</select>
+
+	<!-- 폼 도메인 등록 -->
+	<insert id="insertFormDomn" parameterType="formDomnVo">
+		INSERT INTO TN_FORM_DOMN (
+		FORM_SN,
+		SITE_SN
+		) VALUES (
+		#{formSn},
+		#{siteSn}
+		)
+	</insert>
+
+	<!-- 폼 도메인 삭제 -->
+	<delete id="deleteFormDomn" parameterType="formInfoVo">
+		DELETE FROM TN_FORM_DOMN
+		WHERE
+		FORM_SN = #{formSn}
+	</delete>
+
+
+	<!-- 폼 응답관리 엑셀 목록 -->
+	<select id="selectFormResponseExcel"
+		parameterType="excelDownloadVo" resultType="hmap">
+		/* zesinc.intra.form.FormMapper.selectFormResponseListExcel */
+		SELECT A.RSPNS_HEAD_NO,
+			A.RSPNS_DT,
+			IFNULL(A.RSPNS_NM,'수집안함') AS RSPNS_NM,
+			IFNULL(CONCAT(
+					A.RSPNS_EML_ID,
+					(CASE WHEN A.RSPNS_EML_SITE_NM IS NULL THEN '@' ELSE '' END),
+					A.RSPNS_EML_SITE_NM,
+					(CASE WHEN A.RSPNS_EML_SITE_NM IS NULL THEN '' ELSE '' END)),
+					'수집안함') AS EML,
+			IFNULL (CONCAT(
+				A.RGN_TELNO,
+				(CASE WHEN A.TELOFC_TELNO IS NULL THEN '-' ELSE '' END),
+				A.TELOFC_TELNO,
+				(CASE WHEN A.INDIV_TELNO IS NULL THEN '-' ELSE '' END),
+				A.INDIV_TELNO),'수집안함') AS TELNO
+		FROM TN_FORM_RSPNS_OPT_HEAD A
+		WHERE A.FORM_SN = #{paramMap.q_formSn}
+		ORDER BY A.RSPNS_DT DESC, A.RSPNS_HEAD_NO DESC
+	</select>
+
+	<select id="selectFormResponse"
+		parameterType="formResponseVo" resultType="formResponseVo">
+		SELECT
+		<trim suffixOverrides=",">
+			RSPNS_ARTCL_NM,
+			RSPNS_HEAD_ANS_CN,
+			A.RSPNS_HEAD_NO
+		</trim>
+		FROM TN_FORM_RSPNS_OPT_HEAD A
+		WHERE A.FORM_SN = #{paramMap.q_formSn}
+		ORDER BY A.RSPNS_DT DESC, A.RSPNS_HEAD_NO DESC
+	</select>
+	
+	<!-- 폼 시작일 체크-->
+	<select id="selectQestnarRspnsDetlCount" parameterType="baseVo"
+		resultType="date">
+		SELECT BGNG_YMD
+		FROM TN_FORM_INFO
+		WHERE
+		FORM_SN = #{paramMap.q_formSn}
+	</select>
+	
+	<!-- 폼 응답관리 응답 조회 -->
+    <select id="selectRspns" parameterType="formResponseVo" resultType="formResponseVo">
+        SELECT
+        <trim suffixOverrides=",">
+			A.FORM_SN,
+			A.RSPNS_HEAD_NO,
+			A.ARTCL_SN,
+			A.RSPNS_ANS_CN,
+			A.RSPNS_SN,
+			A.GROUP_SN,
+			B.ARTCL_TYPE_CD
+        </trim>
+        FROM
+            TN_FORM_RSPNS A, TN_FORM_GROUP_ITEM B
+		WHERE B.FORM_SN = #{paramMap.q_formSn}
+			AND A.FORM_SN = B.FORM_SN
+	 		AND A.GROUP_SN = B.GROUP_SN
+			AND A.ARTCL_SN = B.ARTCL_SN
+			AND A.RSPNS_HEAD_NO = #{rspnsHeadNo}
+        ORDER BY A.GROUP_SN ASC, A.ARTCL_SN ASC
+    </select>
+    
+
+	<update id="updateRspnsHeadAnsCn" parameterType="formResponseVo">
+		UPDATE TN_FORM_RSPNS_OPT_HEAD A
+		<set>
+			RSPNS_HEAD_ANS_CN = #{rspnsAnsCn},
+			RSPNS_ARTCL_NM = #{rspnsArtclNm}
+		</set>
+		WHERE A.RSPNS_HEAD_NO = #{rspnsHeadNo}
+	</update>
+	
+	
+	<select id="selectRspnsFile" parameterType="int" resultType="fileVo">
+		SELECT 
+			A.FILE_ID,
+			A.ORGNL_FILE_NM,
+			A.FILE_SN,
+			A.SRVR_FILE_NM,
+			A.FILE_URL_ADDR,
+			A.FILE_SZ_NM,
+			A.FILE_TYPE_NM,
+			A.FILE_EXTN_NM,
+			A.RGTR_ID,
+			A.REG_DT
+		FROM TN_FILE A
+		WHERE A.FILE_SN = #{fileSn}
+	</select>
+	
+	<!-- 그룹 정렬순 수정 -->
+    <update id="updateGroupSortSn" parameterType="formGroupVo">
+        UPDATE TN_FORM_GROUP
+          <set>
+            SORT_SN = #{sortSn}
+          </set>
+        WHERE
+                FORM_SN = #{formSn}
+            AND GROUP_SN = #{groupSn}
+    </update>
+    
+	<!-- 항목 정렬순 수정 -->
+    <update id="updateIemSortSn" parameterType="formGroupIemVo">
+        UPDATE TN_FORM_GROUP_ITEM
+          <set>
+            SORT_SN = #{sortSn}
+          </set>
+        WHERE
+                FORM_SN = #{formSn}
+            AND GROUP_SN = #{groupSn}
+            AND ARTCL_SN = #{artclSn} 
+    </update>
+
+	<!-- 응답관리 삭제 시 신청인원 감소 -->
+    <update id="updateFormRspnsCnt" parameterType="formResponseVO">
+        UPDATE TN_FORM_INFO
+          <set>
+            RSPNS_NOPE = RSPNS_NOPE-#{rspnsCnt}            
+          </set>
+        WHERE
+            FORM_SN = #{paramMap.q_formSn}
+    </update>
+    
+	<!-- 폼의 그룹 개수 조회 -->
+    <select id="selectGroupCount" parameterType="formInfoVo" resultType="formInfoVo">
+       	SELECT
+            ARTCL_SN
+        FROM 
+        	TN_FORM_GROUP_ITEM A
+   		WHERE 
+        	FORM_SN = #{formSn}
+	</select>
+	
+	<!-- 그룹유무 수정 -->
+    <update id="updateDataYn" parameterType="formInfoVo">
+        UPDATE TN_FORM_INFO
+          <set>
+            DATA_YN = #{dataYn}            
+          </set>
+        WHERE
+            FORM_SN = #{formSn}
+    </update>
+</mapper>

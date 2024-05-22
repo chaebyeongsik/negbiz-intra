@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+<messages-config>
+    <en>
+        <test-insertOk>{0} insertOk {1}</test-insertOk>
+        <test-updateOk>{0} updateOk {1}</test-updateOk>
+    </en>
+</messages-config>
+</configuration>

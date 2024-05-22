@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="zesinc.component.popup.JsPopupMapper">
+
+    <!-- 팝업 조회 -->
+    <select id="selectPopup" parameterType="jsPopupVo" resultType="jsPopupVo">
+        SELECT
+        <trim suffixOverrides=",">
+            A.REG_SN,
+            A.TTL,
+            A.WDTH_SZ,
+            A.VRTC_SZ,
+            A.Y_AXIS,
+            A.X_AXIS,
+            A.SCROLL_YN,
+            A.POPUP_SZ_CHG_YN,
+            A.POPUP_TYPE_NO,
+            A.POPUP_RPTT_SE_NO,
+            A.DOC_CONTS_CN,
+            A.FILE_PATH_NM,
+            A.FILE_SN,
+        </trim>
+        FROM
+            TN_POPUP A
+        WHERE
+                 A.REG_SN = #{regSn}
+    </select>
+
+    <!-- 팝업 목록 -->
+    <select id="selectPopupList" parameterType="jsPopupVo" resultType="jsPopupVo">
+        SELECT
+        <trim suffixOverrides=",">
+            A.REG_SN,
+            A.TTL,
+            A.WDTH_SZ,
+            A.VRTC_SZ,
+            A.Y_AXIS,
+            A.X_AXIS,
+            A.SCROLL_YN,
+            A.POPUP_SZ_CHG_YN,
+            A.POPUP_TYPE_NO,
+            A.POPUP_RPTT_SE_NO,
+            A.WRT_TYPE_NM
+        </trim>
+        FROM
+            TN_POPUP A
+        WHERE
+                A.REG_SN IN (SELECT REG_SN FROM TN_POPUP_DOMN WHERE SITE_SN = #{siteSn})
+            AND USE_YN = 'Y'
+            AND A.BGNG_YMD &lt;= TO_CHAR(SYSDATETIME, 'YYYYMMDD')
+            AND A.END_YMD &gt;= TO_CHAR(SYSDATETIME, 'YYYYMMDD')
+        ORDER BY A.SORT_SN DESC
+    </select>
+
+</mapper>

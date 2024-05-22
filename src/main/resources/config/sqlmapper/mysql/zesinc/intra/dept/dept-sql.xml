@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="zesinc.intra.dept.DeptMapper">
+
+    <!-- 부서 Tree 목록 -->
+    <select id="selectDeptTreeList" parameterType="deptVo" resultType="treeVo">
+    /* zesinc.intra.dept.DeptMapper.selectDeptTreeList */
+        SELECT DEPT_CD_ID AS "key",
+               DEPT_NM AS TITLE,
+               IF(((SELECT COUNT(DEPT_CD_ID)
+                         FROM TN_DEPT
+                        WHERE UP_DEPT_CD_ID = A.DEPT_CD_ID))= 0, '0', '1') AS FOLDER,
+               IF(((SELECT COUNT(DEPT_CD_ID)
+                         FROM TN_DEPT
+                        WHERE UP_DEPT_CD_ID = A.DEPT_CD_ID))= 0, '0', '1') AS LAZY,
+               USE_YN
+          FROM TN_DEPT A
+         WHERE A.DEPT_CD_ID != '0'
+        <if test="paramMap.q_upDeptCdId != null and paramMap.q_upDeptCdId != ''">
+            AND A.UP_DEPT_CD_ID = #{paramMap.q_upDeptCdId}
+        </if>
+        ORDER BY A.SORT_SN ASC
+    </select>
+
+    <!-- 부서와 부서원 목록 deptCdId 는 따로 속성을 만들지 않고 담당자ID를 설정하여 사용-->
+    <select id="selectDeptUserTreeList" parameterType="deptVo" resultType="treeVo">
+            SELECT
+                'DEPT' AS BASE_KEY,
+                DEPT_CD_ID AS "KEY",
+                DEPT_NM AS TITLE,
+                 IF((SELECT COUNT(DEPT_CD_ID) FROM TN_DEPT WHERE UP_DEPT_CD_ID = A.DEPT_CD_ID LIMIT 1)= 0, 
+						IF((SELECT COUNT(1) FROM TN_MNGR WHERE DEPT_CD_ID = A.DEPT_CD_ID AND USE_YN = 'Y' LIMIT 1)=0, '0', '1'), '1') AS FOLDER,
+				IF((SELECT COUNT(DEPT_CD_ID) FROM TN_DEPT WHERE UP_DEPT_CD_ID = A.DEPT_CD_ID LIMIT 1)= 0,
+						IF((SELECT COUNT(1) FROM TN_MNGR WHERE DEPT_CD_ID = A.DEPT_CD_ID AND USE_YN = 'Y' LIMIT 1) = 0, '0', '1'),'1') AS LAZY,
+                '0' AS TOP_KEY,
+                A.SORT_SN AS "VALUE"
+            FROM TN_DEPT A
+            WHERE
+                    A.DEPT_CD_ID != '0'
+                AND A.USE_YN = 'Y'
+                AND A.UP_DEPT_CD_ID = #{paramMap.q_upDeptCdId}
+         UNION ALL
+            SELECT
+                'CHAR' AS BASE_KEY,
+                A.PIC_ID AS "KEY",
+                A.PIC_NM AS TITLE,
+                '0'  AS FOLDER,
+                '0'  AS LAZY,
+                '1' AS TOP_KEY,
+                (SELECT SORT_SN FROM TN_DEPT WHERE DEPT_CD_ID = A.DEPT_CD_ID) AS "VALUE"
+            FROM
+                TN_MNGR A
+            WHERE
+                    A.USE_YN = 'Y'
+                AND A.DEPT_CD_ID = #{paramMap.q_upDeptCdId}
+                AND A.PIC_ID != #{paramMap.q_picId}
+                      ORDER BY TOP_KEY,  "VALUE", TITLE ASC
+    </select>
+
+    <!-- 부서 조회 -->
+    <select id="selectDept" parameterType="deptVo" resultType="deptVo">
+    /* zesinc.intra.dept.DeptMapper.selectDept */
+        SELECT A.DEPT_CD_ID,
+               A.DEPT_NM,
+               A.UP_DEPT_CD_ID,
+               (SELECT DEPT_NM
+                  FROM TN_DEPT WHERE DEPT_CD_ID = A.UP_DEPT_CD_ID) AS UPPER_DEPT_NM,
+               A.SORT_SN,
+               A.USE_YN,
+               A.RGN_TELNO,
+               A.TELOFC_TELNO,
+               A.INDIV_TELNO,
+               A.RGN_FXNO,
+               A.TELOFC_FXNO,
+               A.INDIV_FXNO,
+               A.TKCG_TASK_NM,
+               DATE_FORMAT(A.REG_DT, '%Y-%m-%d %H:%i:%s') AS REG_DT,
+               DATE_FORMAT(A.UPDT_DT, '%Y-%m-%d %H:%i:%s') AS UPDT_DT,
+               IF(((SELECT COUNT(DEPT_CD_ID)
+                         FROM TN_DEPT
+                        WHERE UP_DEPT_CD_ID = A.DEPT_CD_ID))= 0, '0', '1') AS HAS_CHILD
+          FROM TN_DEPT A
+         WHERE DEPT_CD_ID = #{paramMap.q_deptCdId}
+    </select>
+
+    <!-- 부서코드 중복검사(autocomplete) -->
+    <select id="selectDplctChckDept" parameterType="deptVo" resultType="int">
+    /* zesinc.intra.dept.DeptMapper.selectDplctChckDept */
+        SELECT COUNT(DEPT_CD_ID) AS cnt
+          FROM TN_DEPT A
+        <where>
+            <if test="beforeDeptCdId != null and beforeDeptCdId != ''">
+                AND A.DEPT_CD_ID &lt;&gt; #{beforeDeptCdId}
+            </if>
+            AND A.DEPT_CD_ID = #{deptCdId}
+        </where>
+    </select>
+
+    <!-- 부서코드 중복검사(일괄등록시) -->
+    <select id="selectDplctChckDeptCodes" parameterType="deptVo" resultType="String">
+    /* zesinc.intra.dept.DeptMapper.selectDplctChckDeptCodes */
+        SELECT A.DEPT_CD_ID
+          FROM TN_DEPT A
+         WHERE DEPT_CD_ID IN
+        <foreach item="item" collection="deptCdIds" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <!-- 상위부서코드 존재여부 검사(일괄등록시) -->
+    <select id="selectUppderDeptCode" parameterType="deptVo" resultType="deptVo">
+    /* zesinc.intra.dept.DeptMapper.selectUppderDeptCode */
+        SELECT A.*
+          FROM TN_DEPT A
+         WHERE DEPT_CD_ID = #{upDeptCdId}
+    </select>
+
+    <!-- 부서 등록 -->
+    <insert id="insertDept" parameterType="deptVo">
+    /* zesinc.intra.dept.DeptMapper.insertDept */
+        INSERT INTO TN_DEPT (
+            DEPT_CD_ID,
+            DEPT_NM,
+            UP_DEPT_CD_ID,
+            SORT_SN,
+            RGN_TELNO,
+            TELOFC_TELNO,
+            INDIV_TELNO,
+            RGN_FXNO,
+            TELOFC_FXNO,
+            INDIV_FXNO,
+            TKCG_TASK_NM,
+            USE_YN,
+            REG_DT
+        ) VALUES (
+            #{deptCdId},
+            #{deptNm},
+            #{upDeptCdId},
+            (SELECT SORT_SN FROM 
+            	(SELECT IFNULL(MAX(SORT_SN), 0) + 1 AS SORT_SN
+               		FROM TN_DEPT WHERE UP_DEPT_CD_ID = #{upDeptCdId}) A),
+            #{rgnTelno},
+            #{telofcTelno},
+            #{indivTelno},
+            #{rgnFxno},
+            #{telofcFxno},
+            #{indivFxno},
+            #{tkcgTaskNm},
+            TRIM(#{useYn}),
+            NOW()
+        )
+    </insert>
+
+    <!-- 부서 수정 -->
+    <update id="updateDept" parameterType="deptVo">
+    /* zesinc.intra.dept.DeptMapper.updateDept */
+        UPDATE TN_DEPT
+           SET
+            <if test="beforeDeptCdId != deptCdId">
+               DEPT_CD_ID = #{deptCdId},
+            </if>
+               DEPT_NM = #{deptNm},
+               RGN_TELNO = #{rgnTelno},
+               TELOFC_TELNO = #{telofcTelno},
+               INDIV_TELNO = #{indivTelno},
+               RGN_FXNO = #{rgnFxno},
+               TELOFC_FXNO = #{telofcFxno},
+               INDIV_FXNO = #{indivFxno},
+               TKCG_TASK_NM = #{tkcgTaskNm},
+               USE_YN = #{useYn},
+               UPDT_DT = NOW()
+         WHERE DEPT_CD_ID = #{beforeDeptCdId}
+    </update>
+
+    <!-- 부서 삭제 -->
+    <delete id="deleteLowerPartDept" parameterType="deptVo">
+    /* zesinc.intra.dept.DeptMapper.deleteLowerPartDept */
+        DELETE FROM TN_DEPT
+         WHERE DEPT_CD_ID IN (
+              WITH RECURSIVE WITH_TAB ( DEPT_CD_ID) AS
+				(
+				  SELECT DEPT_CD_ID FROM TN_DEPT A
+				  	WHERE DEPT_CD_ID = #{deptCdId}
+				  UNION ALL
+				  SELECT A.DEPT_CD_ID
+				 	FROM TN_DEPT A, WITH_TAB B
+				  	WHERE B.DEPT_CD_ID = A.UP_DEPT_CD_ID
+				)
+				SELECT DEPT_CD_ID FROM WITH_TAB
+		)
+    </delete>
+
+    <!-- 부서 삭제 -->
+    <delete id="deleteDept" parameterType="deptVo">
+    /* zesinc.intra.dept.DeptMapper.deleteDept */
+        DELETE FROM TN_DEPT
+         WHERE DEPT_CD_ID = #{deptCdId}
+    </delete>
+
+    <!-- 선택부서의 자녀부서목록 -->
+    <select id="selectChldrnDeptList" parameterType="deptVO" resultType="deptVO">
+    /* zesinc.intra.dept.DeptMapper.selectChldrnDeptList */
+        SELECT A.DEPT_CD_ID,
+               A.UP_DEPT_CD_ID,
+               A.USE_YN
+          FROM TN_DEPT A
+         WHERE A.UP_DEPT_CD_ID = #{deptCdId}
+        ORDER BY A.SORT_SN ASC
+    </select>
+
+    <!-- 부서 정렬순서 변경 -->
+    <update id="updateDeptSortOrder" parameterType="deptVo">
+    /* zesinc.intra.dept.DeptMapper.updateDeptSortOrder */
+        UPDATE TN_DEPT
+           SET
+               SORT_SN = #{sortSn},
+               UP_DEPT_CD_ID = #{upDeptCdId}
+         WHERE DEPT_CD_ID = #{deptCdId}
+    </update>
+
+    <!-- 동일Depth의 부서목록 -->
+    <select id="selectSamensslDpList" parameterType="deptVO" resultType="deptVO">
+    /* zesinc.intra.dept.DeptMapper.selectSamensslDpList */
+        SELECT DEPT_CD_ID,
+               UP_DEPT_CD_ID,
+               SORT_SN
+          FROM TN_DEPT
+         WHERE DEPT_CD_ID != '0'
+           AND DEPT_CD_ID != #{deptCdId}
+           AND UP_DEPT_CD_ID = #{upDeptCdId}
+        ORDER BY SORT_SN ASC
+    </select>
+
+    <!-- 부서관리 엑셀 목록 -->
+    <select id="selectDeptListExcel" parameterType="excelDownloadVo" resultType="hmap">
+    /* zesinc.intra.dept.DeptMapper.selectDeptListExcel */
+        SELECT (SELECT DEPT_NM
+                  FROM TN_DEPT WHERE DEPT_CD_ID = A.UP_DEPT_CD_ID) AS UPPER_DEPT_NM,
+               A.DEPT_NM,
+               A.DEPT_CD_ID,
+               CONCAT(
+					A.RGN_TELNO,
+					(CASE WHEN A.TELOFC_TELNO IS NULL THEN '-' ELSE '' END),
+					A.TELOFC_TELNO,
+					(CASE WHEN A.INDIV_TELNO IS NULL THEN '-' ELSE '' END),
+					A.INDIV_TELNO) AS TELNO,
+               	CONCAT(
+					A.RGN_FXNO,
+					(CASE WHEN A.TELOFC_FXNO IS NULL THEN '-' ELSE '' END),
+					A.TELOFC_FXNO,
+					(CASE WHEN A.INDIV_FXNO IS NULL THEN '-' ELSE '' END),
+					A.INDIV_FXNO) AS FXNUM,
+               IFNULL(A.TKCG_TASK_NM, '') AS TKCG_TASK_NM,
+               A.USE_YN
+          FROM TN_DEPT A
+         WHERE A.DEPT_CD_ID != '0'
+        ORDER BY A.UP_DEPT_CD_ID, A.DEPT_CD_ID
+    </select>
+
+</mapper>

@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="zesinc.intra.cms.layout.CmsLayoutHistoryMapper">
+
+    <!-- 사용자메뉴레이아웃이력 조회 -->
+    <select id="selectCmsLayoutHistory" parameterType="cmsLayoutVo" resultType="cmsLayoutVo">
+        SELECT
+        <trim suffixOverrides=",">
+            A.LYT_CD_NO,
+            A.SITE_SN,
+            (SELECT SITE_EXPLN FROM TN_DOMN WHERE SITE_SN = A.SITE_SN) AS SITE_EXPLN,
+            (SELECT SITE_NM FROM TN_DOMN WHERE SITE_SN = A.SITE_SN) AS SITE_NM,
+            A.LOG_SN,
+            A.LOG_TYPE,
+            A.LOG_DT,
+            A.LYT_NM,
+            A.LYT_CONTS_CN,
+            A.FILE_PATH_NM,
+            A.MDFR_ID,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.MDFR_ID) AS UPDUSR_NM,
+        </trim>
+        FROM
+            TH_USER_MENU_LAYOUT A
+        WHERE
+                A.LYT_CD_NO = #{paramMap.q_lytCdNo}
+            AND A.SITE_SN = #{paramMap.q_siteSn}
+            AND A.LOG_SN = #{paramMap.q_logSn}
+    </select>
+
+    <!-- 사용자메뉴레이아웃이력 목록 -->
+    <sql id="incCmsLayoutHistoryWhere">
+        <where>
+                A.LYT_CD_NO = #{paramMap.q_lytCdNo}
+            AND A.SITE_SN = #{paramMap.q_siteSn}
+        </where>
+    </sql>
+    <select id="selectCmsLayoutHistoryList" parameterType="cmsLayoutVo" resultType="cmsLayoutVo">
+        SELECT
+            Y.*,
+            (SELECT SITE_NM FROM TN_DOMN WHERE SITE_SN = Y.SITE_SN) AS SITE_NM,
+            (SELECT SITE_EXPLN FROM TN_DOMN WHERE SITE_SN = Y.SITE_SN) AS SITE_EXPLN,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = Y.MDFR_ID) AS UPDUSR_NM
+        FROM (
+            SELECT ROWNUM NUM, X.* FROM (
+                SELECT
+                <trim suffixOverrides=",">
+                    A.LYT_CD_NO,
+                    A.SITE_SN,
+                    A.LOG_SN,
+                    A.LOG_TYPE,
+                    A.LOG_DT,
+                    A.LYT_NM,
+                    A.FILE_PATH_NM,
+                    A.MDFR_ID,
+                </trim>
+                FROM
+                    TH_USER_MENU_LAYOUT A
+                <include refid="incCmsLayoutHistoryWhere"/>
+                ORDER BY A.LOG_SN DESC
+            ) X
+            WHERE ROWNUM &lt;= #{paramMap.q_pagingEndNum}
+         ) Y
+         WHERE NUM &gt;= #{paramMap.q_pagingStartNum}
+    </select>
+
+    <!-- 사용자메뉴레이아웃이력 조회 목록 카운트 -->
+    <select id="selectCmsLayoutHistoryListCount" parameterType="cmsLayoutVo" resultType="int">
+        SELECT
+            COUNT(A.LYT_CD_NO) AS TOTAL_COUNT
+        FROM
+            TH_USER_MENU_LAYOUT A
+        <include refid="incCmsLayoutHistoryWhere"/>
+    </select>
+
+    <!-- 사용자메뉴레이아웃이력 등록 -->
+    <insert id="insertCmsLayoutHistory" parameterType="cmsLayoutVo">
+        <selectKey order="BEFORE" keyProperty="logSn" resultType="int">
+            SELECT NVL(MAX(LOG_SN), 0) + 1
+            FROM TH_USER_MENU_LAYOUT
+            WHERE
+                    LYT_CD_NO = #{paramMap.q_lytCdNo}
+                AND SITE_SN = #{paramMap.q_siteSn}
+        </selectKey>
+        INSERT INTO TH_USER_MENU_LAYOUT (
+        <trim suffixOverrides=",">
+            LYT_CD_NO,
+            SITE_SN,
+            LOG_SN,
+            LOG_TYPE,
+            LOG_DT,
+            LYT_NM,
+            LYT_CONTS_CN,
+            FILE_PATH_NM,
+            MDFR_ID,
+        </trim>
+        ) VALUES (
+        <trim suffixOverrides=",">
+            #{lytCdNo},
+            #{siteSn},
+            #{logSn},
+            #{logType},
+            SYSDATE,
+            #{lytNm},
+            #{lytContsCn},
+            #{filePathNm},
+            #{mdfrId},
+        </trim>
+        )
+    </insert>
+
+    <!-- 사용자메뉴레이아웃이력 삭제 -->
+    <delete id="deleteCmsLayoutHistory" parameterType="cmsLayoutVo">
+        DELETE FROM TH_USER_MENU_LAYOUT
+        WHERE
+                LYT_CD_NO = #{paramMap.q_lytCdNo}
+            AND SITE_SN = #{paramMap.q_siteSn}
+            AND LOG_SN = #{paramMap.q_logSn}
+    </delete>
+</mapper>

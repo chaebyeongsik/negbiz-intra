@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+    <locations-config>
+        <!-- web.xml 파일내의 webAppRootKey 키의 값을 설정(WAS 서버의 루트 경로 정보를 획득시 사용됨) -->
+        <webAppRootKey>openworks4.intra.root</webAppRootKey>
+        <!-- was 서버 root 경로 설정 : 운영시 값을 삭제하여 빈값으로 만듬 -->
+        <webappRoot></webappRoot>
+
+        <!-- 개발자 로컬 개발시 배포 경로(Eclipse plugin 사용시 형상관리용 파일 생성 경로. Server Root 까지 설정) -->
+        <!-- 주의 !! 반드시 경로는 / 로 표시하며 제일 마지막을 / 로 닫아 주셔야 합니다. -->
+        <!--  webapp-commons-config.xml 파일내의 productionMode 설정에 따라 사용되거나 미사용됩니다. -->
+        <devPaths>
+            <value>C:/eGovFrameDev-3.10.0-64bit/openworks4-dev-zes-v400-data-stadard-formbuilder-mysql/openworks4-dev-zes-v400-data-stadard-formbuilder-mysql/openworks-intra/src/main/webapp/</value>
+            <value>C:/eGovFrameDev-3.10.0-64bit/openworks4-dev-zes-v400-data-stadard-formbuilder-mysql/openworks4-dev-zes-v400-data-stadard-formbuilder-mysql/openworks-user/src/main/webapp/</value>
+        </devPaths>
+
+        <!-- jsp 파일을 생성하는 경로. 게시판 템플릿, CMS 관련 파일 배포시 등 사용 사용자단 Server Root 까지 설정 -->
+        <!-- 주의 !! 반드시 경로는 / 로 표시하며 제일 마지막을 / 로 닫아 주셔야 합니다. -->
+        <programPaths>
+            <value>C:/eGovFrameDev-3.10.0-64bit/openworks4-dev-zes-v400-data-stadard-formbuilder-mysql/.metadata/.plugins/org.eclipse.wst.server.core/tmp0/wtpwebapps/openworks-intra/</value>
+            <value>C:/eGovFrameDev-3.10.0-64bit/openworks4-dev-zes-v400-data-stadard-formbuilder-mysql/.metadata/.plugins/org.eclipse.wst.server.core/tmp1/wtpwebapps/openworks-user/</value>
+        </programPaths>
+
+        <!-- 일반 첨부 저장 위치 : 값이 없는 경우 was 서버 root 경로를 자동으로 사용 -->
+        <uploadRoot></uploadRoot>
+        <!-- 일반 첨부 저장 최상위 폴더명 -->
+        <uploadFolderPath>upload</uploadFolderPath>
+
+        <!-- 정적컨텐츠 저장 위치 : 값이 없는 경우 was 서버 root 경로를 자동으로 사용 -->
+        <resourceRoot></resourceRoot>
+        <!-- 정적컨텐츠 저장 최상위 경로(웹서버에서 직접 접근) -->
+        <resourceFolderPath>webcontent</resourceFolderPath>
+
+        <!-- 프로그램별 별도 폴더 미 지정시 사용되는 폴더명 -->
+        <defaultUploadFolderPath>default</defaultUploadFolderPath>
+
+        <!-- taglib에서 사용되는 view 화면 jsp 위경로 -->
+        <includeTaglibRoot>/WEB-INF/jsp/common/taglib/</includeTaglibRoot>
+
+        <!-- 스크립트 연동 jsp 페이지 -->
+        <jspViewPage>
+            <alertAndBack>common/actions/ND_AlertAndBack</alertAndBack>
+            <alertAndClose>common/actions/ND_AlertAndClose</alertAndClose>
+            <alertAndRedirect>common/actions/ND_AlertAndRedirect</alertAndRedirect>
+            <postMethodRedirect>common/actions/ND_PostMethodRedirect</postMethodRedirect>
+            <confirmAndRedirect>common/actions/ND_ConfirmAndRedirect</confirmAndRedirect>
+            <runScript>common/actions/ND_Script</runScript>
+        </jspViewPage>
+
+        <!-- 서버 캐시 동기화 URI -->
+        <cacheUri>/component/cache/ND_reloadCache.do</cacheUri>
+
+    </locations-config>
+<typeAliases></typeAliases>
+</configuration>

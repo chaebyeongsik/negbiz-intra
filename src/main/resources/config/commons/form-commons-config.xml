@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- 폼관리 관리 기본 설정 -->
+    <form-config>
+        <default-values>
+            <!-- 기본설정 -->
+ 			<!-- 선착순여부 : 예 Y, 아니오 N -->
+            <frstcmYn>N</frstcmYn>
+            <!-- 게시여부 : 예 Y, 아니오 N -->
+            <pstgYn>Y</pstgYn>
+            <!-- 작성자정보수집설정 : 선택안함 0, 1단계 1, 2단계 2 -->
+            <wrtrInfoClctSttsNo>0</wrtrInfoClctSttsNo>
+ 			<!-- 사용여부 : 예 Y, 아니오 N -->
+            <useYn>Y</useYn>
+            <!-- 필수여부 : 예 Y, 아니오 N -->
+            <esntlYn>Y</esntlYn>
+        </default-values>
+    </form-config>
+
+    
+<typeAliases></typeAliases>
+</configuration>

@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="zesinc.common.cache.menu.MenuCacheMapper">
+
+    <select id="selectMenuList" parameterType="menuCacheVo" resultType="menuCacheVo">
+        SELECT
+            A.MENU_SN,
+            A.MENU_NM,
+            A.UP_MENU_SN,
+            A.SORT_SN,
+            A.MENU_DTL_EXPLN,
+            (SELECT MENU_URL_ADDR FROM TN_MENU_URL WHERE MENU_SN = A.MENU_SN AND MPG_URL_YN = 'Y') AS MAIN_URL,
+            A.PRMTT_NM1,
+            A.PRMTT_NM2,
+            A.PRMTT_NM3,
+            A.INDCT_YN
+        FROM
+            TN_MENU A
+        WHERE
+                A.USE_YN = 'Y'
+            AND A.UP_MENU_SN = #{upMenuSn}
+    </select>
+
+    <select id="selectMenuUrlList" parameterType="menuUrlCacheVo" resultType="menuUrlCacheVo">
+        SELECT
+            A.MENU_SN,
+            A.MENU_NM,
+            A.UP_MENU_SN,
+            A.PRMTT_NM1,
+            A.PRMTT_NM2,
+            A.PRMTT_NM3,
+            A.INDCT_YN,
+            B.MENU_URL_ADDR
+        FROM
+            TN_MENU A, TN_MENU_URL B
+        WHERE
+                A.USE_YN = 'Y'
+            AND A.MENU_SN = B.MENU_SN
+            AND B.MENU_URL_ADDR LIKE '%BD_%'
+    </select>
+
+    <select id="selectMenuActionUrlList" parameterType="menuUrlCacheVo" resultType="menuUrlCacheVo">
+        SELECT
+            A.MENU_SN,
+            A.MENU_NM,
+            A.UP_MENU_SN,
+            A.PRMTT_NM1,
+            A.PRMTT_NM2,
+            A.PRMTT_NM3,
+            A.INDCT_YN,
+            B.MENU_URL_ADDR
+        FROM
+            TN_MENU A, TN_MENU_URL B
+        WHERE
+                A.USE_YN = 'Y'
+            AND A.MENU_SN = B.MENU_SN
+            AND B.MENU_URL_ADDR LIKE '%ND_%'
+    </select>
+
+    <select id="selectChargerMenuList" parameterType="menuCacheVo" resultType="menuCacheVo">
+        SELECT
+            A.MENU_SN,
+            A.MENU_NM,
+            A.UP_MENU_SN,
+            A.SORT_SN,
+            A.MENU_DTL_EXPLN,
+            (SELECT MENU_URL_ADDR FROM TN_MENU_URL WHERE MENU_SN = A.MENU_SN AND MPG_URL_YN = 'Y') AS MAIN_URL,
+            A.PRMTT_NM1,
+            A.PRMTT_NM2,
+            A.PRMTT_NM3,
+            A.INDCT_YN
+        FROM
+            TN_MENU A
+        WHERE
+                A.UP_MENU_SN = #{paramMap.q_upMenuSn}
+            AND A.USE_YN = 'Y'
+            AND A.MENU_SN IN (
+                SELECT   DISTINCT A.MENU_SN
+                FROM   TN_MENU_AUTHOR_ASGN A, TN_MNGR_AUTHOR_ASGN B
+                WHERE A.AUTHRT_CD_ID = B.AUTHRT_CD_ID
+                    AND B.USE_YN = 'Y'
+                    AND B.PIC_ID = #{paramMap.q_picId}
+            )
+        ORDER BY A.SORT_SN ASC
+    </select>
+
+    <select id="selectMyMenuList" parameterType="menuCacheVo" resultType="menuCacheVo">
+        SELECT
+            A.MENU_SN,
+            B.MENU_NM,
+            B.PRMTT_NM1,
+            B.PRMTT_NM2,
+            B.PRMTT_NM3,
+            C.MENU_URL_ADDR AS MAIN_URL
+        FROM
+            TN_MY_MENU A, TN_MENU B, TN_MENU_URL C
+        WHERE
+                A.MENU_SN = B.MENU_SN
+            AND A.MENU_SN = C.MENU_SN
+            AND B.USE_YN = 'Y'
+            AND C.MPG_URL_YN = 'Y'
+            AND A.PIC_ID = #{paramMap.q_picId}
+        ORDER BY A.SORT_SN ASC
+    </select>
+
+</mapper>

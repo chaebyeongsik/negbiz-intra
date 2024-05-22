@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="zesinc.intra.cms.meta.CmsMetaMapper">
+
+    <!-- 사용자메뉴메타 조회 -->
+    <select id="selectCmsMeta" parameterType="cmsMetaVo" resultType="cmsMetaVo">
+        SELECT
+        <trim suffixOverrides=",">
+            A.SITE_SN,
+            A.USER_MENU_ENG_NM,
+            A.USER_MENU_SRCH_NM,
+            A.USER_MENU_EXPLN,
+            A.SITE_SRCH_NM,
+            A.MENU_TAG_CN,
+            A.CPRGT_USE_YN,
+            A.CPRGT_TYPE_NM,
+            A.CPRGT_CN,
+            A.RGTR_ID,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.RGTR_ID) AS RGTR_NM,
+            A.REG_DT,
+            A.MDFR_ID,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.MDFR_ID) AS UPDUSR_NM,
+            A.UPDT_DT,
+            B.MENU_NM
+        </trim>
+        FROM
+            TN_USER_MENU B LEFT OUTER JOIN TN_USER_MENU_META A 
+        ON
+                A.SITE_SN = B.SITE_SN
+            AND A.USER_MENU_ENG_NM = B.USER_MENU_ENG_NM
+        WHERE
+                B.SITE_SN = #{paramMap.q_siteSn}
+            AND B.USER_MENU_ENG_NM = #{paramMap.q_userMenuEngNm}
+    </select>
+
+    <!-- 사용자메뉴메타 갯수 조회 -->
+    <select id="selectCmsMetaCount" parameterType="cmsMetaVo" resultType="int">
+        SELECT
+        <trim suffixOverrides=",">
+            COUNT(A.SITE_SN) AS CNT
+        </trim>
+        FROM
+            TN_USER_MENU_META A 
+        WHERE
+                A.SITE_SN = #{paramMap.q_siteSn}
+            AND A.USER_MENU_ENG_NM = #{paramMap.q_userMenuEngNm}
+    </select>
+
+    <!-- 사용자메뉴메타 등록 -->
+    <insert id="insertCmsMeta" parameterType="cmsMetaVo">
+        INSERT INTO TN_USER_MENU_META (
+        <trim suffixOverrides=",">
+            SITE_SN,
+            USER_MENU_ENG_NM,
+            USER_MENU_SRCH_NM,
+            USER_MENU_EXPLN,
+            SITE_SRCH_NM,
+            MENU_TAG_CN,
+            CPRGT_USE_YN,
+            CPRGT_TYPE_NM,
+            CPRGT_CN,
+            RGTR_ID,
+            REG_DT,
+        </trim>
+        ) VALUES (
+        <trim suffixOverrides=",">
+            #{siteSn},
+            #{userMenuEngNm},
+            #{userMenuSrchNm},
+            #{userMenuExpln},
+            #{siteSrchNm},
+            #{menuTagCn},
+            #{cprgtUseYn},
+            #{cprgtTypeNm},
+            #{cprgtCn},
+            #{rgtrId},
+            SYSDATE,
+        </trim>
+        )
+    </insert>
+
+    <!-- 사용자메뉴메타 수정 -->
+    <update id="updateCmsMeta" parameterType="cmsMetaVo">
+        UPDATE TN_USER_MENU_META 
+          <set>
+            USER_MENU_SRCH_NM = #{userMenuSrchNm},
+            USER_MENU_EXPLN = #{userMenuExpln},
+            SITE_SRCH_NM = #{siteSrchNm},
+            MENU_TAG_CN = #{menuTagCn},
+            CPRGT_USE_YN = #{cprgtUseYn},
+            CPRGT_TYPE_NM = #{cprgtTypeNm},
+            CPRGT_CN = #{cprgtCn},
+            MDFR_ID = #{mdfrId},
+            UPDT_DT = SYSDATE,
+          </set>
+        WHERE
+             SITE_SN = #{paramMap.q_siteSn}
+            AND   USER_MENU_ENG_NM = #{paramMap.q_userMenuEngNm}
+    </update>
+
+</mapper>

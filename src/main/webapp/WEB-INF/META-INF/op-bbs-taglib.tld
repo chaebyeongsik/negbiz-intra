@@ -1,0 +1,2353 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<taglib xmlns="http://java.sun.com/xml/ns/j2ee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-jsptaglibrary_2_0.xsd"
+    version="2.0">
+
+    <description>OpenWorks4 Framework Bbs Template Tag Library</description>
+    <tlib-version>1.0</tlib-version>
+    <short-name>bbs</short-name>
+    <uri>http://www.openworks.kr/jsp/bbs</uri>
+
+    <tag>
+        <description>
+        <![CDATA[
+        <pre>
+        게시판코드 태그로 아래 type에 따라 결과 표시 방식이 변경된다.
+
+        [ TAG 인자로 사용되는 type ]
+        value : 순수 값만 출력
+        text : 순수 한글명만 출력
+        label : 화면에 표시될 label 태그 html 
+        desc : 설정에서 등록한 입력 폼에 대한 설명
+        list : 목록화면 표시용 출력
+        view : 상세화면 표시용 출력
+        form : 등록/수정화면 표시용 출력
+
+        [ TAG 인자로 사용되는 obj ]
+        obj : 컨트롤에서 선언한 게시글 데이터의 객체를 설정
+
+        사용 예 :
+        <bbs:bbsSn type="value" />
+        <bbs:bbsSn type="text" />
+        <bbs:bbsSn type="label" />
+        <bbs:bbsSn type="desc" />
+        <bbs:bbsSn type="list" obj="${dataVo}" />
+        <bbs:bbsSn type="view" obj="${dataVo}" />
+        <bbs:bbsSn type="form" obj="${dataVo}" />
+        </pre>
+        ]]>
+        </description>
+        <name>bbsSn</name>
+        <tag-class>zesinc.web.support.tag.bbsTmplat.BbsSnTag</tag-class>
+        <body-content>empty</body-content>
+        <attribute>
+            <name>type</name>
+            <required>true</required>
+            <rtexprvalue>false</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>obj</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+    </tag>
+
+    <tag>
+        <description>
+        <![CDATA[
+        <pre>
+        게시물일련번로 태그로 아래 type에 따라 결과 표시 방식이 변경된다.
+
+        [ TAG 인자로 사용되는 type ]
+        value : 순수 값만 출력
+        text : 순수 한글명만 출력
+        label : 화면에 표시될 label 태그 html 
+        desc : 설정에서 등록한 입력 폼에 대한 설명
+        list : 목록화면 표시용 출력
+        view : 상세화면 표시용 출력
+        form : 등록/수정화면 표시용 출력
+
+        [ TAG 인자로 사용되는 obj ]
+        obj : 컨트롤에서 선언한 게시글 데이터의 객체를 설정
+
+        사용 예 :
+        <bbs:bbsDocNo type="value" />
+        <bbs:bbsDocNo type="text" />
+        <bbs:bbsDocNo type="label" />
+        <bbs:bbsDocNo type="desc" />
+        <bbs:bbsDocNo type="list" obj="${dataVo}" />
+        <bbs:bbsDocNo type="view" obj="${dataVo}" />
+        <bbs:bbsDocNo type="form" obj="${dataVo}" />
+        </pre>
+        ]]>
+        </description>
+        <name>bbsDocNo</name>
+        <tag-class>zesinc.web.support.tag.bbsTmplat.BbsDocNoTag</tag-class>
+        <body-content>empty</body-content>
+        <attribute>
+            <name>type</name>
+            <required>true</required>
+            <rtexprvalue>false</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>obj</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+    </tag>
+
+    <tag>
+        <description>
+        <![CDATA[
+        <pre>
+        참조일련번호 태그로 아래 type에 따라 결과 표시 방식이 변경된다.
+
+        [ TAG 인자로 사용되는 type ]
+        value : 순수 값만 출력
+        text : 순수 한글명만 출력
+        label : 화면에 표시될 label 태그 html 
+        desc : 설정에서 등록한 입력 폼에 대한 설명
+        list : 목록화면 표시용 출력
+        view : 상세화면 표시용 출력
+        form : 등록/수정화면 표시용 출력
+
+        [ TAG 인자로 사용되는 obj ]
+        obj : 컨트롤에서 선언한 게시글 데이터의 객체를 설정
+
+        사용 예 :
+        <bbs:rfrncDocNo type="value" />
+        <bbs:rfrncDocNo type="text" />
+        <bbs:rfrncDocNo type="label" />
+        <bbs:rfrncDocNo type="desc" />
+        <bbs:rfrncDocNo type="list" obj="${dataVo}" />
+        <bbs:rfrncDocNo type="view" obj="${dataVo}" />
+        <bbs:rfrncDocNo type="form" obj="${dataVo}" />
+        </pre>
+        ]]>
+        </description>
+        <name>rfrncDocNo</name>
+        <tag-class>zesinc.web.support.tag.bbsTmplat.RfrncDocNoTag</tag-class>
+        <body-content>empty</body-content>
+        <attribute>
+            <name>type</name>
+            <required>true</required>
+            <rtexprvalue>false</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>obj</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+    </tag>
+
+    <tag>
+        <description>
+        <![CDATA[
+        <pre>
+        공지여부 태그로 아래 type에 따라 결과 표시 방식이 변경된다.
+
+        [ TAG 인자로 사용되는 type ]
+        value : 순수 값만 출력
+        text : 순수 한글명만 출력
+        label : 화면에 표시될 label 태그 html 
+        desc : 설정에서 등록한 입력 폼에 대한 설명
+        list : 목록화면 표시용 출력
+        view : 상세화면 표시용 출력
+        form : 등록/수정화면 표시용 출력
+
+        [ TAG 인자로 사용되는 obj ]
+        obj : 컨트롤에서 선언한 게시글 데이터의 객체를 설정
+
+        사용 예 :
+        <bbs:notice type="value" />
+        <bbs:notice type="text" />
+        <bbs:notice type="label" />
+        <bbs:notice type="desc" />
+        <bbs:notice type="list" obj="${dataVo}" />
+        <bbs:notice type="view" obj="${dataVo}" />
+        <bbs:notice type="form" obj="${dataVo}" />
+        </pre>
+        ]]>
+        </description>
+        <name>notice</name>
+        <tag-class>zesinc.web.support.tag.bbsTmplat.NoticeTag</tag-class>
+        <body-content>empty</body-content>
+        <attribute>
+            <name>type</name>
+            <required>true</required>
+            <rtexprvalue>false</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>obj</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+    </tag>
+
+    <tag>
+        <description>
+        <![CDATA[
+        <pre>
+        공지시작일 태그로 아래 type에 따라 결과 표시 방식이 변경된다.
+
+        [ TAG 인자로 사용되는 type ]
+        value : 순수 값만 출력
+        text : 순수 한글명만 출력
+        label : 화면에 표시될 label 태그 html 
+        desc : 설정에서 등록한 입력 폼에 대한 설명
+        list : 목록화면 표시용 출력
+        view : 상세화면 표시용 출력
+        form : 등록/수정화면 표시용 출력
+
+        [ TAG 인자로 사용되는 obj ]
+        obj : 컨트롤에서 선언한 게시글 데이터의 객체를 설정
+
+        사용 예 :
+        <bbs:ntcBgngDt type="value" />
+        <bbs:ntcBgngDt type="text" />
+        <bbs:ntcBgngDt type="label" />
+        <bbs:ntcBgngDt type="desc" />
+        <bbs:ntcBgngDt type="list" obj="${dataVo}" />
+        <bbs:ntcBgngDt type="view" obj="${dataVo}" />
+        <bbs:ntcBgngDt type="form" obj="${dataVo}" />
+        </pre>
+        ]]>
+        </description>
+        <name>ntcBgngDt</name>
+        <tag-class>zesinc.web.support.tag.bbsTmplat.NtcBgngDtTag</tag-class>
+        <body-content>empty</body-content>
+        <attribute>
+            <name>type</name>
+            <required>true</required>
+            <rtexprvalue>false</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>obj</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+    </tag>
+
+    <tag>
+        <description>
+        <![CDATA[
+        <pre>
+        공지종료일 태그로 아래 type에 따라 결과 표시 방식이 변경된다.
+
+        [ TAG 인자로 사용되는 type ]
+        value : 순수 값만 출력
+        text : 순수 한글명만 출력
+        label : 화면에 표시될 label 태그 html 
+        desc : 설정에서 등록한 입력 폼에 대한 설명
+        list : 목록화면 표시용 출력
+        view : 상세화면 표시용 출력
+        form : 등록/수정화면 표시용 출력
+
+        [ TAG 인자로 사용되는 obj ]
+        obj : 컨트롤에서 선언한 게시글 데이터의 객체를 설정
+
+        사용 예 :
+        <bbs:ntcEndDt type="value" />
+        <bbs:ntcEndDt type="text" />
+        <bbs:ntcEndDt type="label" />
+        <bbs:ntcEndDt type="desc" />
+        <bbs:ntcEndDt type="list" obj="${dataVo}" />
+        <bbs:ntcEndDt type="view" obj="${dataVo}" />
+        <bbs:ntcEndDt type="form" obj="${dataVo}" />
+        </pre>
+        ]]>
+        </description>
+        <name>ntcEndDt</name>
+        <tag-class>zesinc.web.support.tag.bbsTmplat.NtcEndDtTag</tag-class>
+        <body-content>empty</body-content>
+        <attribute>
+            <name>type</name>
+            <required>true</required>
+            <rtexprvalue>false</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>obj</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+    </tag>
+
+    <tag>
+        <description>
+        <![CDATA[
+        <pre>
+        게시시작일 태그로 아래 type에 따라 결과 표시 방식이 변경된다.
+
+        [ TAG 인자로 사용되는 type ]
+        value : 순수 값만 출력
+        text : 순수 한글명만 출력
+        label : 화면에 표시될 label 태그 html 
+        desc : 설정에서 등록한 입력 폼에 대한 설명
+        list : 목록화면 표시용 출력
+        view : 상세화면 표시용 출력
+        form : 등록/수정화면 표시용 출력
+
+        [ TAG 인자로 사용되는 obj ]
+        obj : 컨트롤에서 선언한 게시글 데이터의 객체를 설정
+
+        사용 예 :
+        <bbs:pstgBgngDt type="value" />
+        <bbs:pstgBgngDt type="text" />
+        <bbs:pstgBgngDt type="label" />
+        <bbs:pstgBgngDt type="desc" />
+        <bbs:pstgBgngDt type="list" obj="${dataVo}" />
+        <bbs:pstgBgngDt type="view" obj="${dataVo}" />
+        <bbs:pstgBgngDt type="form" obj="${dataVo}" />
+        </pre>
+        ]]>
+        </description>
+        <name>pstgBgngDt</name>
+        <tag-class>zesinc.web.support.tag.bbsTmplat.PstgBgngDtTag</tag-class>
+        <body-content>empty</body-content>
+        <attribute>
+            <name>type</name>
+            <required>true</required>
+            <rtexprvalue>false</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>obj</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+    </tag>
+
+    <tag>
+        <description>
+        <![CDATA[
+        <pre>
+        게시종료일 태그로 아래 type에 따라 결과 표시 방식이 변경된다.
+
+        [ TAG 인자로 사용되는 type ]
+        value : 순수 값만 출력
+        text : 순수 한글명만 출력
+        label : 화면에 표시될 label 태그 html 
+        desc : 설정에서 등록한 입력 폼에 대한 설명
+        list : 목록화면 표시용 출력
+        view : 상세화면 표시용 출력
+        form : 등록/수정화면 표시용 출력
+
+        [ TAG 인자로 사용되는 obj ]
+        obj : 컨트롤에서 선언한 게시글 데이터의 객체를 설정
+
+        사용 예 :
+        <bbs:pstgEndDt type="value" />
+        <bbs:pstgEndDt type="text" />
+        <bbs:pstgEndDt type="label" />
+        <bbs:pstgEndDt type="desc" />
+        <bbs:pstgEndDt type="list" obj="${dataVo}" />
+        <bbs:pstgEndDt type="view" obj="${dataVo}" />
+        <bbs:pstgEndDt type="form" obj="${dataVo}" />
+        </pre>
+        ]]>
+        </description>
+        <name>pstgEndDt</name>
+        <tag-class>zesinc.web.support.tag.bbsTmplat.PstgEndDtTag</tag-class>
+        <body-content>empty</body-content>
+        <attribute>
+            <name>type</name>
+            <required>true</required>
+            <rtexprvalue>false</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>obj</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+    </tag>
+
+    <tag>
+        <description>
+        <![CDATA[
+        <pre>
+        공개여부 태그로 아래 type에 따라 결과 표시 방식이 변경된다.
+
+        [ TAG 인자로 사용되는 type ]
+        value : 순수 값만 출력
+        text : 순수 한글명만 출력
+        label : 화면에 표시될 label 태그 html 
+        desc : 설정에서 등록한 입력 폼에 대한 설명
+        list : 목록화면 표시용 출력
+        view : 상세화면 표시용 출력
+        form : 등록/수정화면 표시용 출력
+
+        [ TAG 인자로 사용되는 obj ]
+        obj : 컨트롤에서 선언한 게시글 데이터의 객체를 설정
+
+        사용 예 :
+        <bbs:othbc type="value" />
+        <bbs:othbc type="text" />
+        <bbs:othbc type="label" />
+        <bbs:othbc type="desc" />
+        <bbs:othbc type="list" obj="${dataVo}" />
+        <bbs:othbc type="view" obj="${dataVo}" />
+        <bbs:othbc type="form" obj="${dataVo}" />
+        </pre>
+        ]]>
+        </description>
+        <name>othbc</name>
+        <tag-class>zesinc.web.support.tag.bbsTmplat.OthbcTag</tag-class>
+        <body-content>empty</body-content>
+        <attribute>
+            <name>type</name>
+            <required>true</required>
+            <rtexprvalue>false</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>obj</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+    </tag>
+
+    <tag>
+        <description>
+        <![CDATA[
+        <pre>
+        제목 태그로 아래 type에 따라 결과 표시 방식이 변경된다.
+
+        [ TAG 인자로 사용되는 type ]
+        value : 순수 값만 출력
+        text : 순수 한글명만 출력
+        label : 화면에 표시될 label 태그 html 
+        desc : 설정에서 등록한 입력 폼에 대한 설명
+        list : 목록화면 표시용 출력
+        view : 상세화면 표시용 출력
+        form : 등록/수정화면 표시용 출력
+
+        [ TAG 인자로 사용되는 obj ]
+        obj : 컨트롤에서 선언한 게시글 데이터의 객체를 설정
+
+        사용 예 :
+        <bbs:ttl type="value" />
+        <bbs:ttl type="text" />
+        <bbs:ttl type="label" />
+        <bbs:ttl type="desc" />
+        <bbs:ttl type="list" obj="${dataVo}" />
+        <bbs:ttl type="view" obj="${dataVo}" />
+        <bbs:ttl type="form" obj="${dataVo}" />
+        </pre>
+        ]]>
+        </description>
+        <name>ttl</name>
+        <tag-class>zesinc.web.support.tag.bbsTmplat.TtlTag</tag-class>
+        <body-content>empty</body-content>
+        <attribute>
+            <name>type</name>
+            <required>true</required>
+            <rtexprvalue>false</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>obj</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+    </tag>
+
+    <tag>
+        <description>
+        <![CDATA[
+        <pre>
+        템플릿 파일위치 : /WEB-INF/jsp/common/taglib/bbsTmplat/docContsCn.jsp
+
+        내용 태그로 아래 type에 따라 결과 표시 방식이 변경된다.
+
+        [ TAG 인자로 사용되는 type ]
+        value : 순수 값만 출력
+        text : 순수 한글명만 출력
+        label : 화면에 표시될 label 태그 html 
+        desc : 설정에서 등록한 입력 폼에 대한 설명
+        list : 목록화면 표시용 출력
+        view : 상세화면 표시용 출력
+        form : 등록/수정화면 표시용 출력
+
+        [ TAG 인자로 사용되는 obj ]
+        obj : 컨트롤에서 선언한 게시글 데이터의 객체를 설정
+
+        사용 예 :
+        <bbs:docContsCn type="value" />
+        <bbs:docContsCn type="text" />
+        <bbs:docContsCn type="label" />
+        <bbs:docContsCn type="desc" />
+        <bbs:docContsCn type="list" obj="${dataVo}" />
+        <bbs:docContsCn type="view" obj="${dataVo}" />
+        <bbs:docContsCn type="form" obj="${dataVo}" />
+
+        [ TAG 인자로 사용되는 page ]
+        기본값인 템플릿 파일 이외의 jsp를 생성하여 대체할 수 있다.
+        주의 ! bbsTmplat 폴더부터 입력한다. (상위 경로는 고정되어 있음)
+        
+        사용 예 :
+        page="bbsTmplat/xxxNew.jsp"
+        </pre>
+        ]]>
+        </description>
+        <name>docContsCn</name>
+        <tag-class>zesinc.web.support.tag.bbsTmplat.DocContsCnTag</tag-class>
+        <body-content>empty</body-content>
+        <attribute>
+            <name>type</name>
+            <required>true</required>
+            <rtexprvalue>false</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>obj</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>page</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+    </tag>
+
+    <tag>
+        <description>
+        <![CDATA[
+        <pre>
+        답변내용 태그로 아래 type에 따라 결과 표시 방식이 변경된다.
+
+        [ TAG 인자로 사용되는 type ]
+        value : 순수 값만 출력
+        text : 순수 한글명만 출력
+        label : 화면에 표시될 label 태그 html 
+        desc : 설정에서 등록한 입력 폼에 대한 설명
+        list : 목록화면 표시용 출력
+        view : 상세화면 표시용 출력
+        form : 등록/수정화면 표시용 출력
+
+        [ TAG 인자로 사용되는 obj ]
+        obj : 컨트롤에서 선언한 게시글 데이터의 객체를 설정
+
+        사용 예 :
+        <bbs:ansDtlCn type="value" />
+        <bbs:ansDtlCn type="text" />
+        <bbs:ansDtlCn type="label" />
+        <bbs:ansDtlCn type="desc" />
+        <bbs:ansDtlCn type="list" obj="${dataVo}" />
+        <bbs:ansDtlCn type="view" obj="${dataVo}" />
+        <bbs:ansDtlCn type="form" obj="${dataVo}" />
+        </pre>
+        ]]>
+        </description>
+        <name>ansDtlCn</name>
+        <tag-class>zesinc.web.support.tag.bbsTmplat.AnsDtlCnTag</tag-class>
+        <body-content>empty</body-content>
+        <attribute>
+            <name>type</name>
+            <required>true</required>
+            <rtexprvalue>false</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>obj</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+    </tag>
+
+    <tag>
+        <description>
+        <![CDATA[
+        <pre>
+        답변일 태그로 아래 type에 따라 결과 표시 방식이 변경된다.
+
+        [ TAG 인자로 사용되는 type ]
+        value : 순수 값만 출력
+        text : 순수 한글명만 출력
+        label : 화면에 표시될 label 태그 html 
+        desc : 설정에서 등록한 입력 폼에 대한 설명
+        list : 목록화면 표시용 출력
+        view : 상세화면 표시용 출력
+        form : 등록/수정화면 표시용 출력
+
+        [ TAG 인자로 사용되는 obj ]
+        obj : 컨트롤에서 선언한 게시글 데이터의 객체를 설정
+
+        사용 예 :
+        <bbs:ansDt type="value" />
+        <bbs:ansDt type="text" />
+        <bbs:ansDt type="label" />
+        <bbs:ansDt type="desc" />
+        <bbs:ansDt type="list" obj="${dataVo}" />
+        <bbs:ansDt type="view" obj="${dataVo}" />
+        <bbs:ansDt type="form" obj="${dataVo}" />
+        </pre>
+        ]]>
+        </description>
+        <name>ansDt</name>
+        <tag-class>zesinc.web.support.tag.bbsTmplat.AnsDtTag</tag-class>
+        <body-content>empty</body-content>
+        <attribute>
+            <name>type</name>
+            <required>true</required>
+            <rtexprvalue>false</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>obj</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+    </tag>
+
+    <tag>
+        <description>
+        <![CDATA[
+        <pre>
+        분류코드 태그로 아래 type에 따라 결과 표시 방식이 변경된다.
+
+        [ TAG 인자로 사용되는 type ]
+        value : 순수 값만 출력
+        text : 순수 한글명만 출력
+        label : 화면에 표시될 label 태그 html 
+        desc : 설정에서 등록한 입력 폼에 대한 설명
+        list : 목록화면 표시용 출력
+        view : 상세화면 표시용 출력
+        form : 등록/수정화면 표시용 출력
+
+        [ TAG 인자로 사용되는 obj ]
+        obj : 컨트롤에서 선언한 게시글 데이터의 객체를 설정
+
+        사용 예 :
+        <bbs:clsfNo type="value" />
+        <bbs:clsfNo type="text" />
+        <bbs:clsfNo type="label" />
+        <bbs:clsfNo type="desc" />
+        <bbs:clsfNo type="list" obj="${dataVo}" />
+        <bbs:clsfNo type="view" obj="${dataVo}" />
+        <bbs:clsfNo type="form" obj="${dataVo}" />
+        </pre>
+        ]]>
+        </description>
+        <name>clsfNo</name>
+        <tag-class>zesinc.web.support.tag.bbsTmplat.ClsfNoTag</tag-class>
+        <body-content>empty</body-content>
+        <attribute>
+            <name>type</name>
+            <required>true</required>
+            <rtexprvalue>false</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>obj</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+    </tag>
+
+    <tag>
+        <description>
+        <![CDATA[
+        <pre>
+        하위분류코드 태그로 아래 type에 따라 결과 표시 방식이 변경된다.
+
+        [ TAG 인자로 사용되는 type ]
+        value : 순수 값만 출력
+        text : 순수 한글명만 출력
+        label : 화면에 표시될 label 태그 html 
+        desc : 설정에서 등록한 입력 폼에 대한 설명
+        list : 목록화면 표시용 출력
+        view : 상세화면 표시용 출력
+        form : 등록/수정화면 표시용 출력
+
+        [ TAG 인자로 사용되는 obj ]
+        obj : 컨트롤에서 선언한 게시글 데이터의 객체를 설정
+
+        사용 예 :
+        <bbs:lwrkClsfSn type="value" />
+        <bbs:lwrkClsfSn type="text" />
+        <bbs:lwrkClsfSn type="label" />
+        <bbs:lwrkClsfSn type="desc" />
+        <bbs:lwrkClsfSn type="list" obj="${dataVo}" />
+        <bbs:lwrkClsfSn type="view" obj="${dataVo}" />
+        <bbs:lwrkClsfSn type="form" obj="${dataVo}" />
+        </pre>
+        ]]>
+        </description>
+        <name>lwrkClsfSn</name>
+        <tag-class>zesinc.web.support.tag.bbsTmplat.LwrkClsfSnTag</tag-class>
+        <body-content>empty</body-content>
+        <attribute>
+            <name>type</name>
+            <required>true</required>
+            <rtexprvalue>false</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>obj</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+    </tag>
+
+    <tag>
+        <description>
+        <![CDATA[
+        <pre>
+        내용요약 태그로 아래 type에 따라 결과 표시 방식이 변경된다.
+
+        [ TAG 인자로 사용되는 type ]
+        value : 순수 값만 출력
+        text : 순수 한글명만 출력
+        label : 화면에 표시될 label 태그 html 
+        desc : 설정에서 등록한 입력 폼에 대한 설명
+        list : 목록화면 표시용 출력
+        view : 상세화면 표시용 출력
+        form : 등록/수정화면 표시용 출력
+
+        [ TAG 인자로 사용되는 obj ]
+        obj : 컨트롤에서 선언한 게시글 데이터의 객체를 설정
+
+        사용 예 :
+        <bbs:mainCn type="value" />
+        <bbs:mainCn type="text" />
+        <bbs:mainCn type="label" />
+        <bbs:mainCn type="desc" />
+        <bbs:mainCn type="list" obj="${dataVo}" />
+        <bbs:mainCn type="view" obj="${dataVo}" />
+        <bbs:mainCn type="form" obj="${dataVo}" />
+        </pre>
+        ]]>
+        </description>
+        <name>mainCn</name>
+        <tag-class>zesinc.web.support.tag.bbsTmplat.MainCnTag</tag-class>
+        <body-content>empty</body-content>
+        <attribute>
+            <name>type</name>
+            <required>true</required>
+            <rtexprvalue>false</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>obj</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+    </tag>
+
+    <tag>
+        <description>
+        <![CDATA[
+        <pre>
+        템플릿 파일위치 : /WEB-INF/jsp/common/taglib/bbsTmplat/stsfdgEvl.jsp
+
+        파일(첨부,다운로드) 태그로 아래 type에 따라 결과 표시 방식이 변경된다.
+
+        [ TAG 인자로 사용되는 type ]
+        value : 순수 값만 출력
+        text : 순수 한글명만 출력
+        label : 화면에 표시될 label 태그 html 
+        desc : 설정에서 등록한 입력 폼에 대한 설명
+        list : 목록화면 표시용 출력
+        view : 상세화면 표시용 출력
+        form : 등록/수정화면 표시용 출력
+
+        [ TAG 인자로 사용되는 obj ]
+        obj : 컨트롤에서 선언한 게시글 데이터의 객체를 설정
+
+        사용 예 :
+        <bbs:file type="value" />
+        <bbs:file type="text" />
+        <bbs:file type="label" />
+        <bbs:file type="desc" />
+        <bbs:file type="list" obj="${dataVo}" />
+        <bbs:file type="view" obj="${dataVo}" />
+        <bbs:file type="form" obj="${dataVo}" />
+
+        [ TAG 인자로 사용되는 page ]
+        기본값인 템플릿 파일 이외의 jsp를 생성하여 대체할 수 있다.
+        주의 ! bbsTmplat 폴더부터 입력한다. (상위 경로는 고정되어 있음)
+        
+        사용 예 :
+        page="bbsTmplat/xxxNew.jsp"
+        </pre>
+        ]]>
+        </description>
+        <name>file</name>
+        <tag-class>zesinc.web.support.tag.bbsTmplat.FileTag</tag-class>
+        <body-content>empty</body-content>
+        <attribute>
+            <name>type</name>
+            <required>true</required>
+            <rtexprvalue>false</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>obj</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>page</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+    </tag>
+
+    <tag>
+        <description>
+        <![CDATA[
+        <pre>
+        부서코드 태그로 아래 type에 따라 결과 표시 방식이 변경된다.
+
+        [ TAG 인자로 사용되는 type ]
+        value : 순수 값만 출력
+        text : 순수 한글명만 출력
+        label : 화면에 표시될 label 태그 html 
+        desc : 설정에서 등록한 입력 폼에 대한 설명
+        list : 목록화면 표시용 출력
+        view : 상세화면 표시용 출력
+        form : 등록/수정화면 표시용 출력
+
+        [ TAG 인자로 사용되는 obj ]
+        obj : 컨트롤에서 선언한 게시글 데이터의 객체를 설정
+
+        사용 예 :
+        <bbs:deptCdId type="value" />
+        <bbs:deptCdId type="text" />
+        <bbs:deptCdId type="label" />
+        <bbs:deptCdId type="desc" />
+        <bbs:deptCdId type="list" obj="${dataVo}" />
+        <bbs:deptCdId type="view" obj="${dataVo}" />
+        <bbs:deptCdId type="form" obj="${dataVo}" />
+        </pre>
+        ]]>
+        </description>
+        <name>deptCdId</name>
+        <tag-class>zesinc.web.support.tag.bbsTmplat.DeptCdIdTag</tag-class>
+        <body-content>empty</body-content>
+        <attribute>
+            <name>type</name>
+            <required>true</required>
+            <rtexprvalue>false</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>obj</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+    </tag>
+
+    <tag>
+        <description>
+        <![CDATA[
+        <pre>
+        부서명 태그로 아래 type에 따라 결과 표시 방식이 변경된다.
+
+        [ TAG 인자로 사용되는 type ]
+        value : 순수 값만 출력
+        text : 순수 한글명만 출력
+        label : 화면에 표시될 label 태그 html 
+        desc : 설정에서 등록한 입력 폼에 대한 설명
+        list : 목록화면 표시용 출력
+        view : 상세화면 표시용 출력
+        form : 등록/수정화면 표시용 출력
+
+        [ TAG 인자로 사용되는 obj ]
+        obj : 컨트롤에서 선언한 게시글 데이터의 객체를 설정
+
+        사용 예 :
+        <bbs:deptNm type="value" />
+        <bbs:deptNm type="text" />
+        <bbs:deptNm type="label" />
+        <bbs:deptNm type="desc" />
+        <bbs:deptNm type="list" obj="${dataVo}" />
+        <bbs:deptNm type="view" obj="${dataVo}" />
+        <bbs:deptNm type="form" obj="${dataVo}" />
+        </pre>
+        ]]>
+        </description>
+        <name>deptNm</name>
+        <tag-class>zesinc.web.support.tag.bbsTmplat.DeptNmTag</tag-class>
+        <body-content>empty</body-content>
+        <attribute>
+            <name>type</name>
+            <required>true</required>
+            <rtexprvalue>false</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>obj</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+    </tag>
+
+    <tag>
+        <description>
+        <![CDATA[
+        <pre>
+        담당자ID 태그로 아래 type에 따라 결과 표시 방식이 변경된다.
+
+        [ TAG 인자로 사용되는 type ]
+        value : 순수 값만 출력
+        text : 순수 한글명만 출력
+        label : 화면에 표시될 label 태그 html 
+        desc : 설정에서 등록한 입력 폼에 대한 설명
+        list : 목록화면 표시용 출력
+        view : 상세화면 표시용 출력
+        form : 등록/수정화면 표시용 출력
+
+        [ TAG 인자로 사용되는 obj ]
+        obj : 컨트롤에서 선언한 게시글 데이터의 객체를 설정
+
+        사용 예 :
+        <bbs:picId type="value" />
+        <bbs:picId type="text" />
+        <bbs:picId type="label" />
+        <bbs:picId type="desc" />
+        <bbs:picId type="list" obj="${dataVo}" />
+        <bbs:picId type="view" obj="${dataVo}" />
+        <bbs:picId type="form" obj="${dataVo}" />
+        </pre>
+        ]]>
+        </description>
+        <name>picId</name>
+        <tag-class>zesinc.web.support.tag.bbsTmplat.PicIdTag</tag-class>
+        <body-content>empty</body-content>
+        <attribute>
+            <name>type</name>
+            <required>true</required>
+            <rtexprvalue>false</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>obj</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+    </tag>
+
+    <tag>
+        <description>
+        <![CDATA[
+        <pre>
+        담당자명 태그로 아래 type에 따라 결과 표시 방식이 변경된다.
+
+        [ TAG 인자로 사용되는 type ]
+        value : 순수 값만 출력
+        text : 순수 한글명만 출력
+        label : 화면에 표시될 label 태그 html 
+        desc : 설정에서 등록한 입력 폼에 대한 설명
+        list : 목록화면 표시용 출력
+        view : 상세화면 표시용 출력
+        form : 등록/수정화면 표시용 출력
+
+        [ TAG 인자로 사용되는 obj ]
+        obj : 컨트롤에서 선언한 게시글 데이터의 객체를 설정
+
+        사용 예 :
+        <bbs:picNm type="value" />
+        <bbs:picNm type="text" />
+        <bbs:picNm type="label" />
+        <bbs:picNm type="desc" />
+        <bbs:picNm type="list" obj="${dataVo}" />
+        <bbs:picNm type="view" obj="${dataVo}" />
+        <bbs:picNm type="form" obj="${dataVo}" />
+        </pre>
+        ]]>
+        </description>
+        <name>picNm</name>
+        <tag-class>zesinc.web.support.tag.bbsTmplat.PicNmTag</tag-class>
+        <body-content>empty</body-content>
+        <attribute>
+            <name>type</name>
+            <required>true</required>
+            <rtexprvalue>false</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>obj</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+    </tag>
+
+    <tag>
+        <description>
+        <![CDATA[
+        <pre>
+        템플릿 파일위치 : /WEB-INF/jsp/common/taglib/bbsTmplat/cpyrht.jsp
+
+        저작권 태그로 아래 type에 따라 결과 표시 방식이 변경된다.
+
+        [ TAG 인자로 사용되는 type ]
+        value : 순수 값만 출력
+        text : 순수 한글명만 출력
+        label : 화면에 표시될 label 태그 html 
+        desc : 설정에서 등록한 입력 폼에 대한 설명
+        list : 목록화면 표시용 출력
+        view : 상세화면 표시용 출력
+        form : 등록/수정화면 표시용 출력
+
+        [ TAG 인자로 사용되는 obj ]
+        obj : 컨트롤에서 선언한 게시글 데이터의 객체를 설정
+
+        사용 예 :
+        <bbs:cpyrht type="value" />
+        <bbs:cpyrht type="text" />
+        <bbs:cpyrht type="label" />
+        <bbs:cpyrht type="desc" />
+        <bbs:cpyrht type="list" obj="${dataVo}" />
+        <bbs:cpyrht type="view" obj="${dataVo}" />
+        <bbs:cpyrht type="form" obj="${dataVo}" />
+
+        [ TAG 인자로 사용되는 page ]
+        기본값인 템플릿 파일 이외의 jsp를 생성하여 대체할 수 있다.
+        주의 ! bbsTmplat 폴더부터 입력한다. (상위 경로는 고정되어 있음)
+        
+        사용 예 :
+        page="bbsTmplat/xxxNew.jsp"
+        </pre>
+        ]]>
+        </description>
+        <name>cpyrht</name>
+        <tag-class>zesinc.web.support.tag.bbsTmplat.CpyrhtTag</tag-class>
+        <body-content>empty</body-content>
+        <attribute>
+            <name>type</name>
+            <required>true</required>
+            <rtexprvalue>false</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>obj</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>page</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+    </tag>
+
+    <tag>
+        <description>
+        <![CDATA[
+        <pre>
+        TAG 태그로 아래 type에 따라 결과 표시 방식이 변경된다.
+
+        [ TAG 인자로 사용되는 type ]
+        value : 순수 값만 출력
+        text : 순수 한글명만 출력
+        label : 화면에 표시될 label 태그 html 
+        desc : 설정에서 등록한 입력 폼에 대한 설명
+        list : 목록화면 표시용 출력
+        view : 상세화면 표시용 출력
+        form : 등록/수정화면 표시용 출력
+
+        [ TAG 인자로 사용되는 obj ]
+        obj : 컨트롤에서 선언한 게시글 데이터의 객체를 설정
+
+        사용 예 :
+        <bbs:tagNms type="value" />
+        <bbs:tagNms type="text" />
+        <bbs:tagNms type="label" />
+        <bbs:tagNms type="desc" />
+        <bbs:tagNms type="list" obj="${dataVo}" />
+        <bbs:tagNms type="view" obj="${dataVo}" />
+        <bbs:tagNms type="form" obj="${dataVo}" />
+        </pre>
+        ]]>
+        </description>
+        <name>tagNms</name>
+        <tag-class>zesinc.web.support.tag.bbsTmplat.TagNmsTag</tag-class>
+        <body-content>empty</body-content>
+        <attribute>
+            <name>type</name>
+            <required>true</required>
+            <rtexprvalue>false</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>obj</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+    </tag>
+
+    <tag>
+        <description>
+        <![CDATA[
+        <pre>
+        조회수 태그로 아래 type에 따라 결과 표시 방식이 변경된다.
+
+        [ TAG 인자로 사용되는 type ]
+        value : 순수 값만 출력
+        text : 순수 한글명만 출력
+        label : 화면에 표시될 label 태그 html 
+        desc : 설정에서 등록한 입력 폼에 대한 설명
+        list : 목록화면 표시용 출력
+        view : 상세화면 표시용 출력
+        form : 등록/수정화면 표시용 출력
+
+        [ TAG 인자로 사용되는 obj ]
+        obj : 컨트롤에서 선언한 게시글 데이터의 객체를 설정
+
+        사용 예 :
+        <bbs:inqCnt type="value" />
+        <bbs:inqCnt type="text" />
+        <bbs:inqCnt type="label" />
+        <bbs:inqCnt type="desc" />
+        <bbs:inqCnt type="list" obj="${dataVo}" />
+        <bbs:inqCnt type="view" obj="${dataVo}" />
+        <bbs:inqCnt type="form" obj="${dataVo}" />
+        </pre>
+        ]]>
+        </description>
+        <name>inqCnt</name>
+        <tag-class>zesinc.web.support.tag.bbsTmplat.InqCntTag</tag-class>
+        <body-content>empty</body-content>
+        <attribute>
+            <name>type</name>
+            <required>true</required>
+            <rtexprvalue>false</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>obj</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+    </tag>
+
+    <tag>
+        <description>
+        <![CDATA[
+        <pre>
+        신고횟수 태그로 아래 type에 따라 결과 표시 방식이 변경된다.
+
+        [ TAG 인자로 사용되는 type ]
+        value : 순수 값만 출력
+        text : 순수 한글명만 출력
+        label : 화면에 표시될 label 태그 html 
+        desc : 설정에서 등록한 입력 폼에 대한 설명
+        list : 목록화면 표시용 출력
+        view : 상세화면 표시용 출력
+        form : 등록/수정화면 표시용 출력
+
+        [ TAG 인자로 사용되는 obj ]
+        obj : 컨트롤에서 선언한 게시글 데이터의 객체를 설정
+
+        사용 예 :
+        <bbs:dclrCnt type="value" />
+        <bbs:dclrCnt type="text" />
+        <bbs:dclrCnt type="label" />
+        <bbs:dclrCnt type="desc" />
+        <bbs:dclrCnt type="list" obj="${dataVo}" />
+        <bbs:dclrCnt type="view" obj="${dataVo}" />
+        <bbs:dclrCnt type="form" obj="${dataVo}" />
+        </pre>
+        ]]>
+        </description>
+        <name>dclrCnt</name>
+        <tag-class>zesinc.web.support.tag.bbsTmplat.DclrCntTag</tag-class>
+        <body-content>empty</body-content>
+        <attribute>
+            <name>type</name>
+            <required>true</required>
+            <rtexprvalue>false</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>obj</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+    </tag>
+
+    <tag>
+        <description>
+        <![CDATA[
+        <pre>
+        추천횟수 태그로 아래 type에 따라 결과 표시 방식이 변경된다.
+
+        [ TAG 인자로 사용되는 type ]
+        value : 순수 값만 출력
+        text : 순수 한글명만 출력
+        label : 화면에 표시될 label 태그 html 
+        desc : 설정에서 등록한 입력 폼에 대한 설명
+        list : 목록화면 표시용 출력
+        view : 상세화면 표시용 출력
+        form : 등록/수정화면 표시용 출력
+
+        [ TAG 인자로 사용되는 obj ]
+        obj : 컨트롤에서 선언한 게시글 데이터의 객체를 설정
+
+        사용 예 :
+        <bbs:rcmdtnCnt type="value" />
+        <bbs:rcmdtnCnt type="text" />
+        <bbs:rcmdtnCnt type="label" />
+        <bbs:rcmdtnCnt type="desc" />
+        <bbs:rcmdtnCnt type="list" obj="${dataVo}" />
+        <bbs:rcmdtnCnt type="view" obj="${dataVo}" />
+        <bbs:rcmdtnCnt type="form" obj="${dataVo}" />
+        </pre>
+        ]]>
+        </description>
+        <name>rcmdtnCnt</name>
+        <tag-class>zesinc.web.support.tag.bbsTmplat.RcmdtnCntTag</tag-class>
+        <body-content>empty</body-content>
+        <attribute>
+            <name>type</name>
+            <required>true</required>
+            <rtexprvalue>false</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>obj</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+    </tag>
+
+    <tag>
+        <description>
+        <![CDATA[
+        <pre>
+        템플릿 파일위치 : /WEB-INF/jsp/common/taglib/bbsTmplat/stsfdgEvl.jsp
+
+        만족도 태그로 아래 type에 따라 결과 표시 방식이 변경된다.
+
+        [ TAG 인자로 사용되는 type ]
+        value : 순수 값만 출력
+        text : 순수 한글명만 출력
+        label : 화면에 표시될 label 태그 html 
+        desc : 설정에서 등록한 입력 폼에 대한 설명
+        list : 목록화면 표시용 출력
+        view : 상세화면 표시용 출력
+        form : 등록/수정화면 표시용 출력
+
+        [ TAG 인자로 사용되는 obj ]
+        obj : 컨트롤에서 선언한 게시글 데이터의 객체를 설정
+
+        사용 예 :
+        <bbs:stsfdgEvl type="value" />
+        <bbs:stsfdgEvl type="text" />
+        <bbs:stsfdgEvl type="label" />
+        <bbs:stsfdgEvl type="desc" />
+        <bbs:stsfdgEvl type="list" obj="${dataVo}" />
+        <bbs:stsfdgEvl type="view" obj="${dataVo}" />
+        <bbs:stsfdgEvl type="form" obj="${dataVo}" />
+
+        [ TAG 인자로 사용되는 page ]
+        기본값인 템플릿 파일 이외의 jsp를 생성하여 대체할 수 있다.
+        주의 ! bbsTmplat 폴더부터 입력한다. (상위 경로는 고정되어 있음)
+        
+        사용 예 :
+        page="bbsTmplat/xxxNew.jsp"
+        </pre>
+        ]]>
+        </description>
+        <name>stsfdgEvl</name>
+        <tag-class>zesinc.web.support.tag.bbsTmplat.StsfdgEvlTag</tag-class>
+        <body-content>empty</body-content>
+        <attribute>
+            <name>type</name>
+            <required>true</required>
+            <rtexprvalue>false</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>obj</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>page</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+    </tag>
+
+    <tag>
+        <description>
+        <![CDATA[
+        <pre>
+        브라우저 CntnBrwsrNm 태그로 아래 type에 따라 결과 표시 방식이 변경된다.
+
+        [ TAG 인자로 사용되는 type ]
+        value : 순수 값만 출력
+        text : 순수 한글명만 출력
+        label : 화면에 표시될 label 태그 html 
+        desc : 설정에서 등록한 입력 폼에 대한 설명
+        list : 목록화면 표시용 출력
+        view : 상세화면 표시용 출력
+        form : 등록/수정화면 표시용 출력
+
+        [ TAG 인자로 사용되는 obj ]
+        obj : 컨트롤에서 선언한 게시글 데이터의 객체를 설정
+
+        사용 예 :
+        <bbs:cntnBrwsrNm type="value" />
+        <bbs:cntnBrwsrNm type="text" />
+        <bbs:cntnBrwsrNm type="label" />
+        <bbs:cntnBrwsrNm type="desc" />
+        <bbs:cntnBrwsrNm type="list" obj="${dataVo}" />
+        <bbs:cntnBrwsrNm type="view" obj="${dataVo}" />
+        <bbs:cntnBrwsrNm type="form" obj="${dataVo}" />
+        </pre>
+        ]]>
+        </description>
+        <name>cntnBrwsrNm</name>
+        <tag-class>zesinc.web.support.tag.bbsTmplat.CntnBrwsrNmTag</tag-class>
+        <body-content>empty</body-content>
+        <attribute>
+            <name>type</name>
+            <required>true</required>
+            <rtexprvalue>false</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>obj</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+    </tag>
+
+    <tag>
+        <description>
+        <![CDATA[
+        <pre>
+        IP 주소 태그로 아래 type에 따라 결과 표시 방식이 변경된다.
+
+        [ TAG 인자로 사용되는 type ]
+        value : 순수 값만 출력
+        text : 순수 한글명만 출력
+        label : 화면에 표시될 label 태그 html 
+        desc : 설정에서 등록한 입력 폼에 대한 설명
+        list : 목록화면 표시용 출력
+        view : 상세화면 표시용 출력
+        form : 등록/수정화면 표시용 출력
+
+        [ TAG 인자로 사용되는 obj ]
+        obj : 컨트롤에서 선언한 게시글 데이터의 객체를 설정
+
+        사용 예 :
+        <bbs:ipAddr type="value" />
+        <bbs:ipAddr type="text" />
+        <bbs:ipAddr type="label" />
+        <bbs:ipAddr type="desc" />
+        <bbs:ipAddr type="list" obj="${dataVo}" />
+        <bbs:ipAddr type="view" obj="${dataVo}" />
+        <bbs:ipAddr type="form" obj="${dataVo}" />
+        </pre>
+        ]]>
+        </description>
+        <name>ipAddr</name>
+        <tag-class>zesinc.web.support.tag.bbsTmplat.IpAddrTag</tag-class>
+        <body-content>empty</body-content>
+        <attribute>
+            <name>type</name>
+            <required>true</required>
+            <rtexprvalue>false</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>obj</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+    </tag>
+
+    <tag>
+        <description>
+        <![CDATA[
+        <pre>
+        사용자KEY 태그로 아래 type에 따라 결과 표시 방식이 변경된다.
+
+        [ TAG 인자로 사용되는 type ]
+        value : 순수 값만 출력
+        text : 순수 한글명만 출력
+        label : 화면에 표시될 label 태그 html 
+        desc : 설정에서 등록한 입력 폼에 대한 설명
+        list : 목록화면 표시용 출력
+        view : 상세화면 표시용 출력
+        form : 등록/수정화면 표시용 출력
+
+        [ TAG 인자로 사용되는 obj ]
+        obj : 컨트롤에서 선언한 게시글 데이터의 객체를 설정
+
+        사용 예 :
+        <bbs:userIdntfNm type="value" />
+        <bbs:userIdntfNm type="text" />
+        <bbs:userIdntfNm type="label" />
+        <bbs:userIdntfNm type="desc" />
+        <bbs:userIdntfNm type="list" obj="${dataVo}" />
+        <bbs:userIdntfNm type="view" obj="${dataVo}" />
+        <bbs:userIdntfNm type="form" obj="${dataVo}" />
+        </pre>
+        ]]>
+        </description>
+        <name>userIdntfNm</name>
+        <tag-class>zesinc.web.support.tag.bbsTmplat.UserIdntfNmTag</tag-class>
+        <body-content>empty</body-content>
+        <attribute>
+            <name>type</name>
+            <required>true</required>
+            <rtexprvalue>false</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>obj</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+    </tag>
+
+    <tag>
+        <description>
+        <![CDATA[
+        <pre>
+        등록자ID 태그로 아래 type에 따라 결과 표시 방식이 변경된다.
+
+        [ TAG 인자로 사용되는 type ]
+        value : 순수 값만 출력
+        text : 순수 한글명만 출력
+        label : 화면에 표시될 label 태그 html 
+        desc : 설정에서 등록한 입력 폼에 대한 설명
+        list : 목록화면 표시용 출력
+        view : 상세화면 표시용 출력
+        form : 등록/수정화면 표시용 출력
+
+        [ TAG 인자로 사용되는 obj ]
+        obj : 컨트롤에서 선언한 게시글 데이터의 객체를 설정
+
+        사용 예 :
+        <bbs:rgtrId type="value" />
+        <bbs:rgtrId type="text" />
+        <bbs:rgtrId type="label" />
+        <bbs:rgtrId type="desc" />
+        <bbs:rgtrId type="list" obj="${dataVo}" />
+        <bbs:rgtrId type="view" obj="${dataVo}" />
+        <bbs:rgtrId type="form" obj="${dataVo}" />
+        </pre>
+        ]]>
+        </description>
+        <name>rgtrId</name>
+        <tag-class>zesinc.web.support.tag.bbsTmplat.RgtrIdTag</tag-class>
+        <body-content>empty</body-content>
+        <attribute>
+            <name>type</name>
+            <required>true</required>
+            <rtexprvalue>false</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>obj</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+    </tag>
+
+    <tag>
+        <description>
+        <![CDATA[
+        <pre>
+        등록자명 태그로 아래 type에 따라 결과 표시 방식이 변경된다.
+
+        [ TAG 인자로 사용되는 type ]
+        value : 순수 값만 출력
+        text : 순수 한글명만 출력
+        label : 화면에 표시될 label 태그 html 
+        desc : 설정에서 등록한 입력 폼에 대한 설명
+        list : 목록화면 표시용 출력
+        view : 상세화면 표시용 출력
+        form : 등록/수정화면 표시용 출력
+
+        [ TAG 인자로 사용되는 obj ]
+        obj : 컨트롤에서 선언한 게시글 데이터의 객체를 설정
+
+        사용 예 :
+        <bbs:rgtrNm type="value" />
+        <bbs:rgtrNm type="text" />
+        <bbs:rgtrNm type="label" />
+        <bbs:rgtrNm type="desc" />
+        <bbs:rgtrNm type="list" obj="${dataVo}" />
+        <bbs:rgtrNm type="view" obj="${dataVo}" />
+        <bbs:rgtrNm type="form" obj="${dataVo}" />
+        </pre>
+        ]]>
+        </description>
+        <name>rgtrNm</name>
+        <tag-class>zesinc.web.support.tag.bbsTmplat.RgtrNmTag</tag-class>
+        <body-content>empty</body-content>
+        <attribute>
+            <name>type</name>
+            <required>true</required>
+            <rtexprvalue>false</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>obj</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+    </tag>
+
+    <tag>
+        <description>
+        <![CDATA[
+        <pre>
+        등록자연락처 태그로 아래 type에 따라 결과 표시 방식이 변경된다.
+
+        [ TAG 인자로 사용되는 type ]
+        value : 순수 값만 출력
+        text : 순수 한글명만 출력
+        label : 화면에 표시될 label 태그 html 
+        desc : 설정에서 등록한 입력 폼에 대한 설명
+        list : 목록화면 표시용 출력
+        view : 상세화면 표시용 출력
+        form : 등록/수정화면 표시용 출력
+
+        [ TAG 인자로 사용되는 obj ]
+        obj : 컨트롤에서 선언한 게시글 데이터의 객체를 설정
+
+        사용 예 :
+        <bbs:rgtrTelno type="value" />
+        <bbs:rgtrTelno type="text" />
+        <bbs:rgtrTelno type="label" />
+        <bbs:rgtrTelno type="desc" />
+        <bbs:rgtrTelno type="list" obj="${dataVo}" />
+        <bbs:rgtrTelno type="view" obj="${dataVo}" />
+        <bbs:rgtrTelno type="form" obj="${dataVo}" />
+        </pre>
+        ]]>
+        </description>
+        <name>rgtrTelno</name>
+        <tag-class>zesinc.web.support.tag.bbsTmplat.RgtrTelnoTag</tag-class>
+        <body-content>empty</body-content>
+        <attribute>
+            <name>type</name>
+            <required>true</required>
+            <rtexprvalue>false</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>obj</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+    </tag>
+
+    <tag>
+        <description>
+        <![CDATA[
+        <pre>
+        등록자이메일 태그로 아래 type에 따라 결과 표시 방식이 변경된다.
+
+        [ TAG 인자로 사용되는 type ]
+        value : 순수 값만 출력
+        text : 순수 한글명만 출력
+        label : 화면에 표시될 label 태그 html 
+        desc : 설정에서 등록한 입력 폼에 대한 설명
+        list : 목록화면 표시용 출력
+        view : 상세화면 표시용 출력
+        form : 등록/수정화면 표시용 출력
+
+        [ TAG 인자로 사용되는 obj ]
+        obj : 컨트롤에서 선언한 게시글 데이터의 객체를 설정
+
+        사용 예 :
+        <bbs:rgtrEmlAddr type="value" />
+        <bbs:rgtrEmlAddr type="text" />
+        <bbs:rgtrEmlAddr type="label" />
+        <bbs:rgtrEmlAddr type="desc" />
+        <bbs:rgtrEmlAddr type="list" obj="${dataVo}" />
+        <bbs:rgtrEmlAddr type="view" obj="${dataVo}" />
+        <bbs:rgtrEmlAddr type="form" obj="${dataVo}" />
+        </pre>
+        ]]>
+        </description>
+        <name>rgtrEmlAddr</name>
+        <tag-class>zesinc.web.support.tag.bbsTmplat.RgtrEmlAddrTag</tag-class>
+        <body-content>empty</body-content>
+        <attribute>
+            <name>type</name>
+            <required>true</required>
+            <rtexprvalue>false</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>obj</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+    </tag>
+
+    <tag>
+        <description>
+        <![CDATA[
+        <pre>
+        등록일 태그로 아래 type에 따라 결과 표시 방식이 변경된다.
+
+        [ TAG 인자로 사용되는 type ]
+        value : 순수 값만 출력
+        text : 순수 한글명만 출력
+        label : 화면에 표시될 label 태그 html 
+        desc : 설정에서 등록한 입력 폼에 대한 설명
+        list : 목록화면 표시용 출력
+        view : 상세화면 표시용 출력
+        form : 등록/수정화면 표시용 출력
+
+        [ TAG 인자로 사용되는 obj ]
+        obj : 컨트롤에서 선언한 게시글 데이터의 객체를 설정
+
+        사용 예 :
+        <bbs:regDt type="value" />
+        <bbs:regDt type="text" />
+        <bbs:regDt type="label" />
+        <bbs:regDt type="desc" />
+        <bbs:regDt type="list" obj="${dataVo}" />
+        <bbs:regDt type="view" obj="${dataVo}" />
+        <bbs:regDt type="form" obj="${dataVo}" />
+        </pre>
+        ]]>
+        </description>
+        <name>regDt</name>
+        <tag-class>zesinc.web.support.tag.bbsTmplat.RegDtTag</tag-class>
+        <body-content>empty</body-content>
+        <attribute>
+            <name>type</name>
+            <required>true</required>
+            <rtexprvalue>false</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>obj</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+    </tag>
+
+    <tag>
+        <description>
+        <![CDATA[
+        <pre>
+        비밀번호 태그로 아래 type에 따라 결과 표시 방식이 변경된다.
+
+        [ TAG 인자로 사용되는 type ]
+        value : 순수 값만 출력
+        text : 순수 한글명만 출력
+        label : 화면에 표시될 label 태그 html 
+        desc : 설정에서 등록한 입력 폼에 대한 설명
+        list : 목록화면 표시용 출력
+        view : 상세화면 표시용 출력
+        form : 등록/수정화면 표시용 출력
+
+        [ TAG 인자로 사용되는 obj ]
+        obj : 컨트롤에서 선언한 게시글 데이터의 객체를 설정
+
+        사용 예 :
+        <bbs:pswd type="value" />
+        <bbs:pswd type="text" />
+        <bbs:pswd type="label" />
+        <bbs:pswd type="desc" />
+        <bbs:pswd type="list" obj="${dataVo}" />
+        <bbs:pswd type="view" obj="${dataVo}" />
+        <bbs:pswd type="form" obj="${dataVo}" />
+        </pre>
+        ]]>
+        </description>
+        <name>pswd</name>
+        <tag-class>zesinc.web.support.tag.bbsTmplat.PswdTag</tag-class>
+        <body-content>empty</body-content>
+        <attribute>
+            <name>type</name>
+            <required>true</required>
+            <rtexprvalue>false</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>obj</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+    </tag>
+
+    <tag>
+        <description>
+        <![CDATA[
+        <pre>
+        수정일 태그로 아래 type에 따라 결과 표시 방식이 변경된다.
+
+        [ TAG 인자로 사용되는 type ]
+        value : 순수 값만 출력
+        text : 순수 한글명만 출력
+        label : 화면에 표시될 label 태그 html 
+        desc : 설정에서 등록한 입력 폼에 대한 설명
+        list : 목록화면 표시용 출력
+        view : 상세화면 표시용 출력
+        form : 등록/수정화면 표시용 출력
+
+        [ TAG 인자로 사용되는 obj ]
+        obj : 컨트롤에서 선언한 게시글 데이터의 객체를 설정
+
+        사용 예 :
+        <bbs:updtDt type="value" />
+        <bbs:updtDt type="text" />
+        <bbs:updtDt type="label" />
+        <bbs:updtDt type="desc" />
+        <bbs:updtDt type="list" obj="${dataVo}" />
+        <bbs:updtDt type="view" obj="${dataVo}" />
+        <bbs:updtDt type="form" obj="${dataVo}" />
+        </pre>
+        ]]>
+        </description>
+        <name>updtDt</name>
+        <tag-class>zesinc.web.support.tag.bbsTmplat.UpdtDtTag</tag-class>
+        <body-content>empty</body-content>
+        <attribute>
+            <name>type</name>
+            <required>true</required>
+            <rtexprvalue>false</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>obj</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+    </tag>
+
+    <tag>
+        <description>
+        <![CDATA[
+        <pre>
+        수정자 태그로 아래 type에 따라 결과 표시 방식이 변경된다.
+
+        [ TAG 인자로 사용되는 type ]
+        value : 순수 값만 출력
+        text : 순수 한글명만 출력
+        label : 화면에 표시될 label 태그 html 
+        desc : 설정에서 등록한 입력 폼에 대한 설명
+        list : 목록화면 표시용 출력
+        view : 상세화면 표시용 출력
+        form : 등록/수정화면 표시용 출력
+
+        [ TAG 인자로 사용되는 obj ]
+        obj : 컨트롤에서 선언한 게시글 데이터의 객체를 설정
+
+        사용 예 :
+        <bbs:mdfrId type="value" />
+        <bbs:mdfrId type="text" />
+        <bbs:mdfrId type="label" />
+        <bbs:mdfrId type="desc" />
+        <bbs:mdfrId type="list" obj="${dataVo}" />
+        <bbs:mdfrId type="view" obj="${dataVo}" />
+        <bbs:mdfrId type="form" obj="${dataVo}" />
+        </pre>
+        ]]>
+        </description>
+        <name>mdfrId</name>
+        <tag-class>zesinc.web.support.tag.bbsTmplat.MdfrIdTag</tag-class>
+        <body-content>empty</body-content>
+        <attribute>
+            <name>type</name>
+            <required>true</required>
+            <rtexprvalue>false</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>obj</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+    </tag>
+
+    <tag>
+        <description>
+        <![CDATA[
+        <pre>
+        확장컬럼1 태그로 아래 type에 따라 결과 표시 방식이 변경된다.
+
+        [ TAG 인자로 사용되는 type ]
+        value : 순수 값만 출력
+        text : 순수 한글명만 출력
+        label : 화면에 표시될 label 태그 html 
+        desc : 설정에서 등록한 입력 폼에 대한 설명
+        list : 목록화면 표시용 출력
+        view : 상세화면 표시용 출력
+        form : 등록/수정화면 표시용 출력
+
+        [ TAG 인자로 사용되는 obj ]
+        obj : 컨트롤에서 선언한 게시글 데이터의 객체를 설정
+
+        사용 예 :
+        <bbs:flctnColCn1 type="value" />
+        <bbs:flctnColCn1 type="text" />
+        <bbs:flctnColCn1 type="label" />
+        <bbs:flctnColCn1 type="desc" />
+        <bbs:flctnColCn1 type="list" obj="${dataVo}" />
+        <bbs:flctnColCn1 type="view" obj="${dataVo}" />
+        <bbs:flctnColCn1 type="form" obj="${dataVo}" />
+        </pre>
+        ]]>
+        </description>
+        <name>flctnColCn1</name>
+        <tag-class>zesinc.web.support.tag.bbsTmplat.FlctnColCn1Tag</tag-class>
+        <body-content>empty</body-content>
+        <attribute>
+            <name>type</name>
+            <required>true</required>
+            <rtexprvalue>false</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>obj</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+    </tag>
+
+    <tag>
+        <description>
+        <![CDATA[
+        <pre>
+        확장컬럼2 태그로 아래 type에 따라 결과 표시 방식이 변경된다.
+
+        [ TAG 인자로 사용되는 type ]
+        value : 순수 값만 출력
+        text : 순수 한글명만 출력
+        label : 화면에 표시될 label 태그 html 
+        desc : 설정에서 등록한 입력 폼에 대한 설명
+        list : 목록화면 표시용 출력
+        view : 상세화면 표시용 출력
+        form : 등록/수정화면 표시용 출력
+
+        [ TAG 인자로 사용되는 obj ]
+        obj : 컨트롤에서 선언한 게시글 데이터의 객체를 설정
+
+        사용 예 :
+        <bbs:flctnColCn2 type="value" />
+        <bbs:flctnColCn2 type="text" />
+        <bbs:flctnColCn2 type="label" />
+        <bbs:flctnColCn2 type="desc" />
+        <bbs:flctnColCn2 type="list" obj="${dataVo}" />
+        <bbs:flctnColCn2 type="view" obj="${dataVo}" />
+        <bbs:flctnColCn2 type="form" obj="${dataVo}" />
+        </pre>
+        ]]>
+        </description>
+        <name>flctnColCn2</name>
+        <tag-class>zesinc.web.support.tag.bbsTmplat.FlctnColCn2Tag</tag-class>
+        <body-content>empty</body-content>
+        <attribute>
+            <name>type</name>
+            <required>true</required>
+            <rtexprvalue>false</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>obj</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+    </tag>
+
+    <tag>
+        <description>
+        <![CDATA[
+        <pre>
+        확장컬럼3 태그로 아래 type에 따라 결과 표시 방식이 변경된다.
+
+        [ TAG 인자로 사용되는 type ]
+        value : 순수 값만 출력
+        text : 순수 한글명만 출력
+        label : 화면에 표시될 label 태그 html 
+        desc : 설정에서 등록한 입력 폼에 대한 설명
+        list : 목록화면 표시용 출력
+        view : 상세화면 표시용 출력
+        form : 등록/수정화면 표시용 출력
+
+        [ TAG 인자로 사용되는 obj ]
+        obj : 컨트롤에서 선언한 게시글 데이터의 객체를 설정
+
+        사용 예 :
+        <bbs:flctnColCn3 type="value" />
+        <bbs:flctnColCn3 type="text" />
+        <bbs:flctnColCn3 type="label" />
+        <bbs:flctnColCn3 type="desc" />
+        <bbs:flctnColCn3 type="list" obj="${dataVo}" />
+        <bbs:flctnColCn3 type="view" obj="${dataVo}" />
+        <bbs:flctnColCn3 type="form" obj="${dataVo}" />
+        </pre>
+        ]]>
+        </description>
+        <name>flctnColCn3</name>
+        <tag-class>zesinc.web.support.tag.bbsTmplat.FlctnColCn3Tag</tag-class>
+        <body-content>empty</body-content>
+        <attribute>
+            <name>type</name>
+            <required>true</required>
+            <rtexprvalue>false</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>obj</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+    </tag>
+
+    <tag>
+        <description>
+        <![CDATA[
+        <pre>
+        확장컬럼4 태그로 아래 type에 따라 결과 표시 방식이 변경된다.
+
+        [ TAG 인자로 사용되는 type ]
+        value : 순수 값만 출력
+        text : 순수 한글명만 출력
+        label : 화면에 표시될 label 태그 html 
+        desc : 설정에서 등록한 입력 폼에 대한 설명
+        list : 목록화면 표시용 출력
+        view : 상세화면 표시용 출력
+        form : 등록/수정화면 표시용 출력
+
+        [ TAG 인자로 사용되는 obj ]
+        obj : 컨트롤에서 선언한 게시글 데이터의 객체를 설정
+
+        사용 예 :
+        <bbs:flctnColCn4 type="value" />
+        <bbs:flctnColCn4 type="text" />
+        <bbs:flctnColCn4 type="label" />
+        <bbs:flctnColCn4 type="desc" />
+        <bbs:flctnColCn4 type="list" obj="${dataVo}" />
+        <bbs:flctnColCn4 type="view" obj="${dataVo}" />
+        <bbs:flctnColCn4 type="form" obj="${dataVo}" />
+        </pre>
+        ]]>
+        </description>
+        <name>flctnColCn4</name>
+        <tag-class>zesinc.web.support.tag.bbsTmplat.FlctnColCn4Tag</tag-class>
+        <body-content>empty</body-content>
+        <attribute>
+            <name>type</name>
+            <required>true</required>
+            <rtexprvalue>false</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>obj</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+    </tag>
+
+    <tag>
+        <description>
+        <![CDATA[
+        <pre>
+        확장컬럼5 태그로 아래 type에 따라 결과 표시 방식이 변경된다.
+
+        [ TAG 인자로 사용되는 type ]
+        value : 순수 값만 출력
+        text : 순수 한글명만 출력
+        label : 화면에 표시될 label 태그 html 
+        desc : 설정에서 등록한 입력 폼에 대한 설명
+        list : 목록화면 표시용 출력
+        view : 상세화면 표시용 출력
+        form : 등록/수정화면 표시용 출력
+
+        [ TAG 인자로 사용되는 obj ]
+        obj : 컨트롤에서 선언한 게시글 데이터의 객체를 설정
+
+        사용 예 :
+        <bbs:flctnColCn5 type="value" />
+        <bbs:flctnColCn5 type="text" />
+        <bbs:flctnColCn5 type="label" />
+        <bbs:flctnColCn5 type="desc" />
+        <bbs:flctnColCn5 type="list" obj="${dataVo}" />
+        <bbs:flctnColCn5 type="view" obj="${dataVo}" />
+        <bbs:flctnColCn5 type="form" obj="${dataVo}" />
+        </pre>
+        ]]>
+        </description>
+        <name>flctnColCn5</name>
+        <tag-class>zesinc.web.support.tag.bbsTmplat.FlctnColCn5Tag</tag-class>
+        <body-content>empty</body-content>
+        <attribute>
+            <name>type</name>
+            <required>true</required>
+            <rtexprvalue>false</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>obj</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+    </tag>
+
+    <tag>
+        <description>
+        <![CDATA[
+        <pre>
+        확장컬럼6 태그로 아래 type에 따라 결과 표시 방식이 변경된다.
+
+        [ TAG 인자로 사용되는 type ]
+        value : 순수 값만 출력
+        text : 순수 한글명만 출력
+        label : 화면에 표시될 label 태그 html 
+        desc : 설정에서 등록한 입력 폼에 대한 설명
+        list : 목록화면 표시용 출력
+        view : 상세화면 표시용 출력
+        form : 등록/수정화면 표시용 출력
+
+        [ TAG 인자로 사용되는 obj ]
+        obj : 컨트롤에서 선언한 게시글 데이터의 객체를 설정
+
+        사용 예 :
+        <bbs:flctnColCn6 type="value" />
+        <bbs:flctnColCn6 type="text" />
+        <bbs:flctnColCn6 type="label" />
+        <bbs:flctnColCn6 type="desc" />
+        <bbs:flctnColCn6 type="list" obj="${dataVo}" />
+        <bbs:flctnColCn6 type="view" obj="${dataVo}" />
+        <bbs:flctnColCn6 type="form" obj="${dataVo}" />
+        </pre>
+        ]]>
+        </description>
+        <name>flctnColCn6</name>
+        <tag-class>zesinc.web.support.tag.bbsTmplat.FlctnColCn6Tag</tag-class>
+        <body-content>empty</body-content>
+        <attribute>
+            <name>type</name>
+            <required>true</required>
+            <rtexprvalue>false</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>obj</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+    </tag>
+
+    <tag>
+        <description>
+        <![CDATA[
+        <pre>
+        확장컬럼7 태그로 아래 type에 따라 결과 표시 방식이 변경된다.
+
+        [ TAG 인자로 사용되는 type ]
+        value : 순수 값만 출력
+        text : 순수 한글명만 출력
+        label : 화면에 표시될 label 태그 html 
+        desc : 설정에서 등록한 입력 폼에 대한 설명
+        list : 목록화면 표시용 출력
+        view : 상세화면 표시용 출력
+        form : 등록/수정화면 표시용 출력
+
+        [ TAG 인자로 사용되는 obj ]
+        obj : 컨트롤에서 선언한 게시글 데이터의 객체를 설정
+
+        사용 예 :
+        <bbs:flctnColCn7 type="value" />
+        <bbs:flctnColCn7 type="text" />
+        <bbs:flctnColCn7 type="label" />
+        <bbs:flctnColCn7 type="desc" />
+        <bbs:flctnColCn7 type="list" obj="${dataVo}" />
+        <bbs:flctnColCn7 type="view" obj="${dataVo}" />
+        <bbs:flctnColCn7 type="form" obj="${dataVo}" />
+        </pre>
+        ]]>
+        </description>
+        <name>flctnColCn7</name>
+        <tag-class>zesinc.web.support.tag.bbsTmplat.FlctnColCn7Tag</tag-class>
+        <body-content>empty</body-content>
+        <attribute>
+            <name>type</name>
+            <required>true</required>
+            <rtexprvalue>false</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>obj</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+    </tag>
+
+    <tag>
+        <description>
+        <![CDATA[
+        <pre>
+        확장컬럼8 태그로 아래 type에 따라 결과 표시 방식이 변경된다.
+
+        [ TAG 인자로 사용되는 type ]
+        value : 순수 값만 출력
+        text : 순수 한글명만 출력
+        label : 화면에 표시될 label 태그 html 
+        desc : 설정에서 등록한 입력 폼에 대한 설명
+        list : 목록화면 표시용 출력
+        view : 상세화면 표시용 출력
+        form : 등록/수정화면 표시용 출력
+
+        [ TAG 인자로 사용되는 obj ]
+        obj : 컨트롤에서 선언한 게시글 데이터의 객체를 설정
+
+        사용 예 :
+        <bbs:flctnColCn8 type="value" />
+        <bbs:flctnColCn8 type="text" />
+        <bbs:flctnColCn8 type="label" />
+        <bbs:flctnColCn8 type="desc" />
+        <bbs:flctnColCn8 type="list" obj="${dataVo}" />
+        <bbs:flctnColCn8 type="view" obj="${dataVo}" />
+        <bbs:flctnColCn8 type="form" obj="${dataVo}" />
+        </pre>
+        ]]>
+        </description>
+        <name>flctnColCn8</name>
+        <tag-class>zesinc.web.support.tag.bbsTmplat.FlctnColCn8Tag</tag-class>
+        <body-content>empty</body-content>
+        <attribute>
+            <name>type</name>
+            <required>true</required>
+            <rtexprvalue>false</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>obj</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+    </tag>
+
+    <tag>
+        <description>
+        <![CDATA[
+        <pre>
+        확장컬럼9 태그로 아래 type에 따라 결과 표시 방식이 변경된다.
+
+        [ TAG 인자로 사용되는 type ]
+        value : 순수 값만 출력
+        text : 순수 한글명만 출력
+        label : 화면에 표시될 label 태그 html 
+        desc : 설정에서 등록한 입력 폼에 대한 설명
+        list : 목록화면 표시용 출력
+        view : 상세화면 표시용 출력
+        form : 등록/수정화면 표시용 출력
+
+        [ TAG 인자로 사용되는 obj ]
+        obj : 컨트롤에서 선언한 게시글 데이터의 객체를 설정
+
+        사용 예 :
+        <bbs:flctnColCn9 type="value" />
+        <bbs:flctnColCn9 type="text" />
+        <bbs:flctnColCn9 type="label" />
+        <bbs:flctnColCn9 type="desc" />
+        <bbs:flctnColCn9 type="list" obj="${dataVo}" />
+        <bbs:flctnColCn9 type="view" obj="${dataVo}" />
+        <bbs:flctnColCn9 type="form" obj="${dataVo}" />
+        </pre>
+        ]]>
+        </description>
+        <name>flctnColCn9</name>
+        <tag-class>zesinc.web.support.tag.bbsTmplat.FlctnColCn9Tag</tag-class>
+        <body-content>empty</body-content>
+        <attribute>
+            <name>type</name>
+            <required>true</required>
+            <rtexprvalue>false</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>obj</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+    </tag>
+
+    <tag>
+        <description>
+        <![CDATA[
+        <pre>
+        확장컬럼10 태그로 아래 type에 따라 결과 표시 방식이 변경된다.
+
+        [ TAG 인자로 사용되는 type ]
+        value : 순수 값만 출력
+        text : 순수 한글명만 출력
+        label : 화면에 표시될 label 태그 html 
+        desc : 설정에서 등록한 입력 폼에 대한 설명
+        list : 목록화면 표시용 출력
+        view : 상세화면 표시용 출력
+        form : 등록/수정화면 표시용 출력
+
+        [ TAG 인자로 사용되는 obj ]
+        obj : 컨트롤에서 선언한 게시글 데이터의 객체를 설정
+
+        사용 예 :
+        <bbs:flctnColCn10 type="value" />
+        <bbs:flctnColCn10 type="text" />
+        <bbs:flctnColCn10 type="label" />
+        <bbs:flctnColCn10 type="desc" />
+        <bbs:flctnColCn10 type="list" obj="${dataVo}" />
+        <bbs:flctnColCn10 type="view" obj="${dataVo}" />
+        <bbs:flctnColCn10 type="form" obj="${dataVo}" />
+        </pre>
+        ]]>
+        </description>
+        <name>flctnColCn10</name>
+        <tag-class>zesinc.web.support.tag.bbsTmplat.FlctnColCn10Tag</tag-class>
+        <body-content>empty</body-content>
+        <attribute>
+            <name>type</name>
+            <required>true</required>
+            <rtexprvalue>false</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>obj</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+    </tag>
+
+    <tag>
+        <description>
+        <![CDATA[
+        <pre>
+        템플릿 파일위치 : /WEB-INF/jsp/common/taglib/bbsTmplat/button.jsp
+
+        게시판 템플릿 버튼 생성 태그
+
+        [ TAG 인자로 사용되는 type ]
+        list : 목록화면 표시용 버튼 출력
+        view : 상세화면 표시용 버튼 출력
+        form : 등록/수정화면 표시용 버튼 출력
+
+        [ TAG 인자로 사용되는 obj ]
+        obj : 컨트롤에서 선언한 게시글 데이터의 객체를 설정
+
+        사용 예 :
+        <bbs:button type="list" />
+        <bbs:button type="view" obj="${dataVo}" />
+        <bbs:button type="form" obj="${dataVo}" />
+
+        [ TAG 인자로 사용되는 page ]
+        기본값인 템플릿 파일 이외의 jsp를 생성하여 대체할 수 있다.
+        주의 ! bbsTmplat 폴더부터 입력한다. (상위 경로는 고정되어 있음)
+        
+        사용 예 :
+        page="bbsTmplat/xxxNew.jsp"
+        </pre>
+        ]]>
+        </description>
+        <name>button</name>
+        <tag-class>zesinc.web.support.tag.bbsTmplat.ButtonTag</tag-class>
+        <body-content>empty</body-content>
+        <attribute>
+            <name>type</name>
+            <required>true</required>
+            <rtexprvalue>false</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>obj</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>page</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+    </tag>
+
+    <tag>
+        <description>
+        <![CDATA[
+        <pre>
+        템플릿 파일위치 : /WEB-INF/jsp/common/taglib/bbsTmplat/brftrSntnc.jsp
+
+        게시판 템플릿 이전/다음글 생성 태그
+
+        [ TAG 인자로 사용되는 type ]
+        view : 상세화면 표시용 버튼 출력
+
+        [ TAG 인자로 사용되는 obj ]
+        obj : 컨트롤에서 선언한 게시글 데이터의 객체를 설정
+
+        사용 예 :
+        <bbs:brftrSntnc type="view" obj="${dataVo}" />
+
+        [ TAG 인자로 사용되는 page ]
+        기본값인 템플릿 파일 이외의 jsp를 생성하여 대체할 수 있다.
+        주의 ! bbsTmplat 폴더부터 입력한다. (상위 경로는 고정되어 있음)
+        
+        사용 예 :
+        page="bbsTmplat/xxxNew.jsp"
+        </pre>
+        ]]>
+        </description>
+        <name>brftrSntnc</name>
+        <tag-class>zesinc.web.support.tag.bbsTmplat.BrftrSntncTag</tag-class>
+        <body-content>empty</body-content>
+        <attribute>
+            <name>type</name>
+            <required>true</required>
+            <rtexprvalue>false</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>obj</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+    </tag>
+
+    <tag>
+        <description>
+        <![CDATA[
+        <pre>
+        템플릿 파일위치 : /WEB-INF/jsp/common/taglib/bbsTmplat/cmntList.jsp
+
+        게시판 템플릿 댓글 생성 태그
+
+        [ TAG 인자로 사용되는 type ]
+        view : 상세화면 표시용 버튼 출력
+
+        [ TAG 인자로 사용되는 obj ]
+        obj : 컨트롤에서 선언한 게시글 데이터의 객체를 설정
+
+        사용 예 :
+        <bbs:cmnt type="view" obj="${dataVo}" />
+
+        [ TAG 인자로 사용되는 page ]
+        기본값인 템플릿 파일 이외의 jsp를 생성하여 대체할 수 있다.
+        주의 ! bbsTmplat 폴더부터 입력한다. (상위 경로는 고정되어 있음)
+        
+        사용 예 :
+        page="bbsTmplat/xxxNew.jsp"
+        </pre>
+        ]]>
+        </description>
+        <name>cmnt</name>
+        <tag-class>zesinc.web.support.tag.bbsTmplat.CmntTag</tag-class>
+        <body-content>empty</body-content>
+        <attribute>
+            <name>type</name>
+            <required>true</required>
+            <rtexprvalue>false</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>obj</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+    </tag>
+
+    <tag>
+        <description>
+        <![CDATA[
+        <pre>
+        템플릿 파일위치 : /WEB-INF/jsp/common/taglib/bbsTmplat/thumbnail.jsp
+
+        게시판 템플릿 썸네일 생성 태그
+
+        [ TAG 인자로 사용되는 type ]
+        list : 목록화면 표시용 출력
+        view : 상세화면 표시용 버튼 출력
+
+        [ TAG 인자로 사용되는 obj ]
+        obj : 컨트롤에서 선언한 게시글 데이터의 객체를 설정
+
+        사용 예 :
+        <bbs:thumbnail type="list" obj="${dataVo}" />
+        <bbs:thumbnail type="view" obj="${dataVo}" />
+
+        [ TAG 인자로 사용되는 page ]
+        기본값인 템플릿 파일 이외의 jsp를 생성하여 대체할 수 있다.
+        주의 ! bbsTmplat 폴더부터 입력한다. (상위 경로는 고정되어 있음)
+        
+        사용 예 :
+        page="bbsTmplat/xxxNew.jsp"
+        </pre>
+        ]]>
+        </description>
+        <name>thumbnail</name>
+        <tag-class>zesinc.web.support.tag.bbsTmplat.ThumbNailTag</tag-class>
+        <body-content>empty</body-content>
+        <attribute>
+            <name>type</name>
+            <required>true</required>
+            <rtexprvalue>false</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>obj</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+    </tag>
+</taglib>

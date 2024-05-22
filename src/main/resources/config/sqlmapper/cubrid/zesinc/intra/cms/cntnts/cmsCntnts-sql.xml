@@ -1,0 +1,356 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="zesinc.intra.cms.cntnts.CmsCntntsMapper">
+
+    <!-- 레이아웃/컨텐츠 미리보기용 데이터 -->
+    <select id="selectUserMenuPreview" parameterType="cmsCntntsVo" resultType="cmsCacheVo">
+        SELECT
+        <trim suffixOverrides=",">
+            A.SITE_SN,
+            A.USER_MENU_ENG_NM,
+            A.MENU_NM,
+            A.TTL,
+            A.BSC_PATH_NM,
+            A.MENU_PATH_NM,
+            A.HGHRK_MENU_ENG_NM,
+            A.UP_MENU_ENG_NM,
+            A.MENU_LVL_SN,
+            A.SORT_SN,
+            A.USER_MENU_URL_ADDR,
+            A.LYT_CD_NO,
+            A.LINK_TYPE_NM,
+            A.PIC_INDCT_YN,
+            A.TKCG_DEPT_CD_ID,
+            (SELECT DEPT_NM FROM TN_DEPT WHERE DEPT_CD_ID = A.TKCG_DEPT_CD_ID) AS CHRG_DEPT_NM,
+            A.PIC_ID,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.PIC_ID) AS PIC_NM,
+            A.CONTS_SN,
+            A.STRT_CONTS_CN,
+            A.END_CONTS_CN,
+            A.USER_MENU_IMG_NM,
+            A.MENU_TTL_IMG_NM,
+            A.MENU_ON_IMG_NM,
+            A.MENU_OFF_IMG_NM,
+            A.FILE_SN,
+            A.DGSTFN_INDCT_YN,
+            A.INDCT_YN,
+            A.USE_YN,
+            A.SNS_USE_YN,
+            B.USER_MENU_SRCH_NM,
+            B.USER_MENU_EXPLN,
+            B.SITE_SRCH_NM,
+            B.MENU_TAG_CN,
+            B.CPRGT_USE_YN,
+            B.CPRGT_TYPE_NM,
+            B.CPRGT_CN,
+        </trim>
+        FROM
+            TN_USER_MENU A LEFT OUTER JOIN TN_USER_MENU_META B
+        ON
+                A.SITE_SN = B.SITE_SN
+            AND A.USER_MENU_ENG_NM = B.USER_MENU_ENG_NM
+            AND A.USER_MENU_URL_ADDR IS NOT NULL
+        WHERE
+                A.SITE_SN =  #{q_siteSn}
+            AND A.UP_MENU_ENG_NM = #{q_userMenuEngNm}
+        ORDER BY A.SORT_SN
+    </select>
+
+    <!-- 사용자메뉴 조회 -->
+    <select id="selectCms" parameterType="cmsCntntsVo" resultType="cmsVo">
+        SELECT
+        <trim suffixOverrides=",">
+            A.SITE_SN,
+            B.SITE_EXPLN,
+            B.SITE_NM,
+            B.PORT_SN,
+            B.SITE_PATH_NM,
+            B.HTTPS_YN,
+            B.ACTL_STNG_YN,
+            A.BSC_PATH_NM,
+            A.CONTS_SN,
+            A.STRT_CONTS_CN,
+            A.END_CONTS_CN,
+            A.APRV_YN,
+        </trim>
+        FROM
+            TN_USER_MENU A, TN_DOMN B
+        WHERE
+                A.SITE_SN = #{paramMap.q_siteSn}
+            AND A.SITE_SN = B.SITE_SN
+            AND A.USER_MENU_ENG_NM = #{paramMap.q_userMenuEngNm}
+    </select>
+
+    <!-- 특정 사용자메뉴 컨텐츠 전체 조회 -->
+    <select id="selectCmsAllCntnts" parameterType="cmsCntntsVo" resultType="cmsCntntsVo">
+        SELECT
+        <trim suffixOverrides=",">
+            A.SITE_SN,
+            A.USER_MENU_ENG_NM,
+            B.BSC_PATH_NM,
+            A.CONTS_SN,
+            A.APRV_STTS_NO,
+        </trim>
+        FROM
+            TN_USER_MENU_CNTNTS A, TN_USER_MENU B
+        WHERE
+                A.SITE_SN = B.SITE_SN
+            AND A.USER_MENU_ENG_NM = B.USER_MENU_ENG_NM
+            AND A.SITE_SN = #{paramMap.q_siteSn}
+            AND A.USER_MENU_ENG_NM = #{paramMap.q_userMenuEngNm}
+    </select>
+
+    <!-- 특정 사용자메뉴 컨텐츠 일련번호 전체 조회 -->
+    <select id="selectCmsCntntsSns" parameterType="cmsCntntsVo" resultType="int">
+        SELECT
+        <trim suffixOverrides=",">
+            CONTS_SN
+        </trim>
+        FROM
+            TN_USER_MENU_CNTNTS A
+        WHERE
+                A.SITE_SN = #{paramMap.q_siteSn}
+            AND A.USER_MENU_ENG_NM = #{paramMap.q_userMenuEngNm}
+    </select>
+
+    <!-- 사용자메뉴컨텐츠 조회 -->
+    <select id="selectCmsCntnts" parameterType="cmsCntntsVo" resultType="cmsCntntsVo">
+        SELECT
+        <trim suffixOverrides=",">
+            A.SITE_SN,
+            (SELECT SITE_EXPLN FROM TN_DOMN WHERE SITE_SN = A.SITE_SN) AS SITE_EXPLN,
+            (SELECT SITE_NM FROM TN_DOMN WHERE SITE_SN = A.SITE_SN) AS SITE_NM,
+            (SELECT PORT_SN FROM TN_DOMN WHERE SITE_SN = A.SITE_SN) AS PORT_SN,
+            (SELECT SITE_PATH_NM FROM TN_DOMN WHERE SITE_SN = A.SITE_SN) AS SITE_PATH_NM,
+            A.USER_MENU_ENG_NM,
+            B.MENU_NM,
+            B.TTL,
+            B.BSC_PATH_NM,
+            B.LYT_CD_NO,
+            B.CSS_FILE_NM,
+            A.CONTS_SN,
+            A.STRT_CONTS_CN,
+            A.MAIN_CONTS_CN,
+            A.DATA_SN,
+            A.CHG_CYCL,
+            A.APLCN_YN,
+            A.APRV_STTS_NO,
+            A.APRV_RSN,
+            A.AUTZR_ID,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.AUTZR_ID) AS CONFMER_NM,
+            A.APRV_DT,
+            A.PBLCN_YN,
+            A.PBLCN_RSN,
+            A.ISR_ID,
+            A.PBLCN_DT,
+            A.RSVT_DT,
+            A.WRT_TYPE_NM,
+            A.RGTR_ID,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.RGTR_ID) AS RGTR_NM,
+            A.REG_DT,
+            A.MDFR_ID,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.MDFR_ID) AS UPDUSR_NM,
+            A.UPDT_DT,
+        </trim>
+        FROM
+            TN_USER_MENU_CNTNTS A, TN_USER_MENU B
+        WHERE
+                A.SITE_SN = B.SITE_SN
+            AND A.USER_MENU_ENG_NM = B.USER_MENU_ENG_NM
+            AND A.SITE_SN = #{paramMap.q_siteSn}
+            AND A.USER_MENU_ENG_NM = #{paramMap.q_userMenuEngNm}
+            <if test="paramMap.q_contsSn != null  and paramMap.q_contsSn != ''">
+            AND A.CONTS_SN = #{paramMap.q_contsSn}
+            </if>
+            <if test="paramMap.q_contsSn == null or paramMap.q_contsSn == ''">
+            AND A.APLCN_YN = 'Y'
+            </if>
+    </select>
+
+    <!-- 사용자메뉴컨텐츠 목록 -->
+    <sql id="incCmsCntntsWhere">
+        <where>
+                A.SITE_SN = #{paramMap.q_siteSn}
+            AND A.USER_MENU_ENG_NM = #{paramMap.q_userMenuEngNm}
+        </where>
+    </sql>
+    <select id="selectCmsCntntsList" parameterType="cmsCntntsVo" resultType="cmsCntntsVo">
+        SELECT Y.* FROM (
+            SELECT ROWNUM NUM, X.* FROM (
+                SELECT
+                <trim suffixOverrides=",">
+                    A.SITE_SN,
+                    A.USER_MENU_ENG_NM,
+                    A.CONTS_SN,
+                    A.DATA_SN,
+                    A.CHG_CYCL,
+                    A.APLCN_YN,
+                    A.APRV_STTS_NO,
+                    A.APRV_RSN,
+                    A.AUTZR_ID,
+                    A.APRV_DT,
+                    A.PBLCN_YN,
+                    A.PBLCN_RSN,
+                    A.ISR_ID,
+                    A.PBLCN_DT,
+                    A.RSVT_DT,
+                    A.WRT_TYPE_NM,
+                    A.RGTR_ID,
+                    (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.RGTR_ID) AS RGTR_NM,
+                    A.REG_DT,
+                    A.MDFR_ID,
+                    (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.MDFR_ID) AS UPDUSR_NM,
+                    A.UPDT_DT,
+                </trim>
+                FROM
+                    TN_USER_MENU_CNTNTS A
+                <include refid="incCmsCntntsWhere"/>
+                ORDER BY A.CONTS_SN DESC
+            ) X
+            WHERE ROWNUM &lt;= #{paramMap.q_pagingEndNum}
+         ) Y
+         WHERE NUM &gt;= #{paramMap.q_pagingStartNum}
+    </select>
+
+    <!-- 사용자메뉴컨텐츠 조회 목록 카운트 -->
+    <select id="selectCmsCntntsListCount" parameterType="cmsCntntsVo" resultType="int">
+        SELECT
+            COUNT(A.SITE_SN) AS TOTAL_COUNT
+        FROM
+            TN_USER_MENU_CNTNTS A
+        <include refid="incCmsCntntsWhere"/>
+    </select>
+
+    <!-- 사용자메뉴컨텐츠 등록 -->
+    <insert id="insertCmsCntnts" parameterType="cmsCntntsVo">
+        <selectKey order="BEFORE" keyProperty="contsSn" resultType="int">
+            SELECT NVL(MAX(CONTS_SN), 0) + 1
+            FROM TN_USER_MENU_CNTNTS
+            WHERE
+                    SITE_SN = #{paramMap.q_siteSn}
+                AND USER_MENU_ENG_NM = #{paramMap.q_userMenuEngNm}
+        </selectKey>
+        INSERT INTO TN_USER_MENU_CNTNTS (
+        <trim suffixOverrides=",">
+            SITE_SN,
+            USER_MENU_ENG_NM,
+            CONTS_SN,
+            STRT_CONTS_CN,
+            MAIN_CONTS_CN,
+            DATA_SN,
+            CHG_CYCL,
+            APLCN_YN,
+            APRV_STTS_NO,
+            PBLCN_RSN,
+            WRT_TYPE_NM,
+            RGTR_ID,
+            REG_DT,
+        </trim>
+        ) VALUES (
+        <trim suffixOverrides=",">
+            #{siteSn},
+            #{userMenuEngNm},
+            #{contsSn},
+            #{strtContsCn},
+            #{mainContsCn},
+            #{dataSn},
+            #{chgCycl},
+            #{aplcnYn},
+            #{aprvSttsNo},
+            #{pblcnRsn},
+            #{wrtTypeNm},
+            #{rgtrId},
+            SYSDATETIME,
+        </trim>
+        )
+    </insert>
+
+    <!-- 승인시 사용자메뉴관리 메인 정보를 수정 -->
+    <update id="updateCmsCntntsInfo" parameterType="cmsCntntsVo">
+        UPDATE TN_USER_MENU
+          <set>
+            CONTS_SN = #{contsSn},
+            <if test="mngrMenuUrlAddr != null and mngrMenuUrlAddr != ''">
+            MNGR_MENU_URL_ADDR = #{mngrMenuUrlAddr},
+            </if>
+            <if test="userMenuUrlAddr != null and userMenuUrlAddr != ''">
+            USER_MENU_URL_ADDR = #{userMenuUrlAddr},
+            </if>
+          </set>
+        WHERE
+                SITE_SN = #{paramMap.q_siteSn}
+            AND USER_MENU_ENG_NM = #{paramMap.q_userMenuEngNm}
+    </update>
+
+    <!-- 사용자메뉴컨텐츠 수정 -->
+    <update id="updateCmsCntnts" parameterType="cmsCntntsVo">
+        UPDATE TN_USER_MENU_CNTNTS 
+          <set>
+            <choose>
+                <when test="strtContsCn != null and strtContsCn != ''">
+            		STRT_CONTS_CN = #{strtContsCn},
+            	</when>
+            	<otherwise>
+            		STRT_CONTS_CN = NULL,
+            	</otherwise>
+            </choose>
+            MAIN_CONTS_CN = #{mainContsCn},
+            <if test="aplcnYn != null and aplcnYn != ''">
+            APLCN_YN = #{aplcnYn},
+            </if>
+            APRV_STTS_NO = #{aprvSttsNo},
+            <if test="pblcnRsn != null and pblcnRsn != ''">
+            PBLCN_RSN = #{pblcnRsn},
+            ISR_ID = #{isrId},
+            </if>
+            <if test="aprvSttsNo == 'C1040' or aprvSttsNo == 'C1050'">
+                APRV_RSN = #{aprvRsn},
+                AUTZR_ID = #{autzrId},
+                APRV_DT = SYSDATETIME,
+            </if>
+            RSVT_DT = TO_DATETIME(#{rsvtDt}, 'YYYY-MM-DD'),
+            WRT_TYPE_NM = #{wrtTypeNm},
+            MDFR_ID = #{mdfrId},
+            UPDT_DT = SYSDATETIME,
+          </set>
+        WHERE
+               SITE_SN = #{paramMap.q_siteSn}
+            AND USER_MENU_ENG_NM = #{paramMap.q_userMenuEngNm}
+            AND CONTS_SN = #{paramMap.q_contsSn}
+    </update>
+
+    <!-- 사용자메뉴컨텐츠 발행정보 수정 -->
+    <update id="updateCmsCntntsPblicte" parameterType="cmsCntntsVo">
+        UPDATE TN_USER_MENU_CNTNTS 
+          <set>
+            PBLCN_YN = 'Y',
+            PBLCN_DT = SYSDATETIME
+          </set>
+        WHERE
+               SITE_SN = #{paramMap.q_siteSn}
+            AND USER_MENU_ENG_NM = #{paramMap.q_userMenuEngNm}
+            AND CONTS_SN = #{paramMap.q_contsSn}
+    </update>
+
+    <!-- 사용자메뉴컨텐츠 적용여부 수정 -->
+    <update id="updateCmsCntntsApplcAt" parameterType="cmsCntntsVo">
+        UPDATE TN_USER_MENU_CNTNTS 
+          <set>
+            APLCN_YN = 'N',
+          </set>
+        WHERE
+               SITE_SN = #{paramMap.q_siteSn}
+            AND USER_MENU_ENG_NM = #{paramMap.q_userMenuEngNm}
+            AND CONTS_SN != #{paramMap.q_contsSn}
+    </update>
+
+    <!-- 사용자메뉴컨텐츠 삭제 -->
+    <delete id="deleteCmsCntnts" parameterType="cmsCntntsVo">
+        DELETE FROM TN_USER_MENU_CNTNTS
+        WHERE
+             SITE_SN = #{paramMap.q_siteSn}
+            AND   USER_MENU_ENG_NM = #{paramMap.q_userMenuEngNm}
+            AND   CONTS_SN = #{paramMap.q_contsSn}
+    </delete>
+
+</mapper>

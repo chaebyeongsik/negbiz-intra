@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!-- ========================= VIEW DEFINITION ========================= -->
+
+    <bean id="jsonObjView" class="zesinc.web.spring.view.JsonView" />
+    <bean id="textView" class="zesinc.web.spring.view.TextView" />
+    <bean id="htmlView" class="zesinc.web.spring.view.HtmlView" />
+    <bean id="downloadView" class="zesinc.web.spring.view.DownloadView" />
+    <bean id="pdfView" class="zesinc.web.spring.view.PdfView" />
+    <bean id="atomView" class="zesinc.web.spring.view.AtomView" />
+    <bean id="rssView" class="zesinc.web.spring.view.RssView" />
+    <bean id="excelView" class="zesinc.web.spring.view.ExcelView" />
+
+</beans>

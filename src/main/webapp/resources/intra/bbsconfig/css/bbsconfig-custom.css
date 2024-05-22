@@ -1,0 +1,26 @@
+/*!
+ * Bbsconfig CSS 및 테마 CSS 오버라이드
+ */
+
+/*!
+  * Bbsconfig CSS
+  */
+.config-list > tbody > tr.bg-style {
+  background-color: #f9f9f9;
+}
+.config-list > tbody > tr.bg-hover {
+  background-color: #f5f5f5;
+}
+
+.config-list > tbody > tr.info-hover {
+  background-color: #c4e3f3;
+}
+
+.config-list > tbody > tr > td a div i.icon-checkmark {
+  color: #31708f;
+}
+
+.config-list > tbody > tr > td a div i.icon-close {
+  color: #999;
+}
+

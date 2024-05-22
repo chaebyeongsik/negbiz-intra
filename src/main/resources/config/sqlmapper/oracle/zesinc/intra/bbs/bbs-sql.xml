@@ -1,0 +1,854 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="zesinc.intra.bbs.BbsMapper">
+
+    <!-- 전체 게시판 목록조회 -->
+    <select id="selectBbsconfigList" parameterType="bbsVo" resultType="bbsVo">
+        SELECT
+            A.BBS_SN,
+            A.BBS_NM
+        FROM
+            TN_BBS_SETUP A
+        WHERE
+                A.USE_YN = 'Y'
+            AND A.BBS_SN != #{paramMap.q_bbsSn}
+    </select>
+
+    <!-- 답글을 포함 글 갯수 -->
+    <select id="selectRefrnList" parameterType="bbsVo" resultType="bbsVo">
+        SELECT
+            A.BBS_SN,
+            A.BBS_DOC_NO,
+            A.RFRNC_DOC_NO,
+            A.TTL
+        FROM
+            TN_BBS A
+        WHERE
+                A.BBS_SN = #{paramMap.q_bbsSn}
+            AND A.RFRNC_DOC_NO = (SELECT RFRNC_DOC_NO FROM TN_BBS WHERE BBS_SN = #{paramMap.q_bbsSn} AND BBS_DOC_NO = #{paramMap.q_bbsDocNo})
+    </select>
+
+    <!-- 게시판 이동(답글이 있는 경우 답글 목록 전체 함께 이동) -->
+    <update id="updateMoveBbs" parameterType="bbsVo">
+        INSERT INTO TN_BBS (
+            BBS_SN,
+            BBS_DOC_NO,
+            RFRNC_DOC_NO,
+            SORT_SN,
+            OPNN_GRD_SN,
+            CLSF_NO,
+            LWRK_CLSF_SN,
+            NTC_PST_YN,
+            NTC_BGNG_DT,
+            NTC_END_DT,
+            TTL,
+            DOC_CONTS_CN,
+            MAIN_CN,
+            ANS_DTL_CN,
+            ANS_DT,
+            FILE_SN,
+            INQ_CNT,
+            DGSTFN_EVL_CNT,
+            DGSTFN_SUM_SCR,
+            DCLR_CNT,
+            RCMDTN_CNT,
+            IP_ADDR,
+            CNTN_BRWSR_NM,
+            RLS_YN,
+            LMT_YN,
+            USER_IDNTF_NM,
+            PSWD,
+            PIC_ID,
+            PIC_NM,
+            DEPT_CD_ID,
+            DEPT_NM,
+            FLCTN_COL_CN1,
+            FLCTN_COL_CN2,
+            FLCTN_COL_CN3,
+            FLCTN_COL_CN4,
+            FLCTN_COL_CN5,
+            FLCTN_COL_CN6,
+            FLCTN_COL_CN7,
+            FLCTN_COL_CN8,
+            FLCTN_COL_CN9,
+            FLCTN_COL_CN10,
+            MVMN_BBS_SN,
+            CPRGT_USE_YN,
+            AUT_TYPE_NM,
+            CPRGT_TYPE_NM,
+            CPRGT_CN,
+            RGTR_NM,
+            RGTR_TELNO,
+            RGTR_EML_ADDR,
+            RGTR_ID,
+            REG_DT,
+            MDFR_ID,
+            UPDT_DT,
+            MNGR_INDCT_LMT_YN,
+            MNGR_DEL_YN,
+            DEL_YN,
+            DEL_DT
+        )
+        SELECT
+            #{bbsSn},
+            BBS_DOC_NO,
+            RFRNC_DOC_NO,
+            SORT_SN,
+            OPNN_GRD_SN,
+            #{clsfNo},
+            #{lwrkClsfSn},
+            NTC_PST_YN,
+            NTC_BGNG_DT,
+            NTC_END_DT,
+            TTL,
+            DOC_CONTS_CN,
+            MAIN_CN,
+            ANS_DTL_CN,
+            ANS_DT,
+            FILE_SN,
+            INQ_CNT,
+            DGSTFN_EVL_CNT,
+            DGSTFN_SUM_SCR,
+            DCLR_CNT,
+            RCMDTN_CNT,
+            IP_ADDR,
+            CNTN_BRWSR_NM,
+            RLS_YN,
+            LMT_YN,
+            USER_IDNTF_NM,
+            PSWD,
+            PIC_ID,
+            PIC_NM,
+            DEPT_CD_ID,
+            DEPT_NM,
+            FLCTN_COL_CN1,
+            FLCTN_COL_CN2,
+            FLCTN_COL_CN3,
+            FLCTN_COL_CN4,
+            FLCTN_COL_CN5,
+            FLCTN_COL_CN6,
+            FLCTN_COL_CN7,
+            FLCTN_COL_CN8,
+            FLCTN_COL_CN9,
+            FLCTN_COL_CN10,
+            #{mvmnBbsSn},
+            CPRGT_USE_YN,
+            AUT_TYPE_NM,
+            CPRGT_TYPE_NM,
+            CPRGT_CN,
+            RGTR_NM,
+            RGTR_TELNO,
+            RGTR_EML_ADDR,
+            RGTR_ID,
+            REG_DT,
+            MDFR_ID,
+            UPDT_DT,
+            MNGR_INDCT_LMT_YN,
+            MNGR_DEL_YN,
+            DEL_YN,
+            DEL_DT
+        FROM
+            TN_BBS
+        WHERE
+                BBS_SN = #{mvmnBbsSn}
+            AND RFRNC_DOC_NO = #{rfrncDocNo}
+    </update>
+
+    <!-- 이동대상 게시물을 생성 후 삭제 처리 -->
+    <delete id="deleteMoveBbs" parameterType="bbsVo">
+        DELETE FROM TN_BBS
+        WHERE
+                BBS_SN = #{mvmnBbsSn}
+            AND RFRNC_DOC_NO = #{rfrncDocNo}
+    </delete>
+
+    <!-- 게시판 댓글 이동(답글이 있는 경우 답글 목록 전체 함께 이동) -->
+    <update id="updateMoveBbsCmnt" parameterType="bbsVo">
+        UPDATE TN_BBS_CMNT
+        <set>
+            BBS_SN = #{bbsSn}
+        </set>
+        WHERE
+                BBS_SN = #{mvmnBbsSn}
+            AND BBS_DOC_NO = #{bbsDocNo}
+    </update>
+
+    <!-- 게시판 댓글 이동(답글이 있는 경우 답글 목록 전체 함께 이동) -->
+    <update id="updateMoveBbsTag" parameterType="bbsVo">
+        UPDATE TN_BBS_TAG
+        <set>
+            BBS_SN = #{bbsSn}
+        </set>
+        WHERE
+                BBS_SN = #{mvmnBbsSn}
+            AND BBS_DOC_NO = #{bbsDocNo}
+    </update>
+
+    <!-- 게시물 목록용-->
+    <sql id="bbsListColumn">
+               A.BBS_SN,
+               A.BBS_DOC_NO,
+               A.RFRNC_DOC_NO,
+               A.SORT_SN,
+               A.OPNN_GRD_SN,
+               A.CLSF_NO,
+               A.LWRK_CLSF_SN,
+               A.NTC_PST_YN AS NTC_PST_YN_TMP,
+               A.NTC_BGNG_DT AS NTC_BGNG_DT_TMP,
+               A.NTC_END_DT AS NTC_END_DT_TMP,
+               A.PSTG_BGNG_DT AS PSTG_BGNG_DT_TMP,
+               A.PSTG_END_DT AS PSTG_END_DT_TMP,
+               A.TTL,
+               A.DOC_CONTS_CN,
+               A.MAIN_CN,
+               A.ANS_DTL_CN,
+               A.ANS_DT AS ANS_DT_TMP,
+               A.FILE_SN,
+               A.INQ_CNT,
+               A.DGSTFN_EVL_CNT,
+               A.DGSTFN_SUM_SCR,
+               A.DCLR_CNT,
+               A.RCMDTN_CNT,
+               A.IP_ADDR,
+               A.CNTN_BRWSR_NM,
+               A.RLS_YN,
+               A.LMT_YN,
+               A.USER_IDNTF_NM,
+               A.PSWD,
+               A.PIC_ID,
+               A.PIC_NM,
+               A.DEPT_CD_ID,
+               A.DEPT_NM,
+               A.FLCTN_COL_CN1,
+               A.FLCTN_COL_CN2,
+               A.FLCTN_COL_CN3,
+               A.FLCTN_COL_CN4,
+               A.FLCTN_COL_CN5,
+               A.FLCTN_COL_CN6,
+               A.FLCTN_COL_CN7,
+               A.FLCTN_COL_CN8,
+               A.FLCTN_COL_CN9,
+               A.FLCTN_COL_CN10,
+               A.MVMN_BBS_SN,
+               A.CPRGT_USE_YN,
+               A.AUT_TYPE_NM,
+               A.CPRGT_TYPE_NM,
+               A.CPRGT_CN,
+               A.RGTR_ID,
+               A.RGTR_NM,
+               A.RGTR_TELNO,
+               A.RGTR_EML_ADDR,
+               A.REG_DT AS REG_DT_TMP,
+               A.MDFR_ID,
+               A.UPDT_DT AS UPDT_DT_TMP,
+               A.MNGR_INDCT_LMT_YN,
+               A.MNGR_DEL_YN,
+               A.DEL_YN,
+               A.DEL_DT AS DEL_DT_TMP
+    </sql>
+
+    <!-- 게시물 목록용-->
+    <sql id="bbsListBody">
+        SELECT
+        <include refid="bbsListColumn" />
+          FROM
+               TN_BBS A
+         WHERE A.BBS_SN = #{paramMap.q_bbsSn}
+    </sql>
+
+    <!-- 공지 게시물 목록용-->
+    <sql id="bbsNoticeListBody">
+        SELECT
+            <include refid="bbsListColumn" />
+        FROM
+            TN_BBS A
+        WHERE A.BBS_SN = #{paramMap.q_bbsSn}
+            AND A.NTC_PST_YN = #{ntcPstYn}
+            AND TO_DATE(TO_CHAR(SYSDATE, 'YYYYMMDD')) BETWEEN A.NTC_BGNG_DT AND A.NTC_END_DT
+    </sql>
+
+    <!-- 게시판 조회 -->
+    <select id="selectBbs" parameterType="bbsVo" resultType="bbsVo">
+        SELECT
+        <trim suffixOverrides=",">
+            A.BBS_SN,
+            A.BBS_DOC_NO,
+            A.RFRNC_DOC_NO,
+            A.SORT_SN,
+            A.OPNN_GRD_SN,
+            A.CLSF_NO,
+            (SELECT B.CLSF_NM
+               FROM TN_BBS_CTGRY B
+              WHERE B.BBS_SN = A.BBS_SN
+                AND B.CLSF_NO = A.CLSF_NO) AS CLSF_NM,
+            LWRK_CLSF_SN,
+            (SELECT B.LWRK_CLSF_NM
+               FROM TN_BBS_LWPRT_CTGRY B
+              WHERE B.BBS_SN = A.BBS_SN
+                AND B.CLSF_NO = A.CLSF_NO AND B.LWRK_CLSF_SN = A.LWRK_CLSF_SN) AS LWRK_CLSF_NM,
+            DECODE (A.NTC_PST_YN, 'Y', 'Y', 'N') AS NTC_PST_YN,
+            TO_CHAR(A.NTC_BGNG_DT, 'YYYY-MM-DD') AS NTC_BGNG_DT,
+            TO_CHAR(A.NTC_END_DT, 'YYYY-MM-DD') AS NTC_END_DT,
+			TO_CHAR(A.PSTG_BGNG_DT, 'YYYY-MM-DD') AS PSTG_BGNG_DT,
+            TO_CHAR(A.PSTG_END_DT, 'YYYY-MM-DD') AS PSTG_END_DT,
+            A.TTL,
+            A.DOC_CONTS_CN,
+            A.MAIN_CN,
+            A.ANS_DTL_CN,
+            TO_CHAR(A.ANS_DT, 'YYYY-MM-DD HH24:MI:SS') AS ANS_DT,
+            A.FILE_SN,
+            A.INQ_CNT,
+            A.DGSTFN_EVL_CNT,
+            A.DGSTFN_SUM_SCR,
+            A.DCLR_CNT,
+            A.RCMDTN_CNT,
+            A.IP_ADDR,
+            A.CNTN_BRWSR_NM,
+            A.RLS_YN,
+            A.LMT_YN,
+            A.USER_IDNTF_NM,
+            A.PSWD,
+            A.PIC_ID,
+            A.PIC_NM,
+            A.DEPT_CD_ID,
+            A.DEPT_NM,
+            A.FLCTN_COL_CN1,
+            A.FLCTN_COL_CN2,
+            A.FLCTN_COL_CN3,
+            A.FLCTN_COL_CN4,
+            A.FLCTN_COL_CN5,
+            A.FLCTN_COL_CN6,
+            A.FLCTN_COL_CN7,
+            A.FLCTN_COL_CN8,
+            A.FLCTN_COL_CN9,
+            A.FLCTN_COL_CN10,
+            A.MVMN_BBS_SN,
+            (SELECT BBS_NM FROM TN_BBS_SETUP WHERE BBS_SN = A.MVMN_BBS_SN) AS MVMN_BBS_NM,
+            A.CPRGT_USE_YN,
+            A.AUT_TYPE_NM,
+            A.CPRGT_TYPE_NM,
+            A.CPRGT_CN,
+            A.RGTR_ID,
+            A.RGTR_NM,
+            A.RGTR_TELNO,
+            A.RGTR_EML_ADDR,
+            TO_CHAR(A.REG_DT, 'YYYY-MM-DD HH24:MI:SS') AS REG_DT,
+            A.MDFR_ID,
+            TO_CHAR(A.UPDT_DT, 'YYYY-MM-DD HH24:MI:SS') AS UPDT_DT,
+            A.MNGR_INDCT_LMT_YN,
+            A.MNGR_DEL_YN,
+            A.DEL_YN,
+            TO_CHAR(A.DEL_DT, 'YYYY-MM-DD HH24:MI:SS') AS DEL_DT,
+            TRUNC(TO_DATE(TO_CHAR(SYSDATE, 'YYYYMMDD'), 'YYYYMMDD')) - TRUNC(TO_DATE(TO_CHAR(A.REG_DT, 'YYYYMMDD'), 'YYYYMMDD')) AS PASS_DAY,
+            (SELECT COUNT(1) FROM TN_BBS_CMNT B WHERE  B.BBS_SN = A.BBS_SN AND B.BBS_DOC_NO = A.BBS_DOC_NO) AS CMNT_CO
+        </trim>
+        FROM
+            TN_BBS A
+        WHERE A.BBS_SN = #{paramMap.q_bbsSn}
+          AND A.BBS_DOC_NO = #{paramMap.q_bbsDocNo}
+    </select>
+
+    <!-- 참조일련번호로 게시물 조회 -->
+    <select id="selectRfrncDocNoBbsList" parameterType="bbsVo" resultType="bbsVo">
+        SELECT
+        <trim suffixOverrides=",">
+            A.BBS_SN,
+            A.BBS_DOC_NO,
+            A.RFRNC_DOC_NO
+        </trim>
+        FROM
+            TN_BBS A
+        WHERE A.BBS_SN = #{paramMap.q_bbsSn}
+          AND A.RFRNC_DOC_NO = #{paramMap.q_bbsDocNo}
+          AND A.BBS_DOC_NO != A.RFRNC_DOC_NO
+    </select>
+
+    <!-- 검색 (srchType에 따라서 조건이 변경됨) -->
+    <sql id="incBbsWhere">
+        <if test="paramMap.q_searchVal != null  and paramMap.q_searchVal != ''">
+            <choose>
+                <when test="'TAG_NM' == '${paramMap.q_searchKey}'">
+                    AND EXISTS (SELECT 1 FROM TN_BBS_TAG WHERE BBS_SN = A.BBS_SN AND BBS_DOC_NO = A.BBS_DOC_NO AND TAG_NM LIKE '%' || #{paramMap.q_searchVal} || '%' )
+                </when>
+                <otherwise>
+                    <if test="paramMap.q_srchType == 1001">
+                        AND A.${paramMap.q_searchKey} = #{paramMap.q_searchVal}
+                    </if>
+                    <if test="paramMap.q_srchType == 1002">
+                        AND A.${paramMap.q_searchKey} LIKE '%' || #{paramMap.q_searchVal} || '%'
+                    </if>
+                    <if test="paramMap.q_srchType == 1003">
+                        AND A.${paramMap.q_searchKey} &lt;= #{paramMap.q_searchVal}
+                    </if>
+                    <if test="paramMap.q_srchType == 1004">
+                        AND A.${paramMap.q_searchKey} &gt;= #{paramMap.q_searchVal}
+                    </if>
+                </otherwise>
+            </choose>
+        </if>
+        <if test="paramMap.q_clsfNo != null  and paramMap.q_clsfNo != ''">
+            AND A.CLSF_NO = #{paramMap.q_clsfNo}
+        </if>
+        <if test="paramMap.q_lwrkClsfSn != null  and paramMap.q_lwrkClsfSn != ''">
+            AND A.LWRK_CLSF_SN = #{paramMap.q_lwrkClsfSn}
+        </if>
+    </sql>
+
+    <!-- 게시판 목록(공지제외) -->
+    <select id="selectBbsList" parameterType="bbsVo" resultType="bbsVo">
+        SELECT Y.*,
+               (SELECT B.CLSF_NM
+                  FROM TN_BBS_CTGRY B
+                 WHERE B.BBS_SN = Y.BBS_SN
+                   AND B.CLSF_NO = Y.CLSF_NO) AS CLSF_NM,
+               (SELECT B.LWRK_CLSF_NM
+                  FROM TN_BBS_LWPRT_CTGRY B
+                 WHERE B.BBS_SN = Y.BBS_SN
+                   AND B.CLSF_NO = Y.CLSF_NO AND B.LWRK_CLSF_SN = Y.LWRK_CLSF_SN) AS LWRK_CLSF_NM,
+               DECODE (Y.NTC_PST_YN_TMP, 'Y', 'Y', 'N') AS NTC_PST_YN,
+               TO_CHAR(Y.NTC_BGNG_DT_TMP, 'YYYY-MM-DD') AS NTC_BGNG_DT,
+               TO_CHAR(Y.NTC_END_DT_TMP, 'YYYY-MM-DD') AS NTC_END_DT,
+               TO_CHAR(Y.PSTG_BGNG_DT_TMP, 'YYYY-MM-DD') AS PSTG_BGNG_DT,
+               TO_CHAR(Y.PSTG_END_DT_TMP, 'YYYY-MM-DD') AS PSTG_END_DT,
+               TO_CHAR(Y.ANS_DT_TMP, 'YYYY-MM-DD') AS ANS_DT,
+               (SELECT BBS_NM FROM TN_BBS_SETUP WHERE BBS_SN = Y.MVMN_BBS_SN) AS MVMN_BBS_NM,
+               TO_CHAR(Y.REG_DT_TMP, 'YYYY-MM-DD') AS REG_DT,
+               TO_CHAR(Y.UPDT_DT_TMP, 'YYYY-MM-DD') AS UPDT_DT,
+               TO_CHAR(Y.DEL_DT_TMP, 'YYYY-MM-DD') AS DEL_DT,
+               TRUNC(TO_DATE(TO_CHAR(SYSDATE, 'YYYYMMDD'), 'YYYYMMDD')) - TRUNC(TO_DATE(TO_CHAR(Y.REG_DT_TMP, 'YYYYMMDD'), 'YYYYMMDD')) AS PASS_DAY,
+               (SELECT COUNT(1) FROM TN_BBS_CMNT B WHERE  B.BBS_SN = Y.BBS_SN AND B.BBS_DOC_NO = Y.BBS_DOC_NO) AS CMNT_CO
+        FROM (
+            SELECT ROWNUM NUM, X.* FROM (
+                <include refid="bbsListBody"/>
+                 AND A.NTC_PST_YN = #{ntcPstYn}
+                <include refid="incBbsWhere"/>
+                ORDER BY A.RFRNC_DOC_NO DESC, A.SORT_SN ASC
+            ) X
+            WHERE ROWNUM &lt;= #{paramMap.q_pagingEndNum}
+         ) Y
+         WHERE NUM &gt;= #{paramMap.q_pagingStartNum}
+    </select>
+
+    <!-- 게시판 목록(공지사항) -->
+    <select id="selectBbsNoticeList" parameterType="bbsVo" resultType="bbsVo">
+        SELECT X.*,
+            (SELECT B.CLSF_NM
+               FROM TN_BBS_CTGRY B
+              WHERE B.BBS_SN = X.BBS_SN
+                AND B.CLSF_NO = X.CLSF_NO) AS CLSF_NM,
+            (SELECT B.LWRK_CLSF_NM
+               FROM TN_BBS_LWPRT_CTGRY B
+              WHERE B.BBS_SN = X.BBS_SN
+                AND B.CLSF_NO = X.CLSF_NO AND B.LWRK_CLSF_SN = X.LWRK_CLSF_SN) AS LWRK_CLSF_NM,
+            DECODE (X.NTC_PST_YN_TMP, 'Y', 'Y', 'N') AS NTC_PST_YN,
+            TO_CHAR(X.NTC_BGNG_DT_TMP, 'YYYY-MM-DD') AS NTC_BGNG_DT,
+            TO_CHAR(X.NTC_END_DT_TMP, 'YYYY-MM-DD') AS NTC_END_DT,
+            TO_CHAR(X.ANS_DT_TMP, 'YYYY-MM-DD') AS ANS_DT,
+            (SELECT BBS_NM FROM TN_BBS_SETUP WHERE BBS_SN = X.MVMN_BBS_SN) AS MVMN_BBS_NM,
+            TO_CHAR(X.REG_DT_TMP, 'YYYY-MM-DD') AS REG_DT,
+            TO_CHAR(X.UPDT_DT_TMP, 'YYYY-MM-DD') AS UPDT_DT,
+            TO_CHAR(X.DEL_DT_TMP, 'YYYY-MM-DD') AS DEL_DT,
+            TRUNC(TO_DATE(TO_CHAR(SYSDATE, 'YYYYMMDD'), 'YYYYMMDD')) - TRUNC(TO_DATE(TO_CHAR(X.REG_DT_TMP, 'YYYYMMDD'), 'YYYYMMDD')) AS PASS_DAY,
+            (SELECT COUNT(1) FROM TN_BBS_CMNT B WHERE  B.BBS_SN = X.BBS_SN AND B.BBS_DOC_NO = X.BBS_DOC_NO) AS CMNT_CO
+        FROM (
+          <include refid="bbsNoticeListBody"/>
+            ORDER BY A.REG_DT DESC
+        ) X
+    </select>
+
+    <!-- 게시판 조회 목록 카운트 -->
+    <select id="selectBbsListCount" parameterType="bbsVo" resultType="int">
+        SELECT
+            COUNT(A.BBS_SN) AS TOTAL_COUNT
+        FROM
+            TN_BBS A
+        WHERE A.BBS_SN = #{paramMap.q_bbsSn}
+            AND A.NTC_PST_YN = #{ntcPstYn}
+        <include refid="incBbsWhere"/>
+    </select>
+
+    <!-- 게시판 등록 -->
+    <insert id="insertBbs" parameterType="bbsVo">
+        INSERT INTO TN_BBS (
+        <trim suffixOverrides=",">
+            BBS_SN,
+            BBS_DOC_NO,
+            RFRNC_DOC_NO,
+            SORT_SN,
+            OPNN_GRD_SN,
+            CLSF_NO,
+            LWRK_CLSF_SN,
+            NTC_PST_YN,
+            NTC_BGNG_DT,
+            NTC_END_DT,
+            PSTG_BGNG_DT,
+            PSTG_END_DT,
+            TTL,
+            DOC_CONTS_CN,
+            MAIN_CN,
+            ANS_DTL_CN,
+            ANS_DT,
+            FILE_SN,
+            IP_ADDR,
+            CNTN_BRWSR_NM,
+            RLS_YN,
+            LMT_YN,
+            PIC_ID,
+            PIC_NM,
+            DEPT_CD_ID,
+            DEPT_NM,
+            FLCTN_COL_CN1,
+            FLCTN_COL_CN2,
+            FLCTN_COL_CN3,
+            FLCTN_COL_CN4,
+            FLCTN_COL_CN5,
+            FLCTN_COL_CN6,
+            FLCTN_COL_CN7,
+            FLCTN_COL_CN8,
+            FLCTN_COL_CN9,
+            FLCTN_COL_CN10,
+            CPRGT_USE_YN,
+            AUT_TYPE_NM,
+            CPRGT_TYPE_NM,
+            CPRGT_CN,
+            RGTR_ID,
+            RGTR_NM,
+            RGTR_TELNO,
+            RGTR_EML_ADDR,
+            REG_DT,
+        </trim>
+        ) VALUES (
+        <trim suffixOverrides=",">
+            #{bbsSn},
+            #{bbsDocNo},
+            #{rfrncDocNo},
+            #{sortSn},
+            #{opnnGrdSn},
+            #{clsfNo},
+            #{lwrkClsfSn},
+            #{ntcPstYn},
+            TO_DATE(REPLACE(#{ntcBgngDt}, '-', ''), 'YYYYMMDD'),
+            TO_DATE(REPLACE(#{ntcEndDt}, '-', ''), 'YYYYMMDD'),
+            TO_DATE(REPLACE(#{pstgBgngDt}, '-', ''), 'YYYYMMDD'),
+            TO_DATE(REPLACE(#{pstgEndDt}, '-', ''), 'YYYYMMDD'),
+            #{ttl},
+            #{docContsCn},
+            #{mainCn},
+            #{ansDtlCn},
+            #{ansDt},
+            #{fileSn},
+            #{ipAddr},
+            #{cntnBrwsrNm},
+            #{rlsYn},
+            #{lmtYn},
+            #{picId},
+            #{picNm},
+            #{deptCdId},
+            #{deptNm},
+            #{flctnColCn1},
+            #{flctnColCn2},
+            #{flctnColCn3},
+            #{flctnColCn4},
+            #{flctnColCn5},
+            #{flctnColCn6},
+            #{flctnColCn7},
+            #{flctnColCn8},
+            #{flctnColCn9},
+            #{flctnColCn10},
+            #{cprgtUseYn},
+            #{autTypeNm},
+            #{cprgtTypeNm},
+            #{cprgtCn},
+            #{rgtrId},
+            #{rgtrNm},
+            #{rgtrTelno},
+            #{rgtrEmlAddr},
+            SYSDATE,
+        </trim>
+        )
+    </insert>
+
+    <!-- 게시판 수정 -->
+    <update id="updateBbs" parameterType="bbsVo">
+        UPDATE TN_BBS
+          <set>
+            CLSF_NO = #{clsfNo},
+            LWRK_CLSF_SN = #{lwrkClsfSn},
+            NTC_PST_YN = #{ntcPstYn},
+            NTC_BGNG_DT = TO_DATE(REPLACE(#{ntcBgngDt}, '-', ''), 'YYYYMMDD'),
+            NTC_END_DT = TO_DATE(REPLACE(#{ntcEndDt}, '-', ''), 'YYYYMMDD'),
+            PSTG_BGNG_DT = TO_DATE(REPLACE(#{pstgBgngDt}, '-', ''), 'YYYYMMDD'),
+            PSTG_END_DT = TO_DATE(REPLACE(#{pstgEndDt}, '-', ''), 'YYYYMMDD'),
+            TTL = #{ttl},
+            DOC_CONTS_CN = #{docContsCn},
+            MAIN_CN = #{mainCn},
+            RLS_YN = #{rlsYn},
+            FLCTN_COL_CN1 = #{flctnColCn1},
+            FLCTN_COL_CN2 = #{flctnColCn2},
+            FLCTN_COL_CN3 = #{flctnColCn3},
+            FLCTN_COL_CN4 = #{flctnColCn4},
+            FLCTN_COL_CN5 = #{flctnColCn5},
+            FLCTN_COL_CN6 = #{flctnColCn6},
+            FLCTN_COL_CN7 = #{flctnColCn7},
+            FLCTN_COL_CN8 = #{flctnColCn8},
+            FLCTN_COL_CN9 = #{flctnColCn9},
+            FLCTN_COL_CN10 = #{flctnColCn10},
+            CPRGT_USE_YN = #{cprgtUseYn},
+            AUT_TYPE_NM = #{autTypeNm},
+            CPRGT_TYPE_NM = #{cprgtTypeNm},
+            CPRGT_CN = #{cprgtCn},
+            <if test="rgtrTelno != null and rgtrTelno != ''">
+            RGTR_TELNO = #{rgtrTelno},
+            </if>
+            <if test="rgtrEmlAddr != null and rgtrEmlAddr != ''">
+            RGTR_EML_ADDR = #{rgtrEmlAddr},
+            </if>
+            <if test="fileSn != null and fileSn != ''">
+            FILE_SN = #{fileSn},
+            </if>
+            MDFR_ID = #{mdfrId},
+            UPDT_DT = SYSDATE,
+          </set>
+        WHERE
+             BBS_SN = #{paramMap.q_bbsSn}
+            AND BBS_DOC_NO = #{paramMap.q_bbsDocNo}
+    </update>
+
+    <!-- 답글 등록시 이전 게시물 정렬순을 증가 -->
+    <update id="updateBbsSortSn" parameterType="bbsVo">
+        UPDATE TN_BBS
+        <set>
+            SORT_SN = SORT_SN + 1
+        </set>
+        WHERE
+                BBS_SN = #{bbsSn}
+            AND RFRNC_DOC_NO = #{rfrncDocNo}
+            AND SORT_SN &gt;= #{sortSn}
+    </update>
+
+    <!-- 게시판 삭제 -->
+    <delete id="deleteBbs" parameterType="bbsVo">
+        DELETE FROM TN_BBS
+        WHERE
+                BBS_SN = #{paramMap.q_bbsSn}
+            AND BBS_DOC_NO = #{paramMap.q_bbsDocNo}
+    </delete>
+
+    <!-- 게시판 삭제 : 답글형이며 자식글이 있는 경우에는 내용만 삭제시킨다.-->
+    <update id="deleteRfrncDocNoBbs" parameterType="bbsVo">
+        UPDATE TN_BBS
+          <set>
+            TTL = #{ttl},
+            DOC_CONTS_CN = #{docContsCn},
+            MAIN_CN = #{mainCn},
+            FLCTN_COL_CN1 = #{flctnColCn1},
+            FLCTN_COL_CN2 = #{flctnColCn2},
+            FLCTN_COL_CN3 = #{flctnColCn3},
+            FLCTN_COL_CN4 = #{flctnColCn4},
+            FLCTN_COL_CN5 = #{flctnColCn5},
+            FLCTN_COL_CN6 = #{flctnColCn6},
+            FLCTN_COL_CN7 = #{flctnColCn7},
+            FLCTN_COL_CN8 = #{flctnColCn8},
+            FLCTN_COL_CN9 = #{flctnColCn9},
+            FLCTN_COL_CN10 = #{flctnColCn10},
+            RGTR_TELNO = #{rgtrTelno},
+            RGTR_EML_ADDR = #{rgtrEmlAddr},
+            MNGR_DEL_YN = 'Y',
+            DEL_DT = SYSDATE
+          </set>
+        WHERE
+                BBS_SN = #{paramMap.q_bbsSn}
+            AND BBS_DOC_NO = #{paramMap.q_bbsDocNo}
+    </update>
+
+    <!-- 게시물 조회수 1증가 -->
+    <update id="updateBbsInqCnt" parameterType="bbsVo">
+        UPDATE TN_BBS
+           SET INQ_CNT = NVL(INQ_CNT, 0) + 1
+         WHERE BBS_SN = #{paramMap.q_bbsSn}
+           AND BBS_DOC_NO = #{paramMap.q_bbsDocNo}
+    </update>
+
+    <!-- 게시물 만족도평가횟수 1증가 -->
+    <update id="updateStsfdgEvl" parameterType="bbsVo">
+        UPDATE TN_BBS
+           SET DGSTFN_EVL_CNT = NVL(DGSTFN_EVL_CNT, 0) + 1,
+               DGSTFN_SUM_SCR = NVL(DGSTFN_SUM_SCR, 0) + #{dgstfnSumScr}
+         WHERE BBS_SN = #{bbsSn}
+           AND BBS_DOC_NO = #{bbsDocNo}
+    </update>
+
+    <!-- 게시물 추천횟수 1증가 -->
+    <update id="updateRecoment" parameterType="bbsVo">
+        UPDATE TN_BBS
+           SET RCMDTN_CNT = NVL(RCMDTN_CNT, 0) + 1
+         WHERE BBS_SN = #{bbsSn}
+           AND BBS_DOC_NO = #{bbsDocNo}
+    </update>
+
+    <!-- 게시물 신고횟수 1증가 -->
+    <update id="updateSttemnt" parameterType="bbsVo">
+        UPDATE TN_BBS
+           SET DCLR_CNT = NVL(DCLR_CNT, 0) + 1
+         WHERE BBS_SN = #{bbsSn}
+           AND BBS_DOC_NO = #{bbsDocNo}
+    </update>
+
+    <!-- 이전 게시글 -->
+    <select id="selectBbsPrevView" parameterType="bbsVo" resultType="bbsVo">
+        SELECT
+            Z.BBS_SN,
+            Z.TTL,
+            Z.BBS_DOC_NO,
+            Z.RLS_YN,
+            Z.PSWD,
+            Z.MNGR_DEL_YN,
+            Z.DEL_YN,
+            (SELECT BBS_NM FROM TN_BBS_SETUP WHERE BBS_SN = Z.MVMN_BBS_SN) AS MVMN_BBS_NM,
+            (SELECT COUNT(F.SORT_SN) FROM TN_FILE F WHERE F.FILE_SN = Z.FILE_SN) AS FILE_CO,
+            (SELECT COUNT(C.BBS_SN) FROM TN_BBS_CMNT C WHERE C.BBS_SN = Z.BBS_SN AND C.BBS_DOC_NO = Z.BBS_DOC_NO) AS CMNT_CO,
+            TRUNC(TO_DATE(TO_CHAR(SYSDATE, 'YYYYMMDD'), 'YYYYMMDD')) - TRUNC(TO_DATE(TO_CHAR(Z.REG_DT, 'YYYYMMDD'), 'YYYYMMDD')) AS PASS_DAY
+        FROM (
+            <include refid="bbsSimpleList"/>
+        ) Z
+         WHERE Z.POS = (
+            SELECT
+                (X.POS -1 )
+            FROM (
+                <include refid="bbsSimplePos"/>
+            ) X
+            WHERE
+                X.BBS_DOC_NO = #{paramMap.q_bbsDocNo}
+         )
+    </select>
+
+    <!-- 다음 게시글 -->
+    <select id="selectBbsNextView" parameterType="bbsVo" resultType="bbsVo">
+        SELECT
+            Z.BBS_SN,
+            Z.TTL,
+            Z.BBS_DOC_NO,
+            Z.RLS_YN,
+            Z.PSWD,
+            Z.MNGR_DEL_YN,
+            Z.DEL_YN,
+            (SELECT BBS_NM FROM TN_BBS_SETUP WHERE BBS_SN = Z.MVMN_BBS_SN) AS MVMN_BBS_NM,
+            (SELECT COUNT(F.SORT_SN) FROM TN_FILE F WHERE F.FILE_SN = Z.FILE_SN) AS FILE_CO,
+            (SELECT COUNT(C.BBS_SN) FROM TN_BBS_CMNT C WHERE C.BBS_SN = Z.BBS_SN AND C.BBS_DOC_NO = Z.BBS_DOC_NO) AS CMNT_CO,
+            TRUNC(TO_DATE(TO_CHAR(SYSDATE, 'YYYYMMDD'), 'YYYYMMDD')) - TRUNC(TO_DATE(TO_CHAR(Z.REG_DT, 'YYYYMMDD'), 'YYYYMMDD')) AS PASS_DAY
+        FROM (
+            <include refid="bbsSimpleList"/>
+        ) Z
+         WHERE Z.POS = (
+            SELECT
+                (X.POS + 1)
+            FROM (
+                <include refid="bbsSimplePos"/>
+            ) X
+            WHERE
+                X.BBS_DOC_NO = #{paramMap.q_bbsDocNo}
+         )
+    </select>
+
+    <!-- 다음글/이전글 컬럼 -->
+    <sql id="bbsSimpleList">
+        SELECT
+            ROWNUM AS POS,
+            BBS_SN, BBS_DOC_NO, TTL, RLS_YN,
+            PSWD, MNGR_DEL_YN, DEL_YN,
+            MVMN_BBS_SN, FILE_SN, REG_DT
+        FROM (
+            SELECT
+                A.BBS_SN, A.BBS_DOC_NO, A.TTL, A.RLS_YN,
+                A.PSWD, A.MNGR_DEL_YN, A.DEL_YN,
+                A.MVMN_BBS_SN, A.FILE_SN, A.REG_DT
+            FROM
+                TN_BBS A
+            WHERE
+                    A.BBS_SN = #{paramMap.q_bbsSn}
+                AND A.NTC_PST_YN = #{ntcPstYn}
+                <include refid="incBbsWhere"/>
+            ORDER BY A.RFRNC_DOC_NO DESC, A.SORT_SN ASC
+        ) C
+    </sql>
+
+    <!-- 다음글/이전글 위치 -->
+    <sql id="bbsSimplePos">
+        SELECT
+            ROWNUM AS POS,
+            C.BBS_DOC_NO
+        FROM (
+            SELECT
+                A.BBS_DOC_NO
+            FROM
+                TN_BBS A
+            WHERE
+                    A.BBS_SN = #{paramMap.q_bbsSn}
+                AND A.NTC_PST_YN = #{ntcPstYn}
+                <include refid="incBbsWhere"/>
+            ORDER BY A.RFRNC_DOC_NO DESC, A.SORT_SN ASC
+        ) C
+    </sql>
+
+    <!-- 게시판 플래그삭제 -->
+    <delete id="deleteFlagBbs" parameterType="bbsVo">
+        UPDATE TN_BBS
+           SET MNGR_DEL_YN = #{mngrDelYn}
+         WHERE BBS_SN = #{paramMap.q_bbsSn}
+           AND BBS_DOC_NO = #{paramMap.q_bbsDocNo}
+    </delete>
+
+    <select id="deleteBbsList" parameterType="bbsVo" resultType="bbsVo">
+        SELECT A.BBS_SN,
+               A.BBS_DOC_NO,
+               A.TTL,
+               A.FILE_SN,
+               A.RFRNC_DOC_NO,
+               A.SORT_SN,
+               A.OPNN_GRD_SN
+          FROM TN_BBS A
+         WHERE A.BBS_SN = #{bbsSn}
+           AND A.RFRNC_DOC_NO = #{rfrncDocNo}
+           AND A.BBS_DOC_NO &gt;= #{bbsDocNo}
+           AND A.SORT_SN &gt;= #{sortSn}
+           AND A.OPNN_GRD_SN &lt;= #{opnnGrdSn}
+    </select>
+
+    <!-- 게시물별 태그 목록 -->
+    <select id="selectBbsTagList" parameterType="bbsVo" resultType="String">
+        SELECT A.TAG_NM
+          FROM TN_BBS_TAG A
+         WHERE A.BBS_SN = #{bbsSn}
+           AND A.BBS_DOC_NO = #{bbsDocNo}
+    </select>
+
+    <!-- 태그이름별 전체갯수 -->
+    <select id="selectBbsTagCo" parameterType="bbsVo" resultType="int">
+        SELECT COUNT(A.BBS_DOC_NO) AS allCo
+          FROM TN_BBS_TAG A
+         WHERE A.BBS_SN = #{bbsSn}
+           AND A.BBS_DOC_NO = #{bbsDocNo}
+           AND A.TAG_NM = #{tagNm}
+    </select>
+
+    <!-- 게시물 태그 등록 -->
+    <insert id="insertBbsTag" parameterType="bbsTagVo">
+        INSERT INTO TN_BBS_TAG (
+            BBS_SN,
+            BBS_DOC_NO,
+            TAG_NM
+        ) VALUES (
+            #{bbsSn},
+            #{bbsDocNo},
+            #{tagNm}
+        )
+    </insert>
+
+    <!-- 게시물 태그 삭제 -->
+    <delete id="deleteBbsTag" parameterType="bbsVo">
+        DELETE FROM TN_BBS_TAG
+         WHERE BBS_SN = #{bbsSn}
+           AND BBS_DOC_NO = #{bbsDocNo}
+    </delete>
+
+</mapper>

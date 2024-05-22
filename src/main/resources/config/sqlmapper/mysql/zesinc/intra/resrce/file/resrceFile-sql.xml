@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="zesinc.intra.resrce.file.ResrceFileMapper">
+
+    <!-- 자원파일 조회 -->
+    <select id="selectResrceFile" parameterType="resrceFileVo" resultType="resrceFileVo">
+        SELECT
+        <trim suffixOverrides=",">
+            A.DATA_SN,
+            A.CHG_CYCL,
+            A.FILE_SN,
+            A.ORGNL_FILE_NM,
+            A.SRVR_FILE_NM,
+            A.FILE_URL_ADDR,
+            A.FILE_SZ_NM,
+            A.BYTE_FILE_SZ,
+            A.FILE_TYPE_NM,
+            A.FILE_EXTN_NM,
+            A.FILE_EXPLN,
+            A.THMB_PATH_NM1,
+            A.THMB_PATH_NM2,
+            A.THMB_PATH_NM3,
+            A.SORT_SN,
+            A.RGTR_ID,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.RGTR_ID) AS RGTR_NM,
+            A.REG_DT,
+        </trim>
+        FROM
+            TN_RESRCE_FILE A
+        WHERE
+                A.DATA_SN = #{dataSn}
+            AND A.CHG_CYCL = #{chgCycl}
+            AND A.FILE_SN = #{fileSn}
+    </select>
+
+    <!-- 자원파일 목록 -->
+    <sql id="incResrceFileWhere">
+        <where>
+                A.DATA_SN = #{dataSn}
+            AND A.CHG_CYCL = #{chgCycl}
+        </where>
+    </sql>
+    <select id="selectResrceFileList" parameterType="resrceFileVo" resultType="resrceFileVo">
+        SELECT
+        <trim suffixOverrides=",">
+            A.DATA_SN,
+            A.CHG_CYCL,
+            A.FILE_SN,
+            A.ORGNL_FILE_NM,
+            A.SRVR_FILE_NM,
+            A.FILE_URL_ADDR,
+            A.FILE_SZ_NM,
+            A.BYTE_FILE_SZ,
+            A.FILE_TYPE_NM,
+            A.FILE_EXTN_NM,
+            A.FILE_EXPLN,
+            A.THMB_PATH_NM1,
+            A.THMB_PATH_NM2,
+            A.THMB_PATH_NM3,
+            A.SORT_SN,
+            A.RGTR_ID,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.RGTR_ID) AS RGTR_NM,
+            A.REG_DT,
+        </trim>
+        FROM
+            TN_RESRCE_FILE A
+        <include refid="incResrceFileWhere"/>
+        ORDER BY A.SORT_SN
+    </select>
+
+    <!-- 자원파일 조회 목록 카운트 -->
+    <select id="selectResrceFileListCount" parameterType="resrceFileVo" resultType="int">
+        SELECT
+            COUNT(A.DATA_SN) AS TOTAL_COUNT
+        FROM
+            TN_RESRCE_FILE A
+        <include refid="incResrceFileWhere"/>
+    </select>
+
+    <!-- 자원파일 등록 -->
+    <insert id="insertResrceFile" parameterType="resrceFileVo">
+        <selectKey order="BEFORE" keyProperty="fileSn" resultType="int">
+            SELECT IFNULL(MAX(FILE_SN), 0) + 1
+            FROM TN_RESRCE_FILE
+            WHERE
+                    DATA_SN = #{dataSn}
+                AND CHG_CYCL = #{chgCycl}
+        </selectKey>
+        INSERT INTO TN_RESRCE_FILE (
+        <trim suffixOverrides=",">
+            DATA_SN,
+            CHG_CYCL,
+            FILE_SN,
+            ORGNL_FILE_NM,
+            SRVR_FILE_NM,
+            FILE_URL_ADDR,
+            FILE_SZ_NM,
+            BYTE_FILE_SZ,
+            FILE_TYPE_NM,
+            FILE_EXTN_NM,
+            FILE_EXPLN,
+            THMB_PATH_NM1,
+            THMB_PATH_NM2,
+            THMB_PATH_NM3,
+            SORT_SN,
+            RGTR_ID,
+            REG_DT,
+        </trim>
+        ) VALUES (
+        <trim suffixOverrides=",">
+            #{dataSn},
+            #{chgCycl},
+            #{fileSn},
+            #{orgnlFileNm},
+            #{srvrFileNm},
+            #{fileUrlAddr},
+            #{fileSzNm},
+            #{byteFileSz},
+            #{fileTypeNm},
+            #{fileExtnNm},
+            #{fileExpln},
+            #{thmbPathNm1},
+            #{thmbPathNm2},
+            #{thmbPathNm3},
+            (SELECT SORT_SN FROM (SELECT IFNULL(MAX(SORT_SN), 0) + 1 AS SORT_SN FROM TN_RESRCE_FILE WHERE DATA_SN = #{dataSn} AND CHG_CYCL = #{chgCycl})A),
+            #{rgtrId},
+            NOW(),
+        </trim>
+        )
+    </insert>
+
+    <!-- 자원파일 수정 -->
+    <update id="updateResrceFile" parameterType="resrceFileVo">
+        UPDATE TN_RESRCE_FILE 
+          <set>
+            FILE_SZ_NM = #{fileSzNm},
+            BYTE_FILE_SZ = #{byteFileSz},
+          </set>
+        WHERE
+                DATA_SN = #{dataSn}
+            AND CHG_CYCL = #{chgCycl}
+            AND FILE_SN = #{fileSn}
+    </update>
+
+    <!-- 자원파일 정보 수정 -->
+    <update id="updateResrceFileInfo" parameterType="resrceFileVo">
+        UPDATE TN_RESRCE_FILE 
+          <set>
+            SORT_SN = #{sortSn},
+            ORGNL_FILE_NM = #{orgnlFileNm},
+            FILE_EXPLN = #{fileExpln},
+          </set>
+        WHERE
+                DATA_SN = #{dataSn}
+            AND CHG_CYCL = #{chgCycl}
+            AND FILE_SN = #{fileSn}
+    </update>
+
+    <!-- 자원파일 삭제 -->
+    <delete id="deleteResrceFile" parameterType="resrceFileVo">
+        DELETE FROM TN_RESRCE_FILE
+        WHERE
+                DATA_SN = #{dataSn}
+            AND CHG_CYCL = #{chgCycl}
+            <if test="fileSn != null and fileSn != ''">
+            AND FILE_SN = #{fileSn}
+            </if>
+    </delete>
+
+</mapper>

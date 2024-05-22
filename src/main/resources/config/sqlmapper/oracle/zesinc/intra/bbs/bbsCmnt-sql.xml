@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="zesinc.intra.bbs.BbsCmntMapper">
+
+    <!-- 게시판커멘트 조회 -->
+    <select id="selectBbsCmnt" parameterType="bbsCmntVo" resultType="bbsCmntVo">
+        SELECT
+        <trim suffixOverrides=",">
+            A.BBS_SN,
+            A.BBS_DOC_NO,
+            A.OPNN_SN,
+            A.OPNN_RFRNC_SN,
+            A.SORT_SN,
+            A.OPNN_GRD_SN,
+            A.OPNN_CN,
+            A.DCLR_CNT,
+            A.RCMDTN_CNT,
+            A.DERCM_CNT,
+            A.IP_ADDR,
+            A.PSWD,
+            A.RGTR_NM,
+            A.RGTR_ID,
+            A.REG_DT,
+            A.DEL_YN,
+            A.DEL_DT,
+            A.PIC_ID,
+            A.PIC_DEL_YN,
+            A.PIC_DEL_DT,
+        </trim>
+        FROM
+            TN_BBS_CMNT A
+        WHERE
+                A.BBS_SN = #{bbsSn}
+            AND A.BBS_DOC_NO = #{bbsDocNo}
+            AND A.OPNN_SN = #{opnnSn}
+    </select>
+
+
+    <!-- 게시판커멘트 목록 -->
+    <sql id="incBbsCmntWhere">
+        <where>
+                 A.BBS_SN = #{bbsSn}
+             AND A.BBS_DOC_NO = #{bbsDocNo}
+        </where>
+    </sql>
+    <select id="selectBbsCmntList" parameterType="bbsCmntVo" resultType="bbsCmntVo">
+        SELECT Y.* FROM (
+            SELECT ROWNUM NUM, X.* FROM (
+                SELECT
+                <trim suffixOverrides=",">
+                    A.BBS_SN,
+                    A.BBS_DOC_NO,
+                    A.OPNN_SN,
+                    A.OPNN_RFRNC_SN,
+                    A.SORT_SN,
+                    A.OPNN_GRD_SN,
+                    A.OPNN_CN,
+                    A.DCLR_CNT,
+                    A.RCMDTN_CNT,
+                    A.DERCM_CNT,
+                    A.IP_ADDR,
+                    A.PSWD,
+                    A.RGTR_NM,
+                    A.RGTR_ID,
+                    A.REG_DT,
+                    A.DEL_YN,
+                    A.DEL_DT,
+                    A.PIC_ID,
+                    A.PIC_DEL_YN,
+                    A.PIC_DEL_DT,
+                </trim>
+                FROM
+                    TN_BBS_CMNT A
+                <include refid="incBbsCmntWhere"/>
+                ORDER BY A.OPNN_RFRNC_SN DESC, A.SORT_SN ASC
+            ) X
+            WHERE ROWNUM &lt;= #{paramMap.q_pagingEndNum}
+         ) Y
+         WHERE NUM &gt;= #{paramMap.q_pagingStartNum}
+    </select>
+
+    <!-- 게시판커멘트 조회 목록 카운트 -->
+    <select id="selectBbsCmntListCount" parameterType="bbsCmntVo" resultType="int">
+        SELECT
+            COUNT(A.BBS_SN) AS TOTAL_COUNT
+        FROM
+            TN_BBS_CMNT A
+        <include refid="incBbsCmntWhere"/>
+    </select>
+
+    <!-- 게시판커멘트 등록 -->
+    <insert id="insertBbsCmnt" parameterType="bbsCmntVo">
+        <selectKey order="BEFORE" keyProperty="opnnSn" resultType="int">
+            SELECT NVL(MAX(OPNN_SN), 0) + 1
+            FROM TN_BBS_CMNT
+            WHERE
+                 BBS_SN = #{bbsSn}
+                AND BBS_DOC_NO = #{bbsDocNo}
+        </selectKey>
+        INSERT INTO TN_BBS_CMNT (
+        <trim suffixOverrides=",">
+            BBS_SN,
+            BBS_DOC_NO,
+            OPNN_SN,
+            OPNN_RFRNC_SN,
+            SORT_SN,
+            OPNN_GRD_SN,
+            OPNN_CN,
+            DCLR_CNT,
+            RCMDTN_CNT,
+            DERCM_CNT,
+            IP_ADDR,
+            PSWD,
+            RGTR_NM,
+            RGTR_ID,
+            REG_DT
+        </trim>
+        ) VALUES (
+        <trim suffixOverrides=",">
+            #{bbsSn},
+            #{bbsDocNo},
+            #{opnnSn},
+            <choose>
+                <when test="opnnRfrncSn != null">
+                #{opnnRfrncSn},
+                </when>
+                <otherwise>
+                #{opnnSn},
+                </otherwise>
+            </choose>
+            #{sortSn},
+            #{opnnGrdSn},
+            #{opnnCn},
+            0,
+            0,
+            0,
+            #{ipAddr},
+            #{pswd},
+            #{rgtrNm},
+            #{rgtrId},
+            SYSDATE
+        </trim>
+        )
+    </insert>
+
+    <!-- 자식글 목록 건수 -->
+    <select id="selectCmntRefrnCnt" parameterType="bbsCmntVo" resultType="int">
+        SELECT
+        <trim suffixOverrides=",">
+            COUNT(1) AS CNT
+        </trim>
+        FROM
+            TN_BBS_CMNT A
+        WHERE
+                 A.BBS_SN = #{bbsSn}
+            AND A.BBS_DOC_NO = #{bbsDocNo}
+            AND A.OPNN_RFRNC_SN = #{opnnSn}
+            AND A.OPNN_SN != A.OPNN_RFRNC_SN
+    </select>
+
+    <!-- 게시판커멘트 수정 -->
+    <update id="updateBbsCmnt" parameterType="bbsCmntVo">
+        UPDATE TN_BBS_CMNT 
+          <set>
+            <choose>
+                <when test="type == 'sttemnt'">
+                    DCLR_CNT = DCLR_CNT +1
+                </when>
+                <when test="type == 'recomend'">
+                    RCMDTN_CNT = RCMDTN_CNT + 1
+                </when>
+                <when test="type == 'nonrecom'">
+                    DERCM_CNT = DERCM_CNT + 1
+                </when>
+            </choose>
+          </set>
+        WHERE
+             BBS_SN = #{bbsSn}
+            AND BBS_DOC_NO = #{bbsDocNo}
+            AND OPNN_SN = #{opnnSn}
+    </update>
+
+    <!-- 댓글 등록시 정렬순 수정 -->
+    <update id="updateBbsCmntSortSn" parameterType="bbsCmntVo">
+        UPDATE TN_BBS_CMNT
+        <set>
+            SORT_SN = SORT_SN + 1
+        </set>
+        WHERE
+                 BBS_SN = #{bbsSn}
+            AND BBS_DOC_NO = #{bbsDocNo}
+            AND OPNN_RFRNC_SN = #{opnnRfrncSn}
+            AND SORT_SN &gt;= #{sortSn}
+    </update>
+
+    <!-- 게시판커멘트 삭제 수정 : 자식글이 있는 경우 내용만 삭제 -->
+    <update id="updateDeleteBbsCmnt" parameterType="bbsCmntVo">
+        UPDATE TN_BBS_CMNT 
+          <set>
+            OPNN_CN = #{opnnCn},
+            DEL_YN = #{delYn},
+            DEL_DT = SYSDATE
+          </set>
+        WHERE
+             BBS_SN = #{bbsSn}
+            AND BBS_DOC_NO = #{bbsDocNo}
+            AND OPNN_SN = #{opnnSn}
+    </update>
+
+    <!-- 관리자표시 제한 -->
+    <update id="updateBbsDisplayCmnt" parameterType="bbsCmntVo">
+        UPDATE TN_BBS_CMNT 
+          <set>
+            PIC_ID = #{picId},
+            PIC_DEL_YN = #{picDelYn},
+            PIC_DEL_DT = SYSDATE
+          </set>
+        WHERE
+             BBS_SN = #{bbsSn}
+            AND BBS_DOC_NO = #{bbsDocNo}
+            AND OPNN_SN = #{opnnSn}
+    </update>
+
+    <!-- 게시판커멘트 삭제 -->
+    <delete id="deleteBbsCmnt" parameterType="bbsCmntVo">
+        DELETE FROM TN_BBS_CMNT
+        WHERE
+             BBS_SN = #{bbsSn}
+            AND BBS_DOC_NO = #{bbsDocNo}
+            AND OPNN_SN = #{opnnSn}
+    </delete>
+
+    <!-- 게시물 삭제시 게시판커멘트 전체 삭제 -->
+    <delete id="deleteBbsCmntAll" parameterType="bbsCmntVo">
+        DELETE FROM TN_BBS_CMNT
+        WHERE
+             BBS_SN = #{bbsSn}
+            AND BBS_DOC_NO = #{bbsDocNo}
+    </delete>
+
+</mapper>

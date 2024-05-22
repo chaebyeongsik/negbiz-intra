@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="zesinc.component.file.FileMapper">
+
+    <select id="selectFileSn" resultType="int">
+        SELECT NEXTVAL('FILE_SEQ')
+          FROM DUAL
+    </select>
+
+    <!-- 조회 -->
+    <select id="selectFile" parameterType="fileVo" resultType="fileVo">
+        SELECT
+            A.FILE_SN,
+            A.FILE_ID,
+            A.SORT_SN,
+            A.ORGNL_FILE_NM,
+            A.SRVR_FILE_NM,
+            A.FILE_URL_ADDR,
+            A.THMB_PATH_NM,
+            A.FILE_SZ_NM,
+            A.FILE_TYPE_NM,
+            A.FILE_EXTN_NM,
+            A.FILE_EXPLN,
+            A.INPT_DATA_NM,
+            A.DWNLD_CNT,
+            A.BYTE_FILE_SZ,
+            A.DATA_YN,
+            A.RGTR_ID,
+            A.REG_DT
+        FROM
+            TN_FILE A
+        WHERE
+                A.FILE_SN = #{paramMap.q_fileSn}
+            AND A.FILE_ID = #{paramMap.q_fileId}
+    </select>
+
+    <!-- 조회 -->
+    <select id="selectFileList" parameterType="fileVo" resultType="fileVo">
+        SELECT
+            A.FILE_SN,
+            A.FILE_ID,
+            A.SORT_SN,
+            A.ORGNL_FILE_NM,
+            A.SRVR_FILE_NM,
+            A.FILE_URL_ADDR,
+            A.THMB_PATH_NM,
+            A.FILE_SZ_NM,
+            A.FILE_TYPE_NM,
+            A.FILE_EXTN_NM,
+            A.FILE_EXPLN,
+            A.INPT_DATA_NM,
+            A.DWNLD_CNT,
+            A.BYTE_FILE_SZ,
+            A.DATA_YN,
+            A.RGTR_ID,
+            A.REG_DT
+        FROM
+            TN_FILE A
+        WHERE
+                A.FILE_SN = #{paramMap.q_fileSn}
+        <if test="paramMap.q_fileId != null">
+            AND A.FILE_ID = #{paramMap.q_fileId}
+        </if>
+        ORDER BY A.SORT_SN ASC
+    </select>
+
+    <!-- 목록 조회 카운트 -->
+    <select id="selectListCount" parameterType="fileVo" resultType="int">
+        SELECT
+            COUNT(A.FILE_SN) AS TOTAL_COUNT
+        FROM
+            TN_FILE A
+        WHERE
+                A.FILE_SN = #{paramMap.q_fileSn}
+    </select>
+
+    <!-- 등록 -->
+    <insert id="insertFile" parameterType="fileVo">
+        INSERT INTO TN_FILE (
+            FILE_SN,
+            FILE_ID,
+            SORT_SN,
+            ORGNL_FILE_NM,
+            SRVR_FILE_NM,
+            FILE_URL_ADDR,
+            THMB_PATH_NM,
+            FILE_SZ_NM,
+            FILE_TYPE_NM,
+            FILE_EXTN_NM,
+            FILE_EXPLN,
+            INPT_DATA_NM,
+            DWNLD_CNT,
+            BYTE_FILE_SZ,
+            DATA_YN,
+            RGTR_ID,
+            REG_DT
+        ) VALUES (
+            #{fileSn},
+            #{fileId},
+            (SELECT SORT_SN FROM
+            	(SELECT IFNULL(MAX(SORT_SN), 0) + 1 AS SORT_SN
+            		FROM TN_FILE WHERE FILE_SN = #{fileSn})A),
+            #{orgnlFileNm},
+            #{srvrFileNm},
+            #{fileUrlAddr},
+            #{thmbPathNm},
+            #{fileSzNm},
+            #{fileTypeNm},
+            #{fileExtnNm},
+            #{fileExpln},
+            #{inptDataNm},
+            #{dwnldCnt},
+            #{byteFileSz},
+            #{dataYn},
+            #{rgtrId},
+            NOW()
+        )
+    </insert>
+
+    <!-- 수정 -->
+    <update id="increaseFile" parameterType="fileVo">
+        UPDATE TN_FILE SET 
+            DWNLD_CNT = IFNULL(DWNLD_CNT, 0) + 1
+        WHERE
+                FILE_SN = #{fileSn}
+            AND FILE_ID = #{fileId}
+    </update>
+
+    <!-- 수정 -->
+    <update id="updateFile" parameterType="fileVo">
+        UPDATE TN_FILE SET 
+            SORT_SN = #{sortSn},
+            ORGNL_FILE_NM = #{orgnlFileNm},
+            FILE_EXPLN = #{fileExpln}
+        WHERE
+                FILE_SN = #{fileSn}
+            AND FILE_ID = #{fileId}
+    </update>
+
+    <!-- 삭제 -->
+    <delete id="deleteFile" parameterType="fileVo">
+        DELETE FROM TN_FILE
+        WHERE
+                FILE_SN = #{fileSn}
+        <if test="fileId != null">
+            AND FILE_ID = #{fileId}
+        </if>
+    </delete>
+
+    <insert id="insertFileLog" parameterType="fileLogVo">
+        <selectKey order="BEFORE" keyProperty="sortSn" resultType="int">
+            SELECT IFNULL(MAX(SORT_SN), 0) + 1
+              FROM TH_FILE_DWLD
+             WHERE FILE_SN = #{fileSn}
+               AND FILE_ID = #{fileId}
+        </selectKey>
+        INSERT INTO TH_FILE_DWLD (
+            FILE_SN,      FILE_ID,     SORT_SN,    OPRTR_NM
+        )
+        VALUES (
+            #{fileSn},     #{fileId},    #{sortSn},   #{oprtrNm}
+        )
+    </insert>
+
+    <!-- 파일 이력 목록 조회 -->
+    <sql id="incLogWhere">
+        <where>
+            <if test="paramMap.q_fileSn != null">
+                A.FILE_SN = #{paramMap.q_fileSn}
+            </if>
+            <if test="paramMap.q_fileId != null">
+                AND A.FILE_ID = #{paramMap.q_fileId}
+            </if>
+        </where>
+    </sql>
+    <select id="selectFileLogList" parameterType="fileLogVo" resultType="fileLogVo">
+        SELECT Y.* FROM (
+            SELECT  X.* FROM (
+                SELECT
+                    A.FILE_SN,
+                    A.FILE_ID,
+                    A.SORT_SN,
+                    A.OPRTR_NM,
+                    A.REG_DT
+                FROM
+                    TH_FILE_DWLD A
+                <include refid="incLogWhere"/>
+                ORDER BY A.FILE_SN ASC, A.SORT_SN ASC
+            ) X
+         ) Y
+         LIMIT #{paramMap.q_rowPerPage}
+         OFFSET #{paramMap.q_pagingStartNum}
+    </select>
+
+    <!-- 파일 이력 목록 조회 카운트 -->
+    <select id="selectFileLogListCount" parameterType="fileLogVo" resultType="int">
+        SELECT
+            COUNT(A.FILE_SN) AS TOTAL_COUNT
+        FROM
+            TH_FILE_DWLD A
+        <include refid="incLogWhere"/>
+    </select>
+
+    <!-- 삭제 -->
+    <delete id="deleteFileLog" parameterType="fileVo">
+        DELETE FROM TH_FILE_DWLD
+        WHERE
+                FILE_SN = #{fileSn}
+        <if test="fileId != null">
+            AND FILE_ID = #{fileId}
+        </if>
+    </delete>
+
+</mapper>

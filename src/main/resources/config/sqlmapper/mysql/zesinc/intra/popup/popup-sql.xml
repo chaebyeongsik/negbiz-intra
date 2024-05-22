@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="zesinc.intra.popup.PopupMapper">
+
+    <!-- 팝업 조회 -->
+    <select id="selectPopup" parameterType="popupVo" resultType="popupVo">
+        SELECT
+        <trim suffixOverrides=",">
+            A.REG_SN,
+            A.TTL,
+            DATE_FORMAT(A.BGNG_YMD, '%Y-%m-%d') AS BGNG_YMD,
+            DATE_FORMAT(A.END_YMD, '%Y-%m-%d') AS END_YMD,
+            A.WDTH_SZ,
+            A.VRTC_SZ,
+            A.Y_AXIS,
+            A.X_AXIS,
+            A.SCROLL_YN,
+            A.POPUP_SZ_CHG_YN,
+            A.POPUP_TYPE_NO,
+            A.POPUP_RPTT_SE_NO,
+            A.WRT_TYPE_NM,
+            A.DOC_CONTS_CN,
+            A.SORT_SN,
+            A.FILE_PATH_NM,
+            A.FILE_SN,
+            A.USE_YN,
+            A.RGTR_ID,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.RGTR_ID) AS RGTR_NM,
+            A.REG_DT,
+            A.MDFR_ID,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.MDFR_ID) AS UPDUSR_NM,
+            A.UPDT_DT,
+        </trim>
+        FROM
+            TN_POPUP A
+        WHERE
+                 A.REG_SN = #{paramMap.q_regSn}
+    </select>
+
+
+    <!-- 팝업 목록 -->
+    <sql id="incPopupWhere">
+        <where>
+             <if test="paramMap.q_siteSn != null and paramMap.q_siteSn != ''" >
+                 AND A.REG_SN IN (SELECT REG_SN FROM TN_POPUP_DOMN WHERE SITE_SN = #{paramMap.q_siteSn})
+             </if>
+             <if test="paramMap.q_searchVal != null and paramMap.q_searchVal != ''">
+                AND A.TTL LIKE CONCAT('%', #{paramMap.q_searchVal}, '%')
+             </if>
+             <if test="paramMap.q_startDt != null and paramMap.q_startDt != ''">
+                AND A.BGNG_YMD = REPLACE(#{paramMap.q_startDt}, '-', '')
+             </if>
+             <if test="paramMap.q_searchKey != null and paramMap.q_searchKey != ''">
+                 <choose>
+                    <when test="paramMap.q_searchKey == '1001'">
+                        AND A.BGNG_YMD &gt; DATE_FORMAT(NOW(), '%Y%m%d')
+                    </when>
+                    <when test="paramMap.q_searchKey == '1002'">
+                        AND (A.BGNG_YMD &lt;= DATE_FORMAT(NOW(), '%Y%m%d')
+                                AND A.END_YMD &gt;= DATE_FORMAT(NOW(), '%Y%m%d'))
+                    </when>
+                    <when test="paramMap.q_searchKey == '1003'">
+                        AND A.END_YMD &lt; DATE_FORMAT(NOW(), '%Y%m%d')
+                    </when>
+                    <when test="paramMap.q_searchKey == '1004'">
+                        AND A.USE_YN = 'N' 
+                    </when>
+                 </choose>
+             </if>
+        </where>
+    </sql>
+    <select id="selectPopupList" parameterType="popupVo" resultType="popupVo">
+        SELECT
+            Y.*,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = Y.RGTR_ID) AS RGTR_NM,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = Y.MDFR_ID) AS UPDUSR_NM,
+            DATE_FORMAT(Y.BGNG_YMD_TMP, '%Y-%m-%d') AS BGNG_YMD,
+            DATE_FORMAT(Y.END_YMD_TMP, '%Y-%m-%d') AS END_YMD,
+            (STR_TO_DATE(DATE_FORMAT(NOW(), '%Y%m%d'),'%Y%m%d')) - STR_TO_DATE(Y.BGNG_YMD_TMP, '%Y%m%d') AS STATUS_BEGIN,
+            (STR_TO_DATE(DATE_FORMAT(NOW(), '%Y%m%d'),'%Y%m%d')) - STR_TO_DATE(Y.END_YMD_TMP, '%Y%m%d') AS STATUS_END
+        FROM (
+            SELECT  X.* FROM (
+                SELECT
+                <trim suffixOverrides=",">
+                    A.REG_SN,
+                    A.TTL,
+                    A.BGNG_YMD AS BGNG_YMD_TMP,
+                    A.END_YMD AS END_YMD_TMP,
+                    A.WDTH_SZ,
+                    A.VRTC_SZ,
+                    A.Y_AXIS,
+                    A.X_AXIS,
+                    A.SCROLL_YN,
+                    A.POPUP_SZ_CHG_YN,
+                    A.POPUP_TYPE_NO,
+                    A.POPUP_RPTT_SE_NO,
+                    A.WRT_TYPE_NM,
+                    A.SORT_SN,
+                    A.FILE_PATH_NM,
+                    A.FILE_SN,
+                    A.USE_YN,
+                    A.RGTR_ID,
+                    A.REG_DT,
+                    A.MDFR_ID,
+                    A.UPDT_DT,
+                </trim>
+                FROM
+                    TN_POPUP A
+                <include refid="incPopupWhere"/>
+                ORDER BY A.REG_DT DESC
+            ) X
+         ) Y
+         LIMIT #{paramMap.q_rowPerPage}
+         OFFSET #{paramMap.q_pagingStartNum}
+    </select>
+
+    <!-- 팝업 조회 목록 카운트 -->
+    <select id="selectPopupListCount" parameterType="popupVo" resultType="int">
+        SELECT
+            COUNT(A.REG_SN) AS TOTAL_COUNT
+        FROM
+            TN_POPUP A
+        <include refid="incPopupWhere"/>
+    </select>
+
+    <!-- 팝업 등록 -->
+    <insert id="insertPopup" parameterType="popupVo">
+        <selectKey order="BEFORE" keyProperty="regSn" resultType="int">
+            SELECT IFNULL(MAX(REG_SN), 0) + 1
+            FROM TN_POPUP
+        </selectKey>
+        INSERT INTO TN_POPUP (
+        <trim suffixOverrides=",">
+            REG_SN,
+            TTL,
+            BGNG_YMD,
+            END_YMD,
+            WDTH_SZ,
+            VRTC_SZ,
+            Y_AXIS,
+            X_AXIS,
+            SCROLL_YN,
+            POPUP_SZ_CHG_YN,
+            POPUP_TYPE_NO,
+            POPUP_RPTT_SE_NO,
+            WRT_TYPE_NM,
+            DOC_CONTS_CN,
+            SORT_SN,
+            FILE_PATH_NM,
+            FILE_SN,
+            USE_YN,
+            RGTR_ID,
+            REG_DT,
+        </trim>
+        ) VALUES (
+        <trim suffixOverrides=",">
+            #{regSn},
+            #{ttl},
+            #{bgngYmd},
+            #{endYmd},
+            #{wdthSz},
+            #{vrtcSz},
+            #{yAxis},
+            #{xAxis},
+            #{scrollYn},
+            #{popupSzChgYn},
+            #{popupTypeNo},
+            #{popupRpttSeNo},
+            #{wrtTypeNm},
+            #{docContsCn},
+            (SELECT SORT_SN FROM	
+            	(SELECT IFNULL(MAX(SORT_SN), 0) + 1 AS SORT_SN FROM TN_POPUP)A),
+            #{filePathNm},
+            #{fileSn},
+            #{useYn},
+            #{rgtrId},
+            NOW(),
+        </trim>
+        )
+    </insert>
+
+    <!-- 팝업 수정 -->
+    <update id="updatePopup" parameterType="popupVo">
+        UPDATE TN_POPUP 
+          <set>
+            TTL = #{ttl},
+            BGNG_YMD = #{bgngYmd},
+            END_YMD = #{endYmd},
+            WDTH_SZ = #{wdthSz},
+            VRTC_SZ = #{vrtcSz},
+            Y_AXIS = #{yAxis},
+            X_AXIS = #{xAxis},
+            SCROLL_YN = #{scrollYn},
+            POPUP_SZ_CHG_YN = #{popupSzChgYn},
+            POPUP_TYPE_NO = #{popupTypeNo},
+            POPUP_RPTT_SE_NO = #{popupRpttSeNo},
+            WRT_TYPE_NM = #{wrtTypeNm},
+            DOC_CONTS_CN = #{docContsCn},
+            <if test="filePathNm != null">
+            FILE_PATH_NM = #{filePathNm},
+            </if>
+            <if test="fileSn != null">
+            FILE_SN = #{fileSn},
+            </if>
+            USE_YN = #{useYn},
+            MDFR_ID = #{mdfrId},
+            UPDT_DT = NOW(),
+          </set>
+        WHERE
+             REG_SN = #{paramMap.q_regSn}
+    </update>
+
+    <!-- 팝업 삭제 -->
+    <delete id="deletePopup" parameterType="popupVo">
+        DELETE FROM TN_POPUP
+        WHERE
+             REG_SN = #{paramMap.q_regSn}
+    </delete>
+
+    <!-- 팝업 도메인 목록 -->
+    <select id="selectPopupDomnList" parameterType="popupVo" resultType="popupDomnVo">
+        SELECT
+            A.REG_SN,
+            A.SITE_SN,
+            B.SITE_NM,
+            B.SITE_EXPLN
+        FROM
+            TN_POPUP_DOMN A, TN_DOMN B
+        WHERE
+                A.SITE_SN = B.SITE_SN
+            AND A.REG_SN = #{regSn}
+    </select>
+
+    <!-- 팝업 도메인 등록 -->
+    <insert id="insertPopupDomn" parameterType="popupDomnVo">
+        INSERT INTO TN_POPUP_DOMN (
+            REG_SN,
+            SITE_SN
+        ) VALUES (
+            #{regSn},
+            #{siteSn}
+        )
+    </insert>
+
+    <!-- 팝업 도메인 삭제 -->
+    <delete id="deletePopupDomn" parameterType="popupVo">
+         DELETE FROM TN_POPUP_DOMN
+         WHERE
+                REG_SN = #{regSn}
+    </delete>
+
+</mapper>

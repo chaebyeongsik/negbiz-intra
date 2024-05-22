@@ -1,0 +1,486 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="zesinc.intra.code.CodeMapper">
+
+    <!-- 코드 중복 체크 -->
+    <select id="selectDplctChckCode" parameterType="codeVo" resultType="int">
+        SELECT
+            COUNT(A.CD_ID) AS CNT
+        FROM
+            TC_CODE A
+        WHERE
+        <choose>
+            <when test="paramMap.q_hghrkCdId == 'dummy'">
+                    A.HGHRK_CD_ID  = #{paramMap.q_cdId}
+            </when>
+            <otherwise>
+                 A.CD_ID = #{paramMap.q_cdId}
+             AND A.HGHRK_CD_ID = #{paramMap.q_hghrkCdId}
+            </otherwise>
+        </choose>
+    </select>
+
+    <!-- 코드선택 중복 체크 -->
+    <select id="selectDplctChckCodeChoice" parameterType="cdChcIdVo" resultType="int">
+        SELECT
+            COUNT(A.CD_CHC_ID) AS CNT
+        FROM
+            TC_CODE_CHOICE A
+        WHERE
+                A.HGHRK_CD_ID = #{paramMap.q_hghrkCdId}
+            AND A.CD_CHC_ID = #{paramMap.q_cdChcId}
+    </select>
+
+    <!-- 코드 조회 -->
+    <select id="selectCode" parameterType="codeVo" resultType="codeVo">
+        SELECT
+        <trim suffixOverrides=",">
+            A.CD_ID,
+            A.CD_NM,
+            A.UP_CD_ID,
+            A.HGHRK_CD_ID,
+            (SELECT CD_NM FROM TC_CODE WHERE HGHRK_CD_ID = A.HGHRK_CD_ID AND CD_ID = A.UP_CD_ID) AS UPPER_CODE_NM,
+            A.MTLNG_CD_NM,
+            A.CD_EXPLN,
+            A.SORT_SN,
+            A.PBADMS_STD_CD_ID,
+            A.PBADMS_STD_CD_YN,
+            A.USE_YN,
+            A.RGTR_ID,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.RGTR_ID) AS RGTR_NM,
+            A.REG_DT,
+            A.MDFR_ID,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.MDFR_ID) AS UPDUSR_NM,
+            A.UPDT_DT,
+            DECODE ((SELECT COUNT (1) FROM TC_CODE WHERE HGHRK_CD_ID = A.HGHRK_CD_ID AND UP_CD_ID = A.CD_ID), 0, '0', '1') AS isFolder
+        </trim>
+        FROM
+            TC_CODE A
+        WHERE
+                A.CD_ID = #{paramMap.q_cdId}
+            AND A.HGHRK_CD_ID = #{paramMap.q_hghrkCdId}
+    </select>
+
+    <!-- 코드 조회 -->
+    <select id="selectCodeTreeList" parameterType="codeVo" resultType="treeVo">
+        SELECT
+        <trim suffixOverrides=",">
+            A.HGHRK_CD_ID as baseKey,
+            A.CD_ID AS key,
+            A.CD_NM AS title,
+            A.USE_YN AS at,
+            DECODE ((SELECT COUNT (1) FROM TC_CODE WHERE HGHRK_CD_ID = A.HGHRK_CD_ID AND UP_CD_ID = A.CD_ID), 0, '0', '1') AS folder,
+            DECODE ((SELECT COUNT (1) FROM TC_CODE WHERE HGHRK_CD_ID = A.HGHRK_CD_ID AND UP_CD_ID = A.CD_ID), 0, '0', '1') AS lazy,
+        </trim>
+        FROM
+            TC_CODE A
+        WHERE
+                 A.UP_CD_ID = #{paramMap.q_upCdId}
+             <if test="paramMap.q_hghrkCdId != null">
+             AND A.HGHRK_CD_ID = #{paramMap.q_hghrkCdId}
+             </if>
+        ORDER BY SORT_SN
+    </select>
+
+    <!-- 최상위코드 목록 -->
+    <select id="selectHghrkCdIdList" parameterType="codeVo" resultType="codeVo">
+        SELECT
+            HGHRK_CD_ID,
+            CD_NM
+        FROM TC_CODE
+        WHERE
+                HGHRK_CD_ID = CD_ID
+            AND UP_CD_ID != 'dummy_root'
+        GROUP BY HGHRK_CD_ID, CD_NM
+        ORDER BY CD_NM ASC
+    </select>
+
+    <!-- 코드 목록 -->
+    <sql id="incCodeWhere">
+        <where>
+            <if test="paramMap.q_searchVal != null and paramMap.q_searchVal != ''">
+                AND A.CD_NM LIKE '%' ||  #{paramMap.q_searchVal} || '%'
+            </if>
+            <if test="paramMap.q_upCdId != null and paramMap.q_upCdId != ''">
+                AND A.UP_CD_ID = #{paramMap.q_upCdId}
+            </if>
+            <if test="paramMap.q_hghrkCdId != null and paramMap.q_hghrkCdId != ''">
+                AND A.HGHRK_CD_ID = #{paramMap.q_hghrkCdId}
+            </if>
+            <if test="paramMap.q_useYn != null and paramMap.q_useYn != ''">
+                AND A.USE_YN = #{paramMap.q_useYn}
+            </if>
+            <if test="paramMap.q_pbadmsStdCdYn != null and paramMap.q_pbadmsStdCdYn != ''">
+                AND A.PBADMS_STD_CD_YN = #{paramMap.q_pbadmsStdCdYn}
+            </if>
+        </where>
+    </sql>
+    <select id="selectCodeList" parameterType="codeVo" resultType="codeVo">
+        SELECT
+        <trim suffixOverrides=",">
+            A.CD_ID,
+            A.CD_NM,
+            A.UP_CD_ID,
+            (SELECT CD_NM FROM TC_CODE WHERE CD_ID = A.UP_CD_ID AND HGHRK_CD_ID = A.HGHRK_CD_ID) AS UPPER_CODE_NM,
+            A.MTLNG_CD_NM,
+            A.CD_EXPLN,
+            A.SORT_SN,
+            A.PBADMS_STD_CD_ID,
+            A.PBADMS_STD_CD_YN,
+            A.USE_YN,
+            A.RGTR_ID,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.RGTR_ID) AS RGTR_NM,
+            A.REG_DT,
+            A.MDFR_ID,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.MDFR_ID) AS UPDUSR_NM,
+            A.UPDT_DT,
+        </trim>
+        FROM
+            TC_CODE A
+        <include refid="incCodeWhere"/>
+        ORDER BY A.HGHRK_CD_ID, A.UP_CD_ID, A.SORT_SN
+    </select>
+
+    <!-- 코드 조회 목록 카운트 -->
+    <select id="selectCodeListCount" parameterType="codeVo" resultType="int">
+        SELECT
+            COUNT(A.CD_ID) AS TOTAL_COUNT
+        FROM
+            TC_CODE A
+        <include refid="incCodeWhere"/>
+    </select>
+
+    <!-- 엑셀저장 연계 쿼리 -->
+    <select id="selectCodeExcelList" parameterType="codeVo" resultType="hmap">
+        SELECT ROWNUM AS LOGSN
+             , AA.*
+          FROM (
+		        SELECT
+		        <trim suffixOverrides=",">
+		            A.CD_ID,
+		            A.CD_NM,
+		            A.UP_CD_ID,
+		            (SELECT CD_NM FROM TC_CODE WHERE CD_ID = A.UP_CD_ID AND HGHRK_CD_ID = A.HGHRK_CD_ID) AS UPPER_CODE_NM,
+		            A.HGHRK_CD_ID,
+		            (SELECT CD_NM FROM TC_CODE WHERE CD_ID = A.HGHRK_CD_ID AND HGHRK_CD_ID = A.HGHRK_CD_ID) AS HGHRK_CD_ID_NM,
+		            A.MTLNG_CD_NM,
+		            A.CD_EXPLN,
+		            A.PBADMS_STD_CD_ID,
+		            A.PBADMS_STD_CD_YN,
+		            DECODE(A.USE_YN, 'Y', '사용', '미사용') AS USE_YN,
+		            A.RGTR_ID,
+		            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.RGTR_ID) AS RGTR_NM,
+		            TO_CHAR(A.REG_DT, 'YYYY-MM-DD') AS REG_DT_STR,
+		            A.MDFR_ID,
+		            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.MDFR_ID) AS UPDUSR_NM,
+		            TO_CHAR(A.UPDT_DT, 'YYYY-MM-DD') AS UPDT_DT_STR,
+		        </trim>
+		        FROM
+		            TC_CODE A
+		        <include refid="incCodeWhere"/>
+		        ORDER BY A.HGHRK_CD_ID, A.UP_CD_ID, A.SORT_SN
+               ) AA
+    </select>
+
+    <!-- 코드 등록 -->
+    <insert id="insertCode" parameterType="codeVo">
+        <selectKey order="BEFORE" keyProperty="sortSn" resultType="int">
+            SELECT NVL(MAX(SORT_SN), 0) + 1
+            FROM TC_CODE
+            WHERE
+                 UP_CD_ID = #{paramMap.q_cdId}
+             <if test="paramMap.q_hghrkCdId != paramMap.q_dummy">
+             AND HGHRK_CD_ID = #{paramMap.q_hghrkCdId}
+             </if>
+        </selectKey>
+        INSERT INTO TC_CODE (
+        <trim suffixOverrides=",">
+            CD_ID,
+            CD_NM,
+            HGHRK_CD_ID,
+            UP_CD_ID,
+            MTLNG_CD_NM,
+            CD_EXPLN,
+            SORT_SN,
+            PBADMS_STD_CD_ID,
+            PBADMS_STD_CD_YN,
+            USE_YN,
+            RGTR_ID,
+            REG_DT,
+        </trim>
+        ) VALUES (
+        <trim suffixOverrides=",">
+            #{cdId},
+            #{cdNm},
+            #{hghrkCdId},
+            #{upCdId},
+            #{mtlngCdNm},
+            #{cdExpln},
+            #{sortSn},
+            #{pbadmsStdCdId},
+            'N',
+            #{useYn},
+            #{rgtrId},
+            SYSDATE,
+        </trim>
+        )
+    </insert>
+
+    <!-- 코드 수정 -->
+    <update id="updateCode" parameterType="codeVo">
+        UPDATE TC_CODE
+          <set>
+            CD_NM = #{cdNm},
+            MTLNG_CD_NM = #{mtlngCdNm},
+            CD_EXPLN = #{cdExpln},
+            PBADMS_STD_CD_ID = #{pbadmsStdCdId},
+            <if test="pbadmsStdCdYn != null and pbadmsStdCdYn != ''">
+                PBADMS_STD_CD_YN = #{pbadmsStdCdYn},
+            </if>
+            USE_YN = #{useYn},
+            MDFR_ID = #{mdfrId},
+            UPDT_DT = SYSDATE,
+          </set>
+        WHERE
+                CD_ID = #{paramMap.q_cdId}
+            AND HGHRK_CD_ID = #{paramMap.q_hghrkCdId}
+    </update>
+
+    <!-- 자식 코드 목록 조회 -->
+    <select id="selectChildCodeList" parameterType="codeVo" resultType="codeVo">
+        SELECT
+        <trim suffixOverrides=",">
+            A.CD_ID,
+            A.CD_NM,
+            A.UP_CD_ID,
+            A.HGHRK_CD_ID,
+            A.MTLNG_CD_NM,
+            A.CD_EXPLN,
+            A.SORT_SN,
+            A.PBADMS_STD_CD_ID,
+            A.PBADMS_STD_CD_YN,
+            A.USE_YN,
+            A.RGTR_ID,
+            A.REG_DT,
+            A.MDFR_ID,
+            A.UPDT_DT,
+        </trim>
+        FROM
+            TC_CODE A
+        WHERE
+                A.UP_CD_ID = #{paramMap.q_upCdId}
+            AND A.HGHRK_CD_ID = #{paramMap.q_hghrkCdId}
+            AND CD_ID != #{paramMap.q_cdId}
+        ORDER BY A.SORT_SN ASC
+    </select>
+
+    <!-- 코드 위치/정렬순서 수정 -->
+    <update id="updateCodeSortOrder" parameterType="codeVo">
+        UPDATE TC_CODE
+          <set>
+          HGHRK_CD_ID = #{hghrkCdId},
+          UP_CD_ID = #{upCdId},
+          SORT_SN =  #{sortSn}
+          </set>
+        WHERE
+                 CD_ID = #{cdId}
+             AND UP_CD_ID = #{upCdId}
+             AND HGHRK_CD_ID = #{hghrkCdId}
+    </update>
+
+    <!-- 코드 삭제 -->
+    <delete id="deleteCode" parameterType="codeVo">
+        DELETE FROM TC_CODE
+        WHERE
+                 CD_ID = #{paramMap.q_cdId}
+             AND HGHRK_CD_ID = #{paramMap.q_hghrkCdId}
+    </delete>
+
+    <!-- 코드선택 조회 -->
+    <select id="selectCodeChoice" parameterType="cdChcIdVo" resultType="cdChcIdVo">
+        SELECT
+        <trim suffixOverrides=",">
+            B.HGHRK_CD_ID,
+            B.CD_ID,
+            B.CD_CHC_ID,
+            B.LWRK_CD_ID,
+            A.CD_NM AS LWRK_CD_ID_NM,
+            B.RGTR_ID,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = B.RGTR_ID) AS RGTR_NM,
+            B.REG_DT,
+        </trim>
+        FROM
+            TC_CODE_CHOICE B, TC_CODE A
+        WHERE
+                A.HGHRK_CD_ID = B.HGHRK_CD_ID
+            AND B.LWRK_CD_ID = A.CD_ID
+            AND B.CD_ID = #{paramMap.q_cdId}
+            AND B.HGHRK_CD_ID = #{paramMap.q_hghrkCdId}
+            AND B.CD_CHC_ID = #{paramMap.q_cdChcId}
+        ORDER BY A.SORT_SN ASC
+    </select>
+
+    <!-- 코드선택 목록 -->
+    <select id="selectCodeChoiceList" parameterType="cdChcIdVo" resultType="cdChcIdVo">
+        SELECT
+        <trim suffixOverrides=",">
+            B.HGHRK_CD_ID,
+            B.CD_ID,
+            B.CD_CHC_ID,
+            B.LWRK_CD_ID
+        </trim>
+        FROM
+            TC_CODE_CHOICE B
+        WHERE
+                B.CD_ID = #{paramMap.q_cdId}
+            AND B.HGHRK_CD_ID = #{paramMap.q_hghrkCdId}
+            <if test="paramMap.q_cdChcId != null">
+            AND B.CD_CHC_ID = #{paramMap.q_cdChcId}
+            </if>
+    </select>
+
+    <!-- 코드선택별 코드 목록 -->
+    <select id="selectCodeChoiceCodeList" parameterType="cdChcIdVo" resultType="cdChcIdVo">
+        SELECT
+        <trim suffixOverrides=",">
+            A.CD_NM,
+            B.HGHRK_CD_ID,
+            B.CD_ID,
+            B.CD_CHC_ID,
+            B.LWRK_CD_ID
+        </trim>
+        FROM
+            TC_CODE A, TC_CODE_CHOICE B
+        WHERE
+                A.USE_YN = 'Y'
+            AND A.CD_ID = B.LWRK_CD_ID
+            AND B.CD_ID = #{paramMap.q_cdId}
+            AND B.HGHRK_CD_ID = #{paramMap.q_hghrkCdId}
+            <if test="paramMap.q_cdChcId != null">
+            AND B.CD_CHC_ID = #{paramMap.q_cdChcId}
+            </if>
+        ORDER BY A.SORT_SN ASC
+    </select>
+
+    <!-- 코드선택 목록그룹 -->
+    <select id="selectCodeChoiceGroupList" parameterType="cdChcIdVo" resultType="cdChcIdVo">
+        SELECT
+        <trim suffixOverrides=",">
+            B.HGHRK_CD_ID,
+            B.CD_ID,
+            B.CD_CHC_ID
+        </trim>
+        FROM
+            TC_CODE_CHOICE B
+        WHERE
+                B.CD_ID = #{paramMap.q_cdId}
+            AND B.HGHRK_CD_ID = #{paramMap.q_hghrkCdId}
+        GROUP BY B.HGHRK_CD_ID, B.CD_ID, B.CD_CHC_ID
+    </select>
+
+    <select id="selectCodeChoiceInsertTreeList" parameterType="cdChcIdVo" resultType="treeVo">
+        SELECT
+        <trim suffixOverrides=",">
+            A.CD_ID AS key,
+            A.CD_NM AS title,
+            A.HGHRK_CD_ID AS baseKey,
+            A.USE_YN AS useYn,
+            DECODE ((SELECT COUNT (1) FROM TC_CODE WHERE HGHRK_CD_ID = A.HGHRK_CD_ID AND UP_CD_ID = A.CD_ID), 0, '0', '1') AS folder,
+            DECODE ((SELECT COUNT (1) FROM TC_CODE WHERE HGHRK_CD_ID = A.HGHRK_CD_ID AND UP_CD_ID = A.CD_ID), 0, '0', '1') AS lazy,
+            '0' AS selected,
+            '0' AS unselectable,
+            A.UP_CD_ID AS value
+        </trim>
+        FROM
+            TC_CODE A
+        WHERE
+                 A.UP_CD_ID = #{paramMap.q_cdId}
+            AND A.USE_YN = 'Y'
+            AND A.HGHRK_CD_ID = #{paramMap.q_hghrkCdId}
+        ORDER BY A.SORT_SN
+    </select>
+
+    <select id="selectCodeChoiceUpdateTreeList" parameterType="cdChcIdVo" resultType="treeVo">
+        SELECT
+        <trim suffixOverrides=",">
+            A.CD_ID AS key,
+            A.CD_NM AS title,
+            A.HGHRK_CD_ID AS baseKey,
+            A.USE_YN AS useYn,
+            DECODE ((SELECT COUNT (1) FROM TC_CODE WHERE HGHRK_CD_ID = A.HGHRK_CD_ID AND UP_CD_ID = A.CD_ID), 0, '0', '1') AS folder,
+            DECODE ((SELECT COUNT (1) FROM TC_CODE WHERE HGHRK_CD_ID = A.HGHRK_CD_ID AND UP_CD_ID = A.CD_ID), 0, '0', '1') AS lazy,
+            DECODE ((SELECT COUNT(CD_ID) FROM TC_CODE_CHOICE WHERE HGHRK_CD_ID = A.HGHRK_CD_ID AND LWRK_CD_ID = A.CD_ID AND CD_CHC_ID = #{paramMap.q_cdChcId}), 0, '0', '1') AS selected,
+            '0' AS unselectable,
+            A.UP_CD_ID AS value
+        </trim>
+        FROM
+            TC_CODE A
+        WHERE
+                 A.UP_CD_ID = #{paramMap.q_cdId}
+            AND A.USE_YN = 'Y'
+            AND A.HGHRK_CD_ID = #{paramMap.q_hghrkCdId}
+        ORDER BY A.SORT_SN
+    </select>
+
+    <!-- 코드선택 등록 -->
+    <insert id="insertCodeChoice" parameterType="cdChcIdVo">
+        INSERT INTO TC_CODE_CHOICE (
+        <trim suffixOverrides=",">
+            HGHRK_CD_ID,
+            CD_ID,
+            CD_CHC_ID,
+            LWRK_CD_ID,
+            RGTR_ID,
+            REG_DT,
+        </trim>
+        ) VALUES (
+        <trim suffixOverrides=",">
+            #{hghrkCdId},
+            #{cdId},
+            #{cdChcId},
+            #{lwrkCdId},
+            #{rgtrId},
+            SYSDATE,
+        </trim>
+        )
+    </insert>
+
+    <!-- 코드선택 삭제 -->
+    <delete id="deleteCodeChoice" parameterType="cdChcIdVo">
+        DELETE FROM TC_CODE_CHOICE
+        WHERE
+                CD_ID = #{paramMap.q_cdId}
+            AND HGHRK_CD_ID = #{paramMap.q_hghrkCdId}
+            <if test="paramMap.q_cdChcId != null and paramMap.q_cdChcId != ''">
+            AND CD_CHC_ID = #{paramMap.q_cdChcId}
+            </if>
+            <if test="paramMap.q_lwrkCdId != null and paramMap.q_lwrkCdId != ''">
+            AND LWRK_CD_ID = #{paramMap.q_lwrkCdId}
+            </if>
+    </delete>
+
+    <!-- 코드선택 목록 -->
+    <select id="selectCodeAndCodeChoiceList" parameterType="cdChcIdVo" resultType="cdChcIdVo">
+        SELECT
+        <trim suffixOverrides=",">
+            B.HGHRK_CD_ID,
+            B.CD_ID,
+            B.CD_CHC_ID,
+            B.LWRK_CD_ID
+        </trim>
+        FROM
+            TC_CODE_CHOICE B
+        WHERE
+                HGHRK_CD_ID = #{paramMap.q_hghrkCdId}
+            AND (CD_ID = #{paramMap.q_cdId} OR LWRK_CD_ID = #{paramMap.q_cdId})
+    </select>
+
+    <!-- 코드삭제에 따른 코드선택 삭제 -->
+    <delete id="deleteCodeAndCodeChoice" parameterType="cdChcIdVo">
+        DELETE FROM TC_CODE_CHOICE
+        WHERE
+                HGHRK_CD_ID = #{paramMap.q_hghrkCdId}
+            AND (CD_ID = #{paramMap.q_cdId} OR LWRK_CD_ID = #{paramMap.q_cdId})
+    </delete>
+
+</mapper>

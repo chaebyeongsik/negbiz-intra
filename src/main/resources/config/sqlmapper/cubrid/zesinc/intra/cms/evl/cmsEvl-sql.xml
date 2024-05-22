@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="zesinc.intra.cms.evl.CmsEvlMapper">
+
+    <!-- 사용자메뉴평가 목록 -->
+    <sql id="incCmsEvlWhere">
+        <where>
+                A.SITE_SN = #{paramMap.q_siteSn}
+            AND A.USER_MENU_ENG_NM = #{paramMap.q_userMenuEngNm}
+            <if test="paramMap.q_startDt != null and paramMap.q_startDt != ''">
+            AND REG_YMD &gt;= REPLACE(#{paramMap.q_startDt}, '-', '')
+            </if>
+            <if test="paramMap.q_endDt != null and paramMap.q_endDt != ''">
+            AND REG_YMD &lt;= REPLACE(#{paramMap.q_endDt}, '-', '')
+            </if>
+        </where>
+    </sql>
+    <select id="selectCmsEvlList" parameterType="cmsEvlVo" resultType="cmsEvlVo">
+        SELECT
+        <trim suffixOverrides=",">
+            A.SITE_SN,
+            A.USER_MENU_ENG_NM,
+            A.ARTCL_SN,
+            SUM(A.SUM_SCR) AS SUM_SCR,
+            SUM(A.WHOL_RSPNS_CNT) AS WHOL_RSPNS_CNT
+        </trim>
+        FROM
+            TN_USER_MENU_EVL A
+        <include refid="incCmsEvlWhere"/>
+        GROUP BY A.SITE_SN, A.USER_MENU_ENG_NM, A.ARTCL_SN
+        ORDER BY A.ARTCL_SN DESC
+    </select>
+
+    <select id="selectCmsEvlChartList" parameterType="cmsEvlVo" resultType="barChartVo">
+        SELECT
+	            CASE WHEN ARTCL_SN = 5
+	            	 THEN '매우만족'
+	            	 WHEN ARTCL_SN = 4
+	            	 THEN '만족'
+	            	 WHEN ARTCL_SN = 3
+	            	 THEN '보통'
+	            	 WHEN ARTCL_SN = 2
+	            	 THEN '불만족'
+	            	 WHEN ARTCL_SN = 1
+	            	 THEN '매우불만족'
+	            	 ELSE ''
+	            END AS LABEL,
+	            VALUE
+        FROM (
+            SELECT
+            <trim suffixOverrides=",">
+                A.ARTCL_SN,
+                SUM(A.WHOL_RSPNS_CNT) AS "value"
+            </trim>
+            FROM
+                TN_USER_MENU_EVL A
+            <include refid="incCmsEvlWhere"/>
+            GROUP BY A.ARTCL_SN
+            ORDER BY A.ARTCL_SN DESC
+        )
+    </select>
+
+    <!-- 사용자메뉴평가상세 목록 -->
+    <sql id="incCmsEvlDetailWhere">
+        <where>
+                B.SITE_SN = #{paramMap.q_siteSn}
+            AND B.USER_MENU_ENG_NM = #{paramMap.q_userMenuEngNm}
+            AND B.ARTCL_SN = #{paramMap.q_artclSn}
+            <if test="paramMap.q_startDt != null and paramMap.q_startDt != ''">
+            AND B.REG_DT &gt;= REPLACE(#{paramMap.q_startDt}, '-', '')
+            </if>
+            <if test="paramMap.q_endDt != null and paramMap.q_endDt != ''">
+            AND B.REG_DT &lt;= REPLACE(#{paramMap.q_endDt}, '-', '')
+            </if>
+        </where>
+    </sql>
+    <select id="selectCmsEvlDetailList" parameterType="cmsEvlVo" resultType="cmsEvlVo">
+        SELECT Y.* FROM (
+            SELECT ROWNUM NUM, X.* FROM (
+                SELECT
+                <trim suffixOverrides=",">
+                    B.SITE_SN,
+                    B.USER_MENU_ENG_NM,
+                    B.ARTCL_SN,
+                    B.REG_SN,
+                    B.OPNN_CN,
+                    B.RGTR_IP_ADDR,
+                    B.RGTR_NM,
+                    B.RGTR_ID,
+                    B.REG_DT,
+                </trim>
+                FROM
+                    TN_USER_MENU_EVL_DETAIL B
+                <include refid="incCmsEvlDetailWhere"/>
+                ORDER BY B.SITE_SN ASC, B.USER_MENU_ENG_NM ASC
+            ) X
+            WHERE ROWNUM &lt;= #{paramMap.q_pagingEndNum}
+         ) Y
+         WHERE NUM &gt;= #{paramMap.q_pagingStartNum}
+    </select>
+
+    <!-- 사용자메뉴평가상세 조회 목록 카운트 -->
+    <select id="selectCmsEvlDetailListCount" parameterType="cmsEvlVo" resultType="int">
+        SELECT
+            COUNT(B.SITE_SN) AS TOTAL_COUNT
+        FROM
+            TN_USER_MENU_EVL_DETAIL B
+        <include refid="incCmsEvlDetailWhere"/>
+    </select>
+
+
+    <!-- 사용자메뉴평가 목록 -->
+    <sql id="incCmsEvlAllWhere">
+        <where>
+                A.MENU_LVL_SN &gt;= 0 
+            <if test="paramMap.q_siteSn != null and paramMap.q_siteSn != ''">
+                AND A.SITE_SN = #{paramMap.q_siteSn}
+            </if>
+            <if test="paramMap.q_menuNm != null and paramMap.q_menuNm != ''">
+                AND A.MENU_PATH_NM LIKE '%' || #{paramMap.q_menuNm} || '%'
+            </if>
+            <if test="paramMap.q_startDt != null and paramMap.q_startDt != ''">
+                AND B.REG_YMD &gt;= REPLACE(#{paramMap.q_startDt}, '-', '')
+            </if>
+            <if test="paramMap.q_endDt != null and paramMap.q_endDt != ''">
+                AND B.REG_YMD &lt;= REPLACE(#{paramMap.q_endDt}, '-', '')
+            </if>
+        </where>
+    </sql>
+    <sql id="incCmsEvlAllOrderBy">
+        <choose>
+            <when test="paramMap.q_sortTar != null and paramMap.q_sortTar != ''">
+                ORDER BY 
+                <choose>
+                    <when test="paramMap.q_sortTar == '1010'">
+                        A.MENU_PATH_NM
+                    </when>
+                    <when test="paramMap.q_sortTar == '1020'">
+                        SUM_SCR
+                    </when>
+                    <when test="paramMap.q_sortTar == '1030'">
+                        WHOL_RSPNS_CNT
+                    </when>
+                    <when test="paramMap.q_sortTar == '1040'">
+                        ALL_AVG
+                    </when>
+                </choose>
+                <choose>
+                    <when test="paramMap.q_sortDir == 'desc'">
+                        DESC
+                    </when>
+                    <otherwise>
+                        ASC
+                    </otherwise>
+                </choose>
+            </when>
+            <otherwise>
+                ORDER BY A.MENU_PATH_NM ASC
+            </otherwise>
+        </choose>
+    </sql>
+    <select id="selectCmsEvlAllList" parameterType="cmsEvlVo" resultType="cmsEvlVo">
+        SELECT
+            Y.SITE_SN,
+            (SELECT SITE_NM FROM TN_DOMN WHERE SITE_SN = Y.SITE_SN) AS SITE_NM,
+            (SELECT SITE_EXPLN FROM TN_DOMN WHERE SITE_SN = Y.SITE_SN) AS SITE_EXPLN,
+            (SELECT DEPT_NM FROM TN_DEPT WHERE DEPT_CD_ID = Y.AUTHRT_DEPT_CD_ID) AS AUTHOR_DEPT_NM,
+            Y.USER_MENU_ENG_NM,
+            Y.MENU_PATH_NM,
+            (SELECT AUTHRT_GROUP_NM FROM TN_USER_MENU WHERE SITE_SN = Y.SITE_SN AND USER_MENU_ENG_NM = Y.USER_MENU_ENG_NM) AS AUTHRT_GROUP_NM,
+            Y.SUM_SCR AS SUM_SCR,
+            Y.WHOL_RSPNS_CNT AS WHOL_RSPNS_CNT,
+            ALL_AVG
+        FROM (
+            SELECT ROWNUM NUM, X.* FROM (
+                SELECT
+                <trim suffixOverrides=",">
+                    A.SITE_SN,
+                    A.USER_MENU_ENG_NM,
+                    A.AUTHRT_DEPT_CD_ID,
+                    A.MENU_PATH_NM,
+                    NVL(SUM(B.SUM_SCR), 0) AS SUM_SCR,
+                    NVL(SUM(B.WHOL_RSPNS_CNT), 0) AS WHOL_RSPNS_CNT,
+                    NVL(AVG(B.SUM_SCR / B.WHOL_RSPNS_CNT), 0) AS ALL_AVG
+                </trim>
+                FROM
+                    TN_USER_MENU A LEFT OUTER JOIN TN_USER_MENU_EVL B
+                ON
+                    A.SITE_SN = B.SITE_SN
+                AND A.USER_MENU_ENG_NM = B.USER_MENU_ENG_NM
+                <include refid="incCmsEvlAllWhere"/>
+                GROUP BY A.SITE_SN, A.USER_MENU_ENG_NM, A.MENU_PATH_NM, A.AUTHRT_DEPT_CD_ID
+                <include refid="incCmsEvlAllOrderBy"/>
+            ) X
+            WHERE ROWNUM &lt;= #{paramMap.q_pagingEndNum}
+         ) Y
+         WHERE NUM &gt;= #{paramMap.q_pagingStartNum}
+    </select>
+
+    <!-- 사용자메뉴평가조회 목록 카운트 -->
+    <select id="selectCmsEvlAllListCount" parameterType="cmsEvlVo" resultType="int">
+        SELECT
+            COUNT(1) AS TOTAL_COUNT
+        FROM (
+            SELECT
+                1
+            FROM
+                TN_USER_MENU A LEFT OUTER JOIN TN_USER_MENU_EVL B
+            ON
+                A.SITE_SN = B.SITE_SN
+            AND A.USER_MENU_ENG_NM = B.USER_MENU_ENG_NM
+            <include refid="incCmsEvlAllWhere"/>
+            GROUP BY A.SITE_SN, A.USER_MENU_ENG_NM, A.MENU_PATH_NM, A.TKCG_DEPT_CD_ID
+        )
+    </select>
+
+    <!-- 메뉴 관리담당자 목록 반환 -->
+    <select id="selectAuthorChargerList" parameterType="hmap" resultType="cmsOrgVo">
+        SELECT
+            A.AUTHRT_PIC_ID,
+            (SELECT DEPT_NM FROM TN_DEPT WHERE DEPT_CD_ID = B.DEPT_CD_ID) AS DEPT_NM,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.AUTHRT_PIC_ID) AS AUTHOR_PIC_NM
+        FROM
+            TN_USER_MENU_AUTHOR A, TN_MNGR B
+        WHERE
+                A.AUTHRT_PIC_ID = B.PIC_ID 
+            AND A.SITE_SN = #{siteSn}
+            AND A.USER_MENU_ENG_NM = #{userMenuEngNm}
+    </select>
+</mapper>

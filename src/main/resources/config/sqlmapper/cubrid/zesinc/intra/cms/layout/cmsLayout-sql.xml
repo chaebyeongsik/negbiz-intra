@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="zesinc.intra.cms.layout.CmsLayoutMapper">
+
+    <!-- 코드 중복 체크 -->
+    <select id="selectDplctChckCode" parameterType="cmsLayoutVo" resultType="int">
+        SELECT
+            COUNT(A.LYT_CD_NO) AS CNT
+        FROM
+            TN_USER_MENU_LAYOUT A
+        WHERE
+                A.SITE_SN = #{paramMap.q_siteSn}
+            AND A.LYT_CD_NO = #{paramMap.q_lytCdNo}
+    </select>
+
+    <!-- 사용자메뉴레이아웃 조회 -->
+    <select id="selectCmsLayout" parameterType="cmsLayoutVo" resultType="cmsLayoutVo">
+        SELECT
+        <trim suffixOverrides=",">
+            A.SITE_SN,
+            (SELECT SITE_NM FROM TN_DOMN WHERE SITE_SN = A.SITE_SN) AS SITE_NM,
+            (SELECT SITE_EXPLN FROM TN_DOMN WHERE SITE_SN = A.SITE_SN) AS SITE_EXPLN,
+            A.LYT_CD_NO,
+            A.LYT_NM,
+            A.LYT_CONTS_CN,
+            A.FILE_PATH_NM,
+            A.RGTR_ID,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.RGTR_ID) AS RGTR_NM,
+            A.REG_DT,
+            A.MDFR_ID,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.MDFR_ID) AS UPDUSR_NM,
+            A.UPDT_DT,
+        </trim>
+        FROM
+            TN_USER_MENU_LAYOUT A
+        WHERE
+                A.SITE_SN = #{paramMap.q_siteSn}
+            AND A.LYT_CD_NO = #{paramMap.q_lytCdNo}
+    </select>
+
+    <!-- 사용자메뉴레이아웃 목록 검색조건 -->
+    <sql id="incCmsLayoutWhere">
+        <where>
+            <if test="paramMap.q_siteSn != null and paramMap.q_siteSn != ''">
+                AND A.SITE_SN = #{paramMap.q_siteSn}
+            </if>
+        </where>
+    </sql>
+
+    <!-- 사용자메뉴 레이아웃 목록 -->
+    <select id="selectCmsLayoutList" parameterType="cmsLayoutVo" resultType="cmsLayoutVo">
+        SELECT
+        <trim suffixOverrides=",">
+            A.SITE_SN,
+            (SELECT SITE_NM FROM TN_DOMN WHERE SITE_SN = A.SITE_SN) AS SITE_NM,
+            (SELECT SITE_EXPLN FROM TN_DOMN WHERE SITE_SN = A.SITE_SN) AS SITE_EXPLN,
+            A.LYT_CD_NO,
+            A.LYT_NM,
+            A.FILE_PATH_NM
+        </trim>
+        FROM
+            TN_USER_MENU_LAYOUT A
+        <include refid="incCmsLayoutWhere"/>
+    </select>
+
+    <!-- 사용자메뉴레이아웃 페이징 목록 -->
+    <select id="selectCmsLayoutPageList" parameterType="cmsLayoutVo" resultType="cmsLayoutVo">
+        SELECT
+            Y.*,
+            (SELECT SITE_NM FROM TN_DOMN WHERE SITE_SN = Y.SITE_SN) AS SITE_NM,
+            (SELECT SITE_EXPLN FROM TN_DOMN WHERE SITE_SN = Y.SITE_SN) AS SITE_EXPLN,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = Y.RGTR_ID) AS RGTR_NM,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = Y.MDFR_ID) AS UPDUSR_NM
+        FROM (
+            SELECT ROWNUM NUM, X.* FROM (
+                SELECT
+                <trim suffixOverrides=",">
+                    A.SITE_SN,
+                    A.LYT_CD_NO,
+                    A.LYT_NM,
+                    A.FILE_PATH_NM,
+                    A.RGTR_ID,
+                    A.REG_DT,
+                    A.MDFR_ID,
+                    A.UPDT_DT,
+                </trim>
+                FROM
+                    TN_USER_MENU_LAYOUT A
+                <include refid="incCmsLayoutWhere"/>
+                ORDER BY A.SITE_SN ASC, A.LYT_NM ASC
+            ) X
+            WHERE ROWNUM &lt;= #{paramMap.q_pagingEndNum}
+         ) Y
+         WHERE NUM &gt;= #{paramMap.q_pagingStartNum}
+    </select>
+
+    <!-- 사용자메뉴레이아웃 조회 목록 카운트 -->
+    <select id="selectCmsLayoutPageListCount" parameterType="cmsLayoutVo" resultType="int">
+        SELECT
+            COUNT(A.SITE_SN) AS TOTAL_COUNT
+        FROM
+            TN_USER_MENU_LAYOUT A
+        <include refid="incCmsLayoutWhere"/>
+    </select>
+
+    <!-- 사용자메뉴레이아웃 등록 -->
+    <insert id="insertCmsLayout" parameterType="cmsLayoutVo">
+        INSERT INTO TN_USER_MENU_LAYOUT (
+        <trim suffixOverrides=",">
+            SITE_SN,
+            LYT_CD_NO,
+            LYT_NM,
+            LYT_CONTS_CN,
+            FILE_PATH_NM,
+            RGTR_ID,
+            REG_DT,
+        </trim>
+        ) VALUES (
+        <trim suffixOverrides=",">
+            #{siteSn},
+            #{lytCdNo},
+            #{lytNm},
+            #{lytContsCn},
+            #{filePathNm},
+            #{rgtrId},
+            SYSDATETIME,
+        </trim>
+        )
+    </insert>
+
+    <!-- 사용자메뉴레이아웃 수정 -->
+    <update id="updateCmsLayout" parameterType="cmsLayoutVo">
+        UPDATE TN_USER_MENU_LAYOUT 
+          <set>
+            LYT_NM = #{lytNm},
+            LYT_CONTS_CN = #{lytContsCn},
+            FILE_PATH_NM = #{filePathNm},
+            MDFR_ID = #{mdfrId},
+            UPDT_DT = SYSDATETIME,
+          </set>
+        WHERE
+                SITE_SN = #{paramMap.q_siteSn}
+            AND LYT_CD_NO = #{paramMap.q_lytCdNo}
+    </update>
+
+    <!-- 사용자메뉴레이아웃 삭제 -->
+    <delete id="deleteCmsLayout" parameterType="cmsLayoutVo">
+        DELETE FROM TN_USER_MENU_LAYOUT
+        WHERE
+                SITE_SN = #{paramMap.q_siteSn}
+            AND LYT_CD_NO = #{paramMap.q_lytCdNo}
+    </delete>
+
+</mapper>

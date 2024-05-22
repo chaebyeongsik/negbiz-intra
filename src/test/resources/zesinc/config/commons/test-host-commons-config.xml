@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+    <host-config>
+        <kr.localhost>ko</kr.localhost>
+        <jp.localhost>ja</jp.localhost>
+        <ch.localhost>zh</ch.localhost>
+        <en.localhost>en</en.localhost>
+    </host-config>
+</configuration>

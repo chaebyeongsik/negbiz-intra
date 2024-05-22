@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="zesinc.common.cache.domn.DomnCacheMapper">
+
+    <!-- 도메인 조회 -->
+    <select id="selectDomnList" parameterType="domnCacheVo" resultType="domnCacheVo">
+        SELECT
+        <trim suffixOverrides=",">
+            A.SITE_SN,
+            A.SITE_NM,
+            A.SITE_EXPLN,
+            A.PORT_SN,
+            A.SITE_PATH_NM,
+            A.LANG_CD_ID,
+            A.TKCG_DEPT_CD_ID,
+            A.PIC_ID,
+            A.HTTPS_YN,
+            CASE WHEN A.HTTPS_YN = 'Y' AND A.SCRTY_PORT_SN IS NULL THEN 443
+                 ELSE A.SCRTY_PORT_SN
+            END AS SCRTY_PORT_SN,
+            A.ACTL_STNG_YN,
+            A.USE_YN
+        </trim>
+        FROM
+            TN_DOMN A
+        WHERE
+                 A.USE_YN = #{useYn}
+        ORDER BY SITE_SN
+    </select>
+
+    <!-- 도메인그룹 목록 -->
+    <select id="selectDomnGroupList" parameterType="domnCacheVo" resultType="domnGroupCacheVo">
+        SELECT
+            B.SITE_SN,
+            B.SRVR_IP_ADDR,
+            B.GROUP_PORT_SN
+        FROM
+            TN_DOMN_GROUP B
+        WHERE
+                B.SITE_SN = #{siteSn}
+    </select>
+
+</mapper>

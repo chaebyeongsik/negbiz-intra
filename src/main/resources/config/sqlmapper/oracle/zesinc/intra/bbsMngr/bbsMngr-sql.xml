@@ -1,0 +1,466 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="zesinc.intra.bbsMngr.BbsMngrMapper">
+
+    <!-- 게시판에 속한 모든 첨부파일 목록 : 게시판 삭제시 첨부파일삭제용 -->
+    <select id="selectBbsFileList" parameterType="bbsMngrVo" resultType="int">
+        SELECT
+            FILE_SN
+        FROM
+            TN_BBS
+        WHERE
+                BBS_SN = #{bbsSn}
+            AND FILE_SN != ''
+            AND FILE_SN &gt;= 0
+    </select>
+
+    <!-- 게시판에 속한 모든 첨부파일 목록 : 썸네일 생성용 -->
+    <select id="selectBbsImgFileList" parameterType="bbsMngrVo" resultType="fileVo">
+        SELECT Y.* FROM (
+            SELECT ROWNUM NUM, X.* FROM (
+                SELECT
+                    A.FILE_SN,
+                    A.FILE_ID,
+                    A.SORT_SN,
+                    A.ORGNL_FILE_NM,
+                    A.SRVR_FILE_NM,
+                    A.FILE_URL_ADDR,
+                    A.THMB_PATH_NM,
+                    A.FILE_TYPE_NM,
+                    A.FILE_EXTN_NM,
+                    B.TTL AS FILE_EXPLN,
+                    B.BBS_DOC_NO AS INPT_DATA_NM
+                FROM
+                    TN_FILE A, TN_BBS B
+                WHERE
+                        A.FILE_SN = B.FILE_SN
+                    AND B.BBS_SN = #{paramMap.q_bbsSn}
+                    <if test='paramMap.isNew == "Y"'>
+                    AND (
+                        A.THMB_PATH_NM IS NULL OR
+                        A.THMB_PATH_NM = ''
+                    )
+                    </if>
+                    <if test="paramMap.q_bbsDocNo != null and paramMap.q_bbsDocNo != ''">
+                        AND B.BBS_DOC_NO = #{paramMap.q_bbsDocNo}
+                    </if>
+                    AND LOWER(A.FILE_EXTN_NM) IN
+                    <foreach collection="paramMap.extsnList" item="extsn" open="(" close=")" separator=",">
+                        #{extsn}
+                    </foreach>
+                ORDER BY B.BBS_DOC_NO DESC, A.FILE_SN ASC
+            ) X
+            WHERE ROWNUM &lt;= #{paramMap.q_pagingEnd}
+         ) Y
+         WHERE NUM &gt;= #{paramMap.q_pagingStart}
+    </select>
+
+    <!-- 섬네일 생성 후 생성정보를 통한 업데이트 -->
+    <update id="updateBbsImgThumbCours">
+        UPDATE TN_FILE SET
+            THMB_PATH_NM = #{thmbPathNm}
+        WHERE
+                FILE_SN = #{fileSn}
+            AND FILE_ID = #{fileId}
+    </update>
+
+    <!-- 게시판템플릿 목록 -->
+    <select id="selectBbsTmplatList" parameterType="string" resultType="bbsTmplatVo">
+        SELECT
+            A.TMPLT_TYPE_CD,
+            A.TMPLT_ID,
+            A.TMPLT_NM,
+            A.TMPLT_SCRN_PATH_NM,
+            A.DATA_FILE_SN,
+            A.FILE_SN,
+            A.TMPLT_FILE_PATH_NM,
+            A.TMPLT_SCRN_PATH_NM,
+            A.USE_YN,
+            A.RGTR_ID,
+            A.REG_DT,
+            A.MDFR_ID,
+            A.UPDT_DT
+        FROM TN_BBS_TMPLAT A
+        WHERE
+                A.TMPLT_TYPE_CD = #{tmpltTypeCd}
+            AND A.USE_YN = 'Y'
+        ORDER BY A.TMPLT_NM ASC
+    </select>
+
+    <!-- 게시판 도메인 조회 목록 -->
+    <select id="selectBbsDomnList" parameterType="bbsMngrVo" resultType="bbsMngrVo">
+        SELECT
+            A.BBS_SN,
+            A.SITE_SN,
+            A.LST_TMPLT_NM,
+            A.PST_TMPLT_NM,
+            A.INPT_TMPLT_NM
+        FROM
+            TN_BBS_DOMN A
+        WHERE A.BBS_SN = #{paramMap.q_bbsSn}
+    </select>
+
+    <select id="selectBbsSetupList" parameterType="bbsMngrVo" resultType="bbsMngrVo">
+        SELECT
+            A.BBS_STNG_SN,
+            A.BBS_STNG_NM,
+            A.BBS_STNG_EXPLN,
+            A.USE_YN
+        FROM
+            TN_BBS_MAIN_SETUP A
+        ORDER BY A.BBS_STNG_NM ASC
+    </select>
+
+    <!-- 게시판설정 조회 -->
+    <select id="selectBbsMngr" parameterType="bbsMngrVo" resultType="bbsMngrVo">
+        SELECT
+        <trim suffixOverrides=",">
+            A.BBS_SN,
+            A.BBS_STNG_SN,
+            A.BBS_NM,
+            A.BBS_EXPLN,
+            A.NTC_USE_YN,
+            A.PSTG_USE_YN,
+            A.CLSF_USE_YN,
+            A.NFEED_USE_YN,
+            A.SORT_SN,
+            A.USE_YN,
+            A.PRVC_CLCT_AGRE_YN,
+            A.PRVC_DEL_SE_CD,
+            TO_CHAR(TO_DATE(A.PRVC_DEL_YMD, 'YYYYMMDD'), 'YYYY-MM-DD') AS PRVC_DEL_YMD,
+            A.PRVC_STRG_DAY_CNT,
+            A.RGTR_ID,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.RGTR_ID) AS RGTR_NM,
+            A.REG_DT,
+            A.MDFR_ID,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.MDFR_ID) AS UPDUSR_NM,
+            A.UPDT_DT,
+        </trim>
+        FROM
+            TN_BBS_SETUP A
+        WHERE
+                 A.BBS_SN = #{paramMap.q_bbsSn}
+    </select>
+
+    <!-- 게시판설정 목록 -->
+    <sql id="incBbsMngrWhere">
+        <where>
+            <if test="paramMap.q_searchVal != null  and paramMap.q_searchVal != ''">
+                <if test="paramMap.q_searchKey == 1001">
+                    AND A.BBS_NM LIKE '%' || #{paramMap.q_searchVal} || '%'
+                </if>
+                <if test="paramMap.q_searchKey == 1002">
+                    AND A.BBS_SN = #{paramMap.q_searchVal}
+                </if>
+             </if>
+            <if test="paramMap.q_siteSn != null and paramMap.q_siteSn != ''">
+                AND EXISTS (SELECT 1 FROM TN_BBS_DOMN WHERE BBS_SN = A.BBS_SN AND SITE_SN = #{paramMap.q_siteSn})
+            </if>
+            <if test="paramMap.q_bbsStngSn != null and paramMap.q_bbsStngSn != ''">
+                AND EXISTS (SELECT 1 FROM TN_BBS_MAIN_SETUP WHERE BBS_STNG_SN = A.BBS_STNG_SN AND A.BBS_STNG_SN = #{paramMap.q_bbsStngSn})
+            </if>
+        </where>
+    </sql>
+    <select id="selectBbsMngrList" parameterType="bbsMngrVo" resultType="bbsMngrVo">
+        SELECT
+            Y.*,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = Y.RGTR_ID) AS RGTR_NM,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = Y.MDFR_ID) AS UPDUSR_NM,
+            (SELECT COUNT(BBS_DOC_NO) FROM TN_BBS
+                WHERE BBS_SN = Y.BBS_SN) AS BBSCTT_CO,
+            (SELECT COUNT(BBS_DOC_NO) FROM TN_BBS_CMNT
+                WHERE BBS_SN = Y.BBS_SN) AS OPATCL_CO,
+            (SELECT COUNT(Y.SORT_SN) FROM TN_BBS X, TN_FILE W
+                WHERE X.BBS_SN = Y.BBS_SN AND X.FILE_SN = W.FILE_SN) AS FILE_CO
+        FROM (
+            SELECT ROWNUM NUM, X.* FROM (
+                SELECT
+                <trim suffixOverrides=",">
+                    A.BBS_SN,
+                    A.BBS_STNG_SN,
+                    A.BBS_NM,
+                    A.BBS_EXPLN,
+                    A.NTC_USE_YN,
+                    A.PSTG_USE_YN,
+                    A.CLSF_USE_YN,
+                    A.NFEED_USE_YN,
+                    A.SORT_SN,
+                    A.USE_YN,
+                    A.RGTR_ID,
+                    A.REG_DT,
+                    A.MDFR_ID,
+                    A.UPDT_DT,
+                </trim>
+                FROM
+                    TN_BBS_SETUP A
+                <include refid="incBbsMngrWhere"/>
+                ORDER BY A.SORT_SN ASC
+            ) X
+            WHERE ROWNUM &lt;= #{paramMap.q_pagingEndNum}
+         ) Y
+         WHERE NUM &gt;= #{paramMap.q_pagingStartNum}
+    </select>
+
+    <!-- 게시판설정 조회 목록 카운트 -->
+    <select id="selectBbsMngrListCount" parameterType="bbsMngrVo" resultType="int">
+        SELECT
+            COUNT(A.BBS_SN) AS TOTAL_COUNT
+        FROM
+            TN_BBS_SETUP A
+        <include refid="incBbsMngrWhere"/>
+    </select>
+
+    <!-- 게시판설정 등록 -->
+    <insert id="insertBbsMngr" parameterType="bbsMngrVo">
+        <selectKey order="BEFORE" keyProperty="bbsSn" resultType="int">
+            SELECT NVL(MAX(BBS_SN), 1000) + 1
+            FROM TN_BBS_SETUP
+        </selectKey>
+        INSERT INTO TN_BBS_SETUP (
+        <trim suffixOverrides=",">
+            BBS_SN,
+            BBS_STNG_SN,
+            BBS_NM,
+            BBS_EXPLN,
+            NTC_USE_YN,
+            PSTG_USE_YN,
+            CLSF_USE_YN,
+            NFEED_USE_YN,
+            SORT_SN,
+            USE_YN,
+            PRVC_CLCT_AGRE_YN,
+            <if test='prvcClctAgreYn != null and prvcClctAgreYn == "Y"'>
+            PRVC_DEL_SE_CD,
+                <if test='prvcDelSeCd != null and prvcDelSeCd == "D"'>
+            PRVC_DEL_YMD,
+                </if>
+                <if test='prvcDelSeCd != null and prvcDelSeCd == "Y"'>
+            PRVC_STRG_DAY_CNT,
+                </if>
+            </if>
+            RGTR_ID,
+            REG_DT,
+        </trim>
+        ) VALUES (
+        <trim suffixOverrides=",">
+            #{bbsSn},
+            #{bbsStngSn},
+            #{bbsNm},
+            #{bbsExpln},
+            #{ntcUseYn},
+            #{pstgUseYn},
+            #{clsfUseYn},
+            #{nfeedUseYn},
+            #{sortSn},
+            #{useYn},
+            #{prvcClctAgreYn},
+            <if test='prvcClctAgreYn != null and prvcClctAgreYn == "Y"'>
+            #{prvcDelSeCd},
+                <if test='prvcDelSeCd != null and prvcDelSeCd == "D"'>
+            REPLACE(#{prvcDelYmd}, '-', ''),
+                </if>
+                <if test='prvcDelSeCd != null and prvcDelSeCd == "Y"'>
+            #{prvcStrgDayCnt},
+                </if>
+            </if>
+            #{rgtrId},
+            SYSDATE,
+        </trim>
+        )
+    </insert>
+
+    <!-- 게시판설정 수정 -->
+    <update id="updateBbsMngr" parameterType="bbsMngrVo">
+        UPDATE TN_BBS_SETUP
+          <set>
+            BBS_STNG_SN = #{bbsStngSn},
+            BBS_NM = #{bbsNm},
+            BBS_EXPLN = #{bbsExpln},
+            NTC_USE_YN = #{ntcUseYn},
+            PSTG_USE_YN = #{pstgUseYn},
+            CLSF_USE_YN = #{clsfUseYn},
+            NFEED_USE_YN = #{nfeedUseYn},
+            SORT_SN = #{sortSn},
+            USE_YN = #{useYn},
+            PRVC_CLCT_AGRE_YN = #{prvcClctAgreYn},
+            <if test='prvcClctAgreYn == null or prvcClctAgreYn != "Y"'>
+            PRVC_DEL_SE_CD = NULL,
+            PRVC_DEL_YMD = NULL,
+            PRVC_STRG_DAY_CNT = NULL,
+            </if>
+            <if test='prvcClctAgreYn != null and prvcClctAgreYn == "Y"'>
+            PRVC_DEL_SE_CD = #{prvcDelSeCd},
+                <if test='prvcDelSeCd != null and prvcDelSeCd == "D"'>
+            PRVC_DEL_YMD = REPLACE(#{prvcDelYmd}, '-', ''),
+            PRVC_STRG_DAY_CNT = NULL,
+                </if>
+                <if test='prvcDelSeCd != null and prvcDelSeCd == "Y"'>
+            PRVC_DEL_YMD = NULL,
+            PRVC_STRG_DAY_CNT = #{prvcStrgDayCnt},
+                </if>
+            </if>
+            MDFR_ID = #{mdfrId},
+            UPDT_DT = SYSDATE,
+          </set>
+        WHERE
+             BBS_SN = #{paramMap.q_bbsSn}
+    </update>
+
+    <!-- 게시판설정 수정 -->
+    <update id="updateUseYn" parameterType="bbsMngrVo">
+        UPDATE TN_BBS_SETUP
+          <set>
+            <if test="colId != null  and colId == 'ntcUseYn'">
+            NTC_USE_YN = #{useYn},
+            </if>
+            <if test="colId != null  and colId == 'pstgUseYn'">
+            PSTG_USE_YN = #{pstgUseYn},
+            </if>
+            <if test="colId != null  and colId == 'clsfUseYn'">
+            CLSF_USE_YN = #{useYn},
+            </if>
+            <if test="colId != null  and colId == 'nfeedUseYn'">
+            NFEED_USE_YN = #{useYn},
+            </if>
+            <if test="colId != null  and colId == 'useYn'">
+            USE_YN = #{useYn},
+            </if>
+            MDFR_ID = #{mdfrId},
+            UPDT_DT = SYSDATE,
+          </set>
+        WHERE
+             BBS_SN = #{bbsSn}
+    </update>
+
+    <!-- 게시판설정 삭제 -->
+    <delete id="deleteBbsMngr" parameterType="bbsMngrVo">
+        DELETE FROM TN_BBS_SETUP
+        WHERE
+             BBS_SN = #{paramMap.q_bbsSn}
+    </delete>
+
+    <!-- 게시판 도메인 등록 BBS_DOMN -->
+    <insert id="insertBbsDomn" parameterType="bbsMngrVo">
+        INSERT INTO TN_BBS_DOMN (
+            BBS_SN,
+            SITE_SN,
+            LST_TMPLT_NM,
+            PST_TMPLT_NM,
+            INPT_TMPLT_NM
+        ) VALUES (
+            #{bbsSn},
+            #{siteSn},
+            #{lstTmpltNm},
+            #{pstTmpltNm},
+            #{inptTmpltNm}
+        )
+    </insert>
+
+    <!-- 게시판 카테고리 조회 목록 -->
+    <select id="selectBbsCtgryList" parameterType="bbsMngrVo" resultType="bbsCtgryVo">
+        SELECT
+            A.BBS_SN,
+            A.CLSF_NM,
+            A.CLSF_NO
+        FROM
+            TN_BBS_CTGRY A
+        WHERE
+                A.BBS_SN = #{paramMap.q_bbsSn}
+        ORDER BY A.SORT_SN ASC
+    </select>
+
+    <!-- 게시판 하위카테고리 조회 목록 -->
+    <select id="selectBbsLwprtCtgryList" parameterType="bbsMngrVo" resultType="bbsCtgryVo">
+        SELECT
+            A.BBS_SN,
+            A.CLSF_NM,
+            A.CLSF_NO,
+            B.LWRK_CLSF_SN,
+            B.LWRK_CLSF_NM,
+            B.SORT_SN
+        FROM
+            TN_BBS_CTGRY A, TN_BBS_LWPRT_CTGRY B
+        WHERE
+                A.BBS_SN = B.BBS_SN
+            AND A.CLSF_NO = B.CLSF_NO
+            AND A.BBS_SN = #{bbsSn}
+            AND A.CLSF_NO = #{clsfNo}
+        ORDER BY A.SORT_SN ASC
+    </select>
+
+    <!-- 게시판환경설정 등록 BBS_CTGRY -->
+    <insert id="insertBbsCtgry" parameterType="bbsCtgryVo">
+        <selectKey order="BEFORE" resultType="int" keyProperty="clsfNo">
+            SELECT NVL(MAX(CLSF_NO),0)+1 FROM TN_BBS_CTGRY WHERE BBS_SN = #{bbsSn}
+        </selectKey>
+        INSERT INTO TN_BBS_CTGRY (
+            BBS_SN,
+            CLSF_NO,
+            CLSF_NM,
+            SORT_SN
+        ) VALUES (
+            #{bbsSn},
+            #{clsfNo},
+            #{clsfNm},
+            #{sortSn}
+        )
+    </insert>
+
+    <!-- 게시판환경설정 등록 BBS_LWPRT_CTGRY -->
+    <insert id="insertBbsLwprtCtgry" parameterType="bbsCtgryVo">
+        <selectKey order="BEFORE" resultType="int" keyProperty="lwrkClsfSn">
+            SELECT NVL(MAX(LWRK_CLSF_SN),0)+1 FROM TN_BBS_LWPRT_CTGRY
+            WHERE BBS_SN = #{bbsSn} AND CLSF_NO = #{clsfNo}
+        </selectKey>
+        INSERT INTO TN_BBS_LWPRT_CTGRY (
+            BBS_SN,
+            CLSF_NO,
+            LWRK_CLSF_SN,
+            LWRK_CLSF_NM,
+            SORT_SN
+        ) VALUES (
+            #{bbsSn},
+            #{clsfNo},
+            #{lwrkClsfSn},
+            #{lwrkClsfNm},
+            #{sortSn}
+        )
+    </insert>
+
+    <!-- 게시판환경설정 삭제 BBS_CTGRY -->
+    <delete id="deleteBbsCtgry" parameterType="int">
+        DELETE FROM TN_BBS_CTGRY
+         WHERE BBS_SN = #{bbsSn}
+    </delete>
+
+    <!-- 게시판환경설정 삭제 BBS_LWPRT_CTGRY -->
+    <delete id="deleteBbsLwprtCtgry" parameterType="int">
+        DELETE FROM TN_BBS_LWPRT_CTGRY
+         WHERE BBS_SN = #{bbsSn}
+    </delete>
+
+    <!-- 게시판 도메인 삭제 BBS_DOMN -->
+    <delete id="deleteBbsDomn" parameterType="int">
+        DELETE FROM TN_BBS_DOMN
+         WHERE BBS_SN = #{bbsSn}
+    </delete>
+
+    <!-- 게시판 커멘트 삭제 BBS_CMNT -->
+    <delete id="deleteBbsCmnt" parameterType="int">
+        DELETE FROM TN_BBS_CMNT
+         WHERE BBS_SN = #{bbsSn}
+    </delete>
+
+    <!-- 게시판 태그 삭제 BBS_TAG -->
+    <delete id="deleteBbsTag" parameterType="int">
+        DELETE FROM TN_BBS_TAG
+         WHERE BBS_SN = #{bbsSn}
+    </delete>
+
+    <!-- 게시판 삭제 BBS -->
+    <delete id="deleteBbs" parameterType="int">
+        DELETE FROM TN_BBS
+         WHERE BBS_SN = #{bbsSn}
+    </delete>
+
+</mapper>

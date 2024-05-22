@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="zesinc.intra.cms.manage.CmsManageMapper">
+
+    <!-- 사용자메뉴컨텐츠 조회 -->
+    <select id="selectCmsManage" parameterType="cmsManageVo" resultType="cmsManageVo">
+        SELECT
+        <trim suffixOverrides=",">
+            B.SITE_SN,
+            (SELECT SITE_NM FROM TN_DOMN WHERE SITE_SN = B.SITE_SN) AS SITE_NM,
+            (SELECT SITE_EXPLN FROM TN_DOMN WHERE SITE_SN = B.SITE_SN) AS SITE_EXPLN,
+            (SELECT PORT_SN FROM TN_DOMN WHERE SITE_SN = B.SITE_SN) AS PORT_SN,
+            (SELECT SITE_PATH_NM FROM TN_DOMN WHERE SITE_SN = B.SITE_SN) AS SITE_PATH_NM,
+            B.USER_MENU_ENG_NM,
+            A.MENU_NM,
+            A.TTL,
+            A.BSC_PATH_NM,
+            A.MENU_PATH_NM,
+            A.LYT_CD_NO,
+            B.CONTS_SN,
+            B.STRT_CONTS_CN,
+            B.MAIN_CONTS_CN,
+            B.APLCN_YN,
+            B.APRV_STTS_NO,
+            B.PBLCN_RSN,
+            B.APRV_RSN,
+            B.AUTZR_ID,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = B.AUTZR_ID) AS CONFMER_NM,
+            B.APRV_DT,
+            B.RGTR_ID,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = B.RGTR_ID) AS RGTR_NM,
+            B.REG_DT,
+            B.MDFR_ID,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = B.MDFR_ID) AS UPDUSR_NM,
+            B.UPDT_DT,
+        </trim>
+        FROM
+            TN_USER_MENU_CNTNTS B, TN_USER_MENU A
+        WHERE
+                B.SITE_SN = A.SITE_SN
+            AND B.USER_MENU_ENG_NM = A.USER_MENU_ENG_NM
+            AND B.SITE_SN = #{paramMap.q_siteSn}
+            AND B.USER_MENU_ENG_NM = #{paramMap.q_userMenuEngNm}
+            AND B.CONTS_SN = #{paramMap.q_contsSn}
+    </select>
+
+    <!-- 사용자메뉴컨텐츠 목록 -->
+    <sql id="incCmsManageWhere">
+        <where>
+                B.SITE_SN = A.SITE_SN
+            AND B.USER_MENU_ENG_NM = A.USER_MENU_ENG_NM
+            <if test="paramMap.q_searchDomnCode != null and paramMap.q_searchDomnCode != ''">
+                AND B.SITE_SN = #{paramMap.q_searchDomnCode}
+            </if>
+            <if test="paramMap.q_aprvSttsNo != null">
+                <if test="paramMap.q_aprvSttsNo != 'C0000'">
+                    AND B.APRV_STTS_NO = #{paramMap.q_aprvSttsNo}
+                </if>
+            </if>
+            <if test="paramMap.q_searchVal != null">
+                <if test="paramMap.q_searchKey == 1001">
+                    AND A.MENU_PATH_NM LIKE CONCAT('%', #{paramMap.q_searchVal}, '%')
+                </if>
+                <if test="paramMap.q_searchKey == 1002">
+                    AND B.MDFR_ID IN (
+                        SELECT PIC_ID FROM TN_MNGR WHERE PIC_NM LIKE CONCAT('%', #{paramMap.q_searchVal}, '%')
+                    )
+                </if>
+            </if>
+        </where>
+    </sql>
+    <select id="selectCmsManageList" parameterType="cmsManageVo" resultType="cmsManageVo">
+        SELECT Y.* FROM (
+            SELECT  X.* FROM (
+                SELECT
+                <trim suffixOverrides=",">
+                    B.SITE_SN,
+                    (SELECT SITE_NM FROM TN_DOMN WHERE SITE_SN = B.SITE_SN) AS SITE_NM,
+                    (SELECT SITE_EXPLN FROM TN_DOMN WHERE SITE_SN = B.SITE_SN) AS SITE_EXPLN,
+                    (SELECT PORT_SN FROM TN_DOMN WHERE SITE_SN = B.SITE_SN) AS PORT_SN,
+                    (SELECT SITE_PATH_NM FROM TN_DOMN WHERE SITE_SN = B.SITE_SN) AS SITE_PATH_NM,
+                    B.USER_MENU_ENG_NM,
+                    A.MENU_NM,
+                    A.TTL,
+                    A.MENU_PATH_NM,
+                    A.LYT_CD_NO,
+                    B.CONTS_SN,
+                    B.APLCN_YN,
+                    B.APRV_STTS_NO,
+                    B.PBLCN_RSN,
+                    B.APRV_RSN,
+                    B.AUTZR_ID,
+                    (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = B.AUTZR_ID) AS CONFMER_NM,
+                    B.APRV_DT,
+                    B.RGTR_ID,
+                    (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = B.RGTR_ID) AS RGTR_NM,
+                    B.REG_DT,
+                    B.MDFR_ID,
+                    (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = B.MDFR_ID) AS UPDUSR_NM,
+                    B.UPDT_DT,
+                </trim>
+                FROM
+                    TN_USER_MENU_CNTNTS B, TN_USER_MENU A
+                <include refid="incCmsManageWhere"/>
+                ORDER BY A.USER_MENU_ENG_NM ASC, B.CONTS_SN DESC, B.UPDT_DT ASC
+            ) X
+         ) Y
+         LIMIT #{paramMap.q_rowPerPage}
+         OFFSET #{paramMap.q_pagingStartNum}
+    </select>
+
+    <!-- 사용자메뉴컨텐츠 조회 목록 카운트 -->
+    <select id="selectCmsManageListCount" parameterType="cmsManageVo" resultType="int">
+        SELECT
+            COUNT(B.SITE_SN) AS TOTAL_COUNT
+        FROM
+            TN_USER_MENU_CNTNTS B, TN_USER_MENU A
+        <include refid="incCmsManageWhere"/>
+    </select>
+
+    <!-- 승인시 사용자메뉴관리 메인 정보를 수정 -->
+    <update id="updateCmsCntntsInfo" parameterType="cmsManageVo">
+        UPDATE TN_USER_MENU
+          <set>
+            CONTS_SN = #{contsSn},
+            <if test="mngrMenuUrlAddr != null and mngrMenuUrlAddr != ''">
+            MNGR_MENU_URL_ADDR = #{mngrMenuUrlAddr},
+            </if>
+            <if test="userMenuUrlAddr != null and userMenuUrlAddr != ''">
+            USER_MENU_URL_ADDR = #{userMenuUrlAddr},
+            </if>
+          </set>
+        WHERE
+                SITE_SN = #{paramMap.q_siteSn}
+            AND USER_MENU_ENG_NM = #{paramMap.q_userMenuEngNm}
+    </update>
+
+    <!-- 사용자메뉴컨텐츠 적용여부 수정 -->
+    <update id="updateCmsCntntsApplcAt" parameterType="cmsManageVo">
+        UPDATE TN_USER_MENU_CNTNTS 
+          <set>
+            APLCN_YN = 'N',
+          </set>
+        WHERE
+               SITE_SN = #{paramMap.q_siteSn}
+            AND USER_MENU_ENG_NM = #{paramMap.q_userMenuEngNm}
+            AND CONTS_SN != #{paramMap.q_contsSn}
+    </update>
+
+    <!-- 사용자메뉴컨텐츠 수정 -->
+    <update id="updateCmsManage" parameterType="cmsManageVo">
+        UPDATE TN_USER_MENU_CNTNTS 
+          <set>
+            APLCN_YN = #{aplcnYn},
+            APRV_STTS_NO = #{aprvSttsNo},
+            APRV_RSN = #{aprvRsn},
+            <if test="aprvSttsNo == 'C1040' or aprvSttsNo == 'C1050'">
+                AUTZR_ID = #{autzrId},
+                APRV_DT = NOW(),
+            </if>
+          </set>
+        WHERE
+               SITE_SN = #{paramMap.q_siteSn}
+            AND USER_MENU_ENG_NM = #{paramMap.q_userMenuEngNm}
+            AND CONTS_SN = #{paramMap.q_contsSn}
+    </update>
+
+</mapper>

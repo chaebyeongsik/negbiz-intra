@@ -1,0 +1,641 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="zesinc.intra.cms.base.CmsMapper">
+
+    <!-- 담당자목록 Auto Complete 용 -->
+    <select id="selectMngrList" parameterType="cmsOrgVo" resultType="cmsOrgVo">
+        SELECT X.* FROM
+			(
+			    SELECT
+			        @ROWNUM := @ROWNUM + 1 AS ROWNUM,
+			        CONCAT(A.PIC_NM, ' / ', B.DEPT_NM) AS label,
+		            A.PIC_NM AS value,
+		            A.PIC_ID,
+		            A.PIC_NM,
+		            A.DEPT_CD_ID,
+		            B.DEPT_NM
+			    FROM
+			       TN_MNGR A, TN_DEPT B, (SELECT @ROWNUM := 0) TMP
+			    WHERE A.DEPT_CD_ID = B.DEPT_CD_ID
+		            AND A.PIC_NM LIKE CONCAT(#{paramMap.q_picNm}, '%')
+		            <if test="paramMap.q_useYn != null">
+		            AND A.USE_YN = #{paramMap.q_useYn}
+		            </if>
+				ORDER BY A.PIC_NM
+			) X
+			WHERE X.ROWNUM &lt; #{paramMap.q_maxRowNum}
+    </select>
+
+    <!-- 부서목록 Auto Complete 용 -->
+    <select id="selectDeptList" parameterType="cmsOrgVo" resultType="cmsOrgVo">
+        SELECT
+        	@ROWNUM := @ROWNUM + 1 AS NUM,
+            B.DEPT_NM AS label,
+            B.DEPT_CD_ID AS value,
+            B.DEPT_NM,
+            (SELECT DEPT_NM FROM TN_DEPT WHERE DEPT_CD_ID = B.UP_DEPT_CD_ID) AS UPPER_DEPT_NM
+        FROM
+            TN_DEPT B,
+            (SELECT @ROWNUM := @ROWNUM + 1 AS NUM
+	             FROM (SELECT @ROWNUM:=0) TMP) C
+        WHERE
+                B.DEPT_NM LIKE CONCAT(#{paramMap.q_deptNm}, '%')
+            <if test="paramMap.q_useYn != null">
+            AND B.USE_YN = #{paramMap.q_useYn}
+            </if>
+            <if test="paramMap.q_maxRowNum != null">
+            AND NUM &lt; #{paramMap.q_maxRowNum}
+            </if>
+        ORDER BY B.DEPT_NM
+    </select>
+
+    <!-- 코드 중복 체크 -->
+    <select id="selectDplctChckCode" parameterType="cmsVo" resultType="int">
+        SELECT
+            COUNT(A.USER_MENU_ENG_NM) AS CNT
+        FROM
+            TN_USER_MENU A
+        WHERE
+                A.SITE_SN = #{paramMap.q_siteSn}
+            <if test="paramMap.q_userMenuEngNm != null and paramMap.q_userMenuEngNm != ''">
+            AND A.USER_MENU_ENG_NM = #{paramMap.q_userMenuEngNm}
+            </if>
+    </select>
+
+    <!-- 사용자메뉴 조회 -->
+    <select id="selectCms" parameterType="cmsVo" resultType="cmsVo">
+        SELECT
+        <trim suffixOverrides=",">
+            A.SITE_SN,
+            B.SITE_EXPLN,
+            B.SITE_NM,
+            B.PORT_SN,
+            B.SCRTY_PORT_SN,
+            B.SITE_PATH_NM,
+            B.HTTPS_YN,
+            B.ACTL_STNG_YN,
+            A.USER_MENU_ENG_NM,
+            A.MENU_NM,
+            A.TTL,
+            A.BSC_PATH_NM,
+            A.MENU_PATH_NM,
+            A.HGHRK_MENU_ENG_NM,
+            A.UP_MENU_ENG_NM,
+            A.MENU_LVL_SN,
+            A.SORT_SN,
+            A.MNGR_MENU_URL_ADDR,
+            A.USER_MENU_URL_ADDR,
+            A.LYT_CD_NO,
+            A.UP_LYT_USE_YN,
+            A.MENU_TYPE,
+            A.LINK_TYPE_NM,
+            A.CONTS_TYPE_NM,
+            A.CNTRL_NM,
+            A.TKCG_DEPT_CD_ID,
+            A.PIC_ID,
+            A.AUTHRT_GROUP_NM,
+            A.AUTHRT_DEPT_CD_ID,
+            A.CONTS_SN,
+            A.STRT_CONTS_CN,
+            A.END_CONTS_CN,
+            A.USER_MENU_IMG_NM,
+            A.MENU_TTL_IMG_NM,
+            A.MENU_ON_IMG_NM,
+            A.MENU_OFF_IMG_NM,
+            A.CSS_FILE_NM,
+            A.FILE_SN,
+            A.APRV_YN,
+            A.DGSTFN_INDCT_YN,
+            A.PIC_INDCT_YN,
+            A.INDCT_YN,
+            A.USE_YN,
+            A.SNS_USE_YN,
+            A.SNS_PRMTT_NM,
+            A.RGTR_ID,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.RGTR_ID) AS RGTR_NM,
+            A.REG_DT,
+            A.MDFR_ID,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.MDFR_ID) AS UPDUSR_NM,
+            A.UPDT_DT,
+            (SELECT DEPT_NM FROM TN_DEPT WHERE DEPT_CD_ID = A.TKCG_DEPT_CD_ID) AS CHRG_DEPT_NM,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.PIC_ID) AS PIC_NM,
+            (SELECT DEPT_NM FROM TN_DEPT WHERE DEPT_CD_ID = A.AUTHRT_DEPT_CD_ID) AS AUTHOR_DEPT_NM,
+            IF (((SELECT COUNT(1) FROM TN_USER_MENU WHERE SITE_SN = A.SITE_SN AND UP_MENU_ENG_NM = A.USER_MENU_ENG_NM))= 0, '0', '1') AS isFolder,
+        </trim>
+        FROM
+            TN_USER_MENU A, TN_DOMN B
+        WHERE
+                A.SITE_SN = #{paramMap.q_siteSn}
+            AND A.SITE_SN = B.SITE_SN
+            AND A.USER_MENU_ENG_NM = #{paramMap.q_userMenuEngNm}
+    </select>
+
+    <!-- 부모사용자메뉴 조회 -->
+    <select id="selectParentCms" parameterType="cmsVo" resultType="cmsVo">
+        SELECT
+        <trim suffixOverrides=",">
+            A.SITE_SN,
+            A.USER_MENU_ENG_NM,
+            A.MENU_NM,
+            A.TTL,
+            A.BSC_PATH_NM,
+            A.MENU_PATH_NM,
+            A.HGHRK_MENU_ENG_NM,
+            A.UP_MENU_ENG_NM,
+            A.MENU_LVL_SN,
+            A.SORT_SN,
+            A.LYT_CD_NO,
+            A.UP_LYT_USE_YN,
+            A.TKCG_DEPT_CD_ID,
+            A.PIC_ID,
+            A.AUTHRT_GROUP_NM,
+            A.AUTHRT_DEPT_CD_ID,
+            A.INDCT_YN,
+            A.USE_YN,
+        </trim>
+        FROM
+            TN_USER_MENU A
+        WHERE
+                A.SITE_SN = #{paramMap.q_siteSn}
+            AND A.USER_MENU_ENG_NM = #{paramMap.q_userMenuEngNm}
+    </select>
+
+    <!-- 자식 사용자메뉴 목록 조회 -->
+    <select id="selectChildCmsList" parameterType="cmsVo" resultType="cmsVo">
+        SELECT
+        <trim suffixOverrides=",">
+            A.SITE_SN,
+            A.USER_MENU_ENG_NM,
+            A.MENU_NM,
+            A.TTL,
+            A.BSC_PATH_NM,
+            A.MENU_PATH_NM,
+            A.HGHRK_MENU_ENG_NM,
+            A.UP_MENU_ENG_NM,
+            A.MENU_LVL_SN,
+            A.SORT_SN,
+            A.LYT_CD_NO,
+            A.UP_LYT_USE_YN,
+            A.TKCG_DEPT_CD_ID,
+            A.PIC_ID,
+            A.AUTHRT_GROUP_NM,
+            A.AUTHRT_DEPT_CD_ID,
+            A.INDCT_YN,
+            A.USE_YN,
+        </trim>
+        FROM
+            TN_USER_MENU A
+        WHERE
+                A.SITE_SN = #{siteSn}
+            AND A.UP_MENU_ENG_NM = #{upMenuEngNm}
+            AND A.USER_MENU_ENG_NM != #{userMenuEngNm}
+            <if test="paramMap.q_useUpdateLayout != null">
+            AND A.UP_LYT_USE_YN = #{paramMap.q_useUpdateLayout}
+            </if>
+        ORDER BY A.SORT_SN
+    </select>
+
+    <!-- 사용자메뉴 TREE 조회 -->
+    <select id="selectCmsTreeList" parameterType="cmsVo" resultType="treeVo">
+        SELECT
+        <trim suffixOverrides=",">
+            A.SITE_SN AS baseKey,
+            A.HGHRK_MENU_ENG_NM AS topKey,
+            A.USER_MENU_ENG_NM AS "key",
+            A.MENU_NM AS title,
+            IF (((SELECT COUNT(1) FROM TN_USER_MENU WHERE SITE_SN = A.SITE_SN AND UP_MENU_ENG_NM = A.USER_MENU_ENG_NM)) = 0, '0', '1') AS folder,
+            IF (((SELECT COUNT(1) FROM TN_USER_MENU WHERE SITE_SN = A.SITE_SN AND UP_MENU_ENG_NM = A.USER_MENU_ENG_NM)) = 0, '0', '1') AS lazy,
+        </trim>
+        FROM
+            TN_USER_MENU A
+        WHERE
+                A.SITE_SN = #{paramMap.q_siteSn}
+            AND A.UP_MENU_ENG_NM = #{paramMap.q_upMenuEngNm}
+        ORDER BY A.SORT_SN
+    </select>
+
+    <!-- 사용자메뉴 목록 -->
+    <sql id="incCmsWhere">
+        <where>
+                    A.SITE_SN = #{paramMap.q_siteSn}
+                AND A.USER_MENU_ENG_NM = #{paramMap.q_userMenuEngNm}
+        </where>
+    </sql>
+    <select id="selectCmsList" parameterType="cmsVo" resultType="cmsVo">
+        SELECT Y.* FROM (
+            SELECT  X.* FROM (
+                SELECT
+                <trim suffixOverrides=",">
+                    A.SITE_SN,
+                    A.USER_MENU_ENG_NM,
+                    A.MENU_NM,
+                    A.TTL,
+                    A.BSC_PATH_NM,
+                    A.MENU_PATH_NM,
+                    A.HGHRK_MENU_ENG_NM,
+                    A.UP_MENU_ENG_NM,
+                    A.MENU_LVL_SN,
+                    A.SORT_SN,
+                    A.MNGR_MENU_URL_ADDR,
+                    A.USER_MENU_URL_ADDR,
+                    A.LYT_CD_NO,
+                    A.UP_LYT_USE_YN,
+                    A.MENU_TYPE,
+                    A.LINK_TYPE_NM,
+                    A.CONTS_TYPE_NM,
+                    A.CNTRL_NM,
+                    A.TKCG_DEPT_CD_ID,
+                    A.PIC_ID,
+                    A.AUTHRT_GROUP_NM,
+                    A.AUTHRT_DEPT_CD_ID,
+                    A.CONTS_SN,
+                    A.END_CONTS_CN,
+                    A.USER_MENU_IMG_NM,
+                    A.MENU_TTL_IMG_NM,
+                    A.MENU_ON_IMG_NM,
+                    A.MENU_OFF_IMG_NM,
+                    A.CSS_FILE_NM,
+                    A.FILE_SN,
+                    A.APRV_YN,
+                    A.DGSTFN_INDCT_YN,
+                    A.PIC_INDCT_YN,
+                    A.INDCT_YN,
+                    A.USE_YN,
+                    A.SNS_USE_YN,
+                    A.RGTR_ID,
+                    (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.RGTR_ID) AS RGTR_NM,
+                    A.REG_DT,
+                    A.MDFR_ID,
+                    (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.MDFR_ID) AS UPDUSR_NM,
+                    A.UPDT_DT,
+                </trim>
+                FROM
+                    TN_USER_MENU A
+                <include refid="incCmsWhere"/>
+                ORDER BY A.MENU_NM ASC
+            ) X
+         ) Y
+         LIMIT #{paramMap.q_rowPerPage}
+         OFFSET #{paramMap.q_pagingStartNum}
+    </select>
+
+    <!-- 사용자메뉴 조회 목록 카운트 -->
+    <select id="selectCmsListCount" parameterType="cmsVo" resultType="int">
+        SELECT
+            COUNT(A.SITE_SN) AS TOTAL_COUNT
+        FROM
+            TN_USER_MENU A
+        <include refid="incCmsWhere"/>
+    </select>
+
+    <!-- 사용자메뉴 등록 -->
+    <insert id="insertCms" parameterType="cmsVo">
+        INSERT INTO TN_USER_MENU (
+        <trim suffixOverrides=",">
+            SITE_SN,
+            USER_MENU_ENG_NM,
+            MENU_NM,
+            TTL,
+            BSC_PATH_NM,
+            MENU_PATH_NM,
+            HGHRK_MENU_ENG_NM,
+            UP_MENU_ENG_NM,
+            MENU_LVL_SN,
+            SORT_SN,
+            MNGR_MENU_URL_ADDR,
+            USER_MENU_URL_ADDR,
+            LYT_CD_NO,
+            UP_LYT_USE_YN,
+            MENU_TYPE,
+            LINK_TYPE_NM,
+            CONTS_TYPE_NM,
+            CNTRL_NM,
+            TKCG_DEPT_CD_ID,
+            PIC_ID,
+            AUTHRT_GROUP_NM,
+            AUTHRT_DEPT_CD_ID,
+            CONTS_SN,
+            STRT_CONTS_CN,
+            END_CONTS_CN,
+            USER_MENU_IMG_NM,
+            MENU_TTL_IMG_NM,
+            MENU_ON_IMG_NM,
+            MENU_OFF_IMG_NM,
+            FILE_SN,
+            APRV_YN,
+            DGSTFN_INDCT_YN,
+            PIC_INDCT_YN,
+            INDCT_YN,
+            USE_YN,
+            SNS_USE_YN,
+            SNS_PRMTT_NM,
+            RGTR_ID,
+            REG_DT,
+        </trim>
+        ) VALUES (
+        <trim suffixOverrides=",">
+            #{siteSn},
+            #{userMenuEngNm},
+            #{menuNm},
+            <choose>
+            	<when test="ttl == ''">
+            		NULL,
+            	</when>
+            	<otherwise>
+            		#{ttl},
+            	</otherwise>
+            </choose>
+            #{bscPathNm},
+            #{menuPathNm},
+            #{hghrkMenuEngNm},
+            #{upMenuEngNm},
+            #{menuLvlSn},
+            (SELECT SORT_SN FROM (SELECT COUNT(USER_MENU_ENG_NM) AS SORT_SN FROM TN_USER_MENU WHERE SITE_SN = #{siteSn} AND UP_MENU_ENG_NM = #{upMenuEngNm})A),
+            #{mngrMenuUrlAddr},
+            #{userMenuUrlAddr},
+            #{lytCdNo},
+            #{upLytUseYn},
+            #{menuType},
+            #{linkTypeNm},
+            #{contsTypeNm},
+            #{cntrlNm},
+            #{tkcgDeptCdId},
+            #{picId},
+            #{authrtGroupNm},
+            #{authrtDeptCdId},
+            #{contsSn},
+            #{strtContsCn},
+            #{endContsCn},
+            #{userMenuImgNm},
+            #{menuTtlImgNm},
+            #{menuOnImgNm},
+            #{menuOffImgNm},
+            #{fileSn},
+            #{aprvYn},
+            #{dgstfnIndctYn},
+            #{picIndctYn},
+            #{indctYn},
+            #{useYn},
+            #{snsUseYn},
+            #{snsPrmttNm},
+            #{rgtrId},
+            NOW(),
+        </trim>
+        )
+    </insert>
+
+    <!-- 사용자메뉴기본정보 수정 -->
+    <update id="updateCmsBase" parameterType="cmsVo">
+        UPDATE TN_USER_MENU
+          <set>
+            MENU_NM = #{menuNm},
+            MENU_PATH_NM = #{menuPathNm},
+            <choose>
+            	<when test="ttl == ''">
+            		TTL = NULL,
+            	</when>
+            	<otherwise>
+            		TTL = #{ttl},
+            	</otherwise>
+            </choose>
+            MNGR_MENU_URL_ADDR = #{mngrMenuUrlAddr},
+            USER_MENU_URL_ADDR = #{userMenuUrlAddr},
+            LYT_CD_NO = #{lytCdNo},
+            UP_LYT_USE_YN = #{upLytUseYn},
+            MENU_TYPE = #{menuType},
+            LINK_TYPE_NM = #{linkTypeNm},
+            CONTS_TYPE_NM = #{contsTypeNm},
+            CNTRL_NM = #{cntrlNm},
+            TKCG_DEPT_CD_ID = #{tkcgDeptCdId},
+            PIC_ID = #{picId},
+            AUTHRT_GROUP_NM = #{authrtGroupNm},
+            AUTHRT_DEPT_CD_ID = #{authrtDeptCdId},
+            APRV_YN = #{aprvYn},
+            DGSTFN_INDCT_YN = #{dgstfnIndctYn},
+            PIC_INDCT_YN = #{picIndctYn},
+            INDCT_YN = #{indctYn},
+            USE_YN = #{useYn},
+            SNS_USE_YN = #{snsUseYn},
+            SNS_PRMTT_NM = #{snsPrmttNm},
+            MDFR_ID = #{mdfrId},
+            UPDT_DT = NOW(),
+          </set>
+        WHERE
+                SITE_SN = #{paramMap.q_siteSn}
+            AND USER_MENU_ENG_NM = #{paramMap.q_userMenuEngNm}
+    </update>
+
+    <update id="updateLytCdNo" parameterType="cmsVo">
+        UPDATE TN_USER_MENU
+          <set>
+            MENU_PATH_NM = #{menuPathNm},
+            <if test="paramMap.q_useUpdateLayout != null">
+            LYT_CD_NO = #{lytCdNo},
+            </if>
+          </set>
+        WHERE
+                SITE_SN = #{siteSn}
+            AND USER_MENU_ENG_NM = #{userMenuEngNm}
+    </update>
+
+    <!-- 사용자메뉴추가정보 수정 -->
+    <update id="updateCmsAdd" parameterType="cmsVo">
+        UPDATE TN_USER_MENU
+          <set>
+            STRT_CONTS_CN = #{strtContsCn},
+            END_CONTS_CN = #{endContsCn},
+            USER_MENU_IMG_NM = #{userMenuImgNm},
+            MENU_TTL_IMG_NM = #{menuTtlImgNm},
+            MENU_ON_IMG_NM = #{menuOnImgNm},
+            MENU_OFF_IMG_NM = #{menuOffImgNm},
+            CSS_FILE_NM = #{cssFileNm},
+            FILE_SN = #{fileSn},
+            MDFR_ID = #{mdfrId},
+            UPDT_DT = NOW(),
+          </set>
+        WHERE
+                SITE_SN = #{paramMap.q_siteSn}
+            AND USER_MENU_ENG_NM = #{paramMap.q_userMenuEngNm}
+    </update>
+
+    <!-- 사용자메뉴 정렬순서 수정 -->
+    <update id="updateCmsSortOrder" parameterType="cmsVo">
+        UPDATE TN_USER_MENU
+          <set>
+            HGHRK_MENU_ENG_NM = #{hghrkMenuEngNm},
+            UP_MENU_ENG_NM = #{upMenuEngNm},
+            BSC_PATH_NM = #{bscPathNmh},
+            MENU_PATH_NM = #{menuPathNm},
+            MENU_LVL_SN = #{menuLvlSn},
+            SORT_SN = #{sortSn},
+            <if test="paramMap.q_useUpdateLayout != null">
+            LYT_CD_NO = #{lytCdNo},
+            </if>
+          </set>
+        WHERE
+                SITE_SN = #{siteSn}
+            AND USER_MENU_ENG_NM = #{userMenuEngNm}
+    </update>
+
+    <!-- 사용자메뉴 삭제 -->
+    <delete id="deleteCms" parameterType="cmsVo">
+        DELETE FROM TN_USER_MENU
+        WHERE
+                SITE_SN = #{paramMap.q_siteSn}
+            AND USER_MENU_ENG_NM = #{paramMap.q_userMenuEngNm}
+    </delete>
+
+    <!-- 사용자메뉴 하위 URL 삭제 -->
+    <delete id="deleteMenuLwprtUrl" parameterType="cmsVo">
+        DELETE FROM TN_USER_MENU_LWPRT_URL
+        WHERE
+                SITE_SN = #{paramMap.q_siteSn}
+            AND USER_MENU_ENG_NM = #{paramMap.q_userMenuEngNm}
+    </delete>
+
+    <!-- 하위메뉴URL 조회 -->
+    <select id="selectUserMenuLwprtUrl" parameterType="cmsVo" resultType="string">
+        SELECT
+          <trim suffixOverrides=",">
+            A.LWPRT_MENU_URL_ADDR
+          </trim>
+        FROM
+            TN_USER_MENU_LWPRT_URL A
+        WHERE
+                A.SITE_SN = #{siteSn}
+            AND A.USER_MENU_ENG_NM = #{userMenuEngNm}
+    </select>
+
+    <!-- 하위메뉴URL 등록 -->
+    <insert id="insertUserMenuLwprtUrl" parameterType="cmsLwprtUrlVo">
+        INSERT INTO TN_USER_MENU_LWPRT_URL (
+            SITE_SN,
+            USER_MENU_ENG_NM,
+            LWPRT_MENU_URL_ADDR
+        ) VALUES (
+            #{siteSn},
+            #{userMenuEngNm},
+            #{lwprtMenuUrlAddr}
+        )
+    </insert>
+
+    <!-- 하위메뉴 URL 삭제 -->
+    <delete id="deleteUserMenuLwprtUrl" parameterType="cmsLwprtUrlVo">
+        DELETE FROM TN_USER_MENU_LWPRT_URL
+        WHERE
+                SITE_SN = #{siteSn}
+            AND USER_MENU_ENG_NM = #{userMenuEngNm}
+    </delete>
+
+    <!-- 메뉴 관리담당자 목록 반환 -->
+    <select id="selectAuthorChargerList" parameterType="cmsVo" resultType="cmsOrgVo">
+        SELECT
+            A.AUTHRT_PIC_ID,
+            (SELECT DEPT_NM FROM TN_DEPT WHERE DEPT_CD_ID = B.DEPT_CD_ID) AS DEPT_NM,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.AUTHRT_PIC_ID) AS AUTHOR_PIC_NM
+        FROM
+            TN_USER_MENU_AUTHOR A, TN_MNGR B
+        WHERE
+                A.AUTHRT_PIC_ID = B.PIC_ID
+            AND A.SITE_SN = #{paramMap.q_siteSn}
+            AND A.USER_MENU_ENG_NM = #{paramMap.q_userMenuEngNm}
+    </select>
+
+    <!-- 메뉴 관리담당자 등록 -->
+    <insert id="insertAuthorCharger" parameterType="cmsOrgVo">
+        INSERT INTO TN_USER_MENU_AUTHOR (
+            SITE_SN,
+            USER_MENU_ENG_NM,
+            AUTHRT_PIC_ID,
+            RGTR_ID,
+            REG_DT
+        ) VALUES (
+            #{siteSn},
+            #{userMenuEngNm},
+            #{authrtPicId},
+            #{rgtrId},
+            NOW()
+        )
+    </insert>
+
+    <!-- 메뉴 관리담당자 삭제 -->
+    <delete id="deleteAuthorCharger" parameterType="cmsVo">
+        DELETE FROM TN_USER_MENU_AUTHOR
+        WHERE
+                SITE_SN = #{paramMap.q_siteSn}
+            AND USER_MENU_ENG_NM = #{paramMap.q_userMenuEngNm}
+    </delete>
+
+    <!-- 사용자등급 목록 -->
+    <select id="selectUserGradList" parameterType="cmsVo" resultType="cmsUserGradVo">
+        SELECT
+        <trim suffixOverrides=",">
+            A.USER_GRD_CD_ID,
+            A.USER_GRD_NM,
+            A.USER_GRD_EXPLN,
+            IF(((SELECT COUNT(USER_MENU_ENG_NM)
+              FROM TN_USER_MENU_GRAD
+             WHERE SITE_SN = #{paramMap.q_siteSn}
+               AND USER_MENU_ENG_NM = #{paramMap.q_userMenuEngNm}
+               AND USER_GRD_CD_ID = A.USER_GRD_CD_ID))= 0, '0', '1') AS HAS_GRAD
+        </trim>
+        FROM
+            TN_USER_GRAD A
+        WHERE
+            A.USE_YN = 'Y'
+    </select>
+
+    <!-- 사용자메뉴등급 등록 -->
+    <insert id="insertUserGrad" parameterType="cmsUserGradVo">
+        INSERT INTO TN_USER_MENU_GRAD (
+        <trim suffixOverrides=",">
+            SITE_SN,
+            USER_MENU_ENG_NM,
+            USER_GRD_CD_ID,
+            RGTR_ID,
+            REG_DT,
+        </trim>
+        ) VALUES (
+        <trim suffixOverrides=",">
+            #{siteSn},
+            #{userMenuEngNm},
+            #{userGrdCdId},
+            #{rgtrId},
+            NOW(),
+        </trim>
+        )
+    </insert>
+
+    <!-- 사용자메뉴등급 삭제 -->
+    <delete id="deleteUserGrad" parameterType="cmsVo">
+        DELETE FROM TN_USER_MENU_GRAD
+        WHERE
+                SITE_SN = #{paramMap.q_siteSn}
+            AND USER_MENU_ENG_NM = #{paramMap.q_userMenuEngNm}
+    </delete>
+
+    <!-- 사용자메뉴메타 삭제 -->
+    <delete id="deleteUserMeta" parameterType="cmsVo">
+        DELETE FROM TN_USER_MENU_META
+        WHERE
+                SITE_SN = #{paramMap.q_siteSn}
+            AND USER_MENU_ENG_NM = #{paramMap.q_userMenuEngNm}
+    </delete>
+
+    <!-- 사용자메뉴평가 삭제 -->
+    <delete id="deleteUserEvl" parameterType="cmsVo">
+        DELETE FROM TN_USER_MENU_EVL
+        WHERE
+                SITE_SN = #{paramMap.q_siteSn}
+            AND USER_MENU_ENG_NM = #{paramMap.q_userMenuEngNm}
+    </delete>
+
+    <!-- 사용자메뉴평가상세 삭제 -->
+    <delete id="deleteUserEvlDetail" parameterType="cmsVo">
+        DELETE FROM TN_USER_MENU_EVL_DETAIL
+        WHERE
+                SITE_SN = #{paramMap.q_siteSn}
+            AND USER_MENU_ENG_NM = #{paramMap.q_userMenuEngNm}
+    </delete>
+
+</mapper>

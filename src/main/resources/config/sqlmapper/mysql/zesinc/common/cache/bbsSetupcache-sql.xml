@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="zesinc.common.cache.bbsconfig.BbsConfigCacheMapper">
+
+    <select id="selectBbsConfigList" resultType="bbsConfigCacheVo">
+        SELECT
+            A.BBS_SN,
+            A.BBS_NM,
+            A.BBS_EXPLN,
+            A.SORT_SN,
+            A.USE_YN,
+            A.REG_DT,
+            A.UPDT_DT,
+            A.NTC_USE_YN,
+            A.PSTG_USE_YN,
+            A.CLSF_USE_YN,
+            A.NFEED_USE_YN,
+            B.LYR_USE_YN,
+            B.THMB_USE_YN,
+            B.WDTH_SZ,
+            B.VRTC_SZ,
+            B.WTMK_USE_YN,
+            B.WTMK_FILE_NM,
+            B.WTMK_PSTN_NM,
+            B.WTMK_TRNSPC,
+            C.PAGE_PST_CNT,
+            C.TTL_AJMT_SZ,
+            C.NEW_INDCT_DAY_CNT,
+            C.PST_EMPHS_INQ_CNT,
+            C.WRTR_INDCT_SN,
+            D.BFR_AFTR_DOC_INDCT_YN,
+            D.RCMDTN_USE_YN,
+            D.DCLR_USE_YN,
+            D.DGSTFN_USE_YN,
+            D.TAG_USE_YN,
+            D.OPNN_DOC_YN,
+            D.INQ_CNT_LMT_HR_CNT,
+            E.MNGR_EDTR_USE_YN,
+            E.USER_EDTR_USE_YN,
+            E.ATCH_FILE_USE_YN,
+            E.ULD_CLSF_SN,
+            E.FILE_LMT_CNT,
+            E.LMT_FILE_SZ,
+            E.WHOL_ULD_SZ,
+            E.PRMSN_FILE_EXTN_MTTR,
+            E.CCHA_USE_YN,
+            E.RLS_YN,
+            E.PHBWD_USE_YN,
+            E.PHBWD_CD_ID
+        FROM
+            TN_BBS_SETUP A,
+            TN_BBS_GLOBAL_SETUP B,
+            TN_BBS_LIST_SETUP C,
+            TN_BBS_VIEW_SETUP D,
+            TN_BBS_FORM_SETUP E
+        WHERE
+            A.USE_YN = 'Y'
+        AND B.BBS_STNG_SN = A.BBS_STNG_SN
+        AND C.BBS_STNG_SN = A.BBS_STNG_SN
+        AND D.BBS_STNG_SN = A.BBS_STNG_SN
+        AND E.BBS_STNG_SN = A.BBS_STNG_SN
+    </select>
+
+    <select id="selectBbsConfigDomnList" resultType="bbsDomnCacheVo" parameterType="bbsConfigCacheVo">
+        SELECT
+            A.BBS_SN,
+            A.BBS_NM,
+            B.SITE_SN,
+            B.LST_TMPLT_NM,
+            B.PST_TMPLT_NM,
+            B.INPT_TMPLT_NM
+        FROM
+            TN_BBS_SETUP A, TN_BBS_DOMN B
+        WHERE
+                A.USE_YN = 'Y'
+            AND A.BBS_SN = #{bbsSn}
+            AND A.BBS_SN = B.BBS_SN
+        ORDER BY A.BBS_NM ASC
+    </select>
+
+    <select id="selectBbsConfig" resultType="bbsConfigCacheVo" parameterType="bbsConfigCacheVo">
+        SELECT
+            A.BBS_SN,
+            A.BBS_NM,
+            A.BBS_EXPLN,
+            A.SORT_SN,
+            A.USE_YN,
+            A.REG_DT,
+            A.UPDT_DT,
+            A.NTC_USE_YN,
+            A.CLSF_USE_YN,
+            A.NFEED_USE_YN,
+            B.LYR_USE_YN,
+            B.THMB_USE_YN,
+            B.WDTH_SZ,
+            B.VRTC_SZ,
+            B.WTMK_USE_YN,
+            B.WTMK_FILE_NM,
+            B.WTMK_PSTN_NM,
+            B.WTMK_TRNSPC,
+            C.PAGE_PST_CNT,
+            C.TTL_AJMT_SZ,
+            C.NEW_INDCT_DAY_CNT,
+            C.PST_EMPHS_INQ_CNT,
+            C.WRTR_INDCT_SN,
+            D.BFR_AFTR_DOC_INDCT_YN,
+            D.RCMDTN_USE_YN,
+            D.DCLR_USE_YN,
+            D.DGSTFN_USE_YN,
+            D.TAG_USE_YN,
+            D.OPNN_DOC_YN,
+            D.INQ_CNT_LMT_HR_CNT,
+            E.MNGR_EDTR_USE_YN,
+            E.USER_EDTR_USE_YN,
+            E.ATCH_FILE_USE_YN,
+            E.ULD_CLSF_SN,
+            E.FILE_LMT_CNT,
+            E.LMT_FILE_SZ,
+            E.WHOL_ULD_SZ,
+            E.PRMSN_FILE_EXTN_MTTR,
+            E.CCHA_USE_YN,
+            E.RLS_YN,
+            E.PHBWD_USE_YN,
+            E.PHBWD_CD_ID
+        FROM
+            TN_BBS_SETUP A,
+            TN_BBS_GLOBAL_SETUP B,
+            TN_BBS_LIST_SETUP C,
+            TN_BBS_VIEW_SETUP D,
+            TN_BBS_FORM_SETUP E
+        WHERE
+            A.BBS_SN = #{bbsSn}
+        AND B.BBS_STNG_SN = A.BBS_STNG_SN
+        AND C.BBS_STNG_SN = A.BBS_STNG_SN
+        AND D.BBS_STNG_SN = A.BBS_STNG_SN
+        AND E.BBS_STNG_SN = A.BBS_STNG_SN
+    </select>
+
+    <select id="selectBbsCtgryList" resultType="bbsCtgryCacheVo" parameterType="int">
+        SELECT
+            A.BBS_SN,
+            A.CLSF_NM,
+            A.CLSF_NO
+        FROM
+            TN_BBS_CTGRY A
+        WHERE
+                A.BBS_SN = #{bbsSn}
+        ORDER BY A.SORT_SN ASC
+    </select>
+
+        <!-- 게시판 하위카테고리 조회 목록 -->
+    <select id="selectBbsLwprtCtgryList" parameterType="bbsCtgryCacheVo" resultType="bbsCtgryCacheVo">
+        SELECT
+            A.BBS_SN,
+            A.CLSF_NM,
+            A.CLSF_NO,
+            B.LWRK_CLSF_SN,
+            B.LWRK_CLSF_NM,
+            B.SORT_SN
+        FROM
+            TN_BBS_CTGRY A, TN_BBS_LWPRT_CTGRY B
+        WHERE
+                A.BBS_SN = B.BBS_SN
+            AND A.CLSF_NO = B.CLSF_NO
+            AND A.BBS_SN = #{bbsSn}
+            AND A.CLSF_NO = #{clsfNo}
+        ORDER BY A.SORT_SN ASC
+    </select>
+
+    <select id="selectBbsItemList" resultType="bbsItemCacheVo">
+        SELECT
+            A.BBS_STNG_SN,
+            A.COL_ID,
+            A.COL_NM,
+            A.SCRN_NM,
+            A.COL_TYPE_NM,
+            A.BBS_COL_EXPLN,
+            A.SRCH_TYPE,
+            A.ESNTL_YN,
+            A.SORT_SN,
+            A.LST_INDCT_YN,
+            A.INQ_INDCT_YN,
+            A.INPT_INDCT_YN
+        FROM
+            TN_BBS_ITEM_SETUP A, TN_BBS_SETUP B
+        WHERE
+                A.BBS_STNG_SN = B.BBS_STNG_SN
+            AND B.BBS_SN = #{bbsSn}
+            <if test="srchStngYn != null  and srchStngYn != ''">
+              AND SRCH_TYPE != ''
+            </if>
+        ORDER BY A.SORT_SN ASC
+    </select>
+</mapper>

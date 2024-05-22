@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+    <!-- 게시판 관리 기본 설정 -->
+
+    <bbs-config>
+        <!-- 게시판 생성시 기본 설정 값(설정이 필요한 컬럼만 사용) -->
+        <defaultColumn>
+            <bbsSn />
+            <bbsDocNo />
+            <rfrncDocNo />
+            <ntcPstYn />
+            <ntcBgngDt />
+            <ntcEndDt />
+            <pstgBgngDt />
+            <pstgEndDt />
+            <rlsYn />
+            <ttl />
+            <docContsCn />
+            <clsfNo />
+            <lwrkClsfSn />
+            <mainCn />
+            <ansDtlCn />
+            <ansDt />
+            <file />
+            <deptCdId />
+            <deptNm />
+            <picId />
+            <picNm />
+            <cpyrht />
+            <tagNms />
+            <inqCnt />
+            <dclrCnt />
+            <rcmdtnCnt />
+            <stsfdgEvl />
+            <cntnBrwsrNm />
+            <ipAddr />
+            <userIdntfNm />
+            <rgtrId />
+            <rgtrNm />
+            <rgtrTelno />
+            <rgtrEmlAddr />
+            <regDt />
+            <pswd /> 
+            <mdfrId />
+            <updtDt />
+            <flctnColCn1 />
+            <flctnColCn2 />
+            <flctnColCn3 />
+            <flctnColCn4 />
+            <flctnColCn5 />
+            <flctnColCn6 />
+            <flctnColCn7 />
+            <flctnColCn8 />
+            <flctnColCn9 />
+            <flctnColCn10 />
+        </defaultColumn>
+
+        <defaultConfig table="TN_BBS">
+            <bbsSn colId="bbsSn" colNm="게시판코드" colTypeNm="" bbsColExpln="" srchStngYn="N" srchType="" esntlYn="N" lstIndctYn="N" inqIndctYn="N" inptIndctYn="N" />
+            <bbsDocNo colId="bbsDocNo" colNm="게시물일련번호" colTypeNm="" bbsColExpln="" srchStngYn="N" srchType="" esntlYn="N" lstIndctYn="N" inqIndctYn="N" inptIndctYn="N" />
+            <rfrncDocNo colId="rfrncDocNo" colNm="참조일련번호" colTypeNm="" bbsColExpln="" srchStngYn="N" srchType="" esntlYn="N" lstIndctYn="N" inqIndctYn="N" inptIndctYn="N" />
+            <ntcPstYn colId="ntcPstYn" colNm="공지여부" colTypeNm="" bbsColExpln="" srchStngYn="N" srchType="" esntlYn="N" lstIndctYn="N" inqIndctYn="N" inptIndctYn="N" />
+            <ntcBgngDt colId="ntcBgngDt" colNm="공지시작일" colTypeNm="DATE" bbsColExpln="" srchStngYn="N" srchType="" esntlYn="N" lstIndctYn="N" inqIndctYn="N" inptIndctYn="N" />
+            <ntcEndDt colId="ntcEndDt" colNm="공지종료일" colTypeNm="DATE" bbsColExpln="" srchStngYn="N" srchType="" esntlYn="N" lstIndctYn="N" inqIndctYn="N" inptIndctYn="N" />
+            <pstgBgngDt colId="pstgBgngDt" colNm="게시시작일시" colTypeNm="" bbsColExpln="" srchStngYn="N" srchType="" esntlYn="N" lstIndctYn="N" inqIndctYn="N" inptIndctYn="N" />
+            <pstgEndDt colId="pstgEndDt" colNm="게시종료일시" colTypeNm="" bbsColExpln="" srchStngYn="N" srchType="" esntlYn="N" lstIndctYn="N" inqIndctYn="N" inptIndctYn="N" />
+            <rlsYn colId="rlsYn" colNm="공개여부" colTypeNm="" bbsColExpln="" srchStngYn="N" srchType="" esntlYn="N" lstIndctYn="N" inqIndctYn="N" inptIndctYn="N" />
+            <ttl colId="ttl" colNm="제목" colTypeNm="" bbsColExpln="" srchStngYn="Y" srchType="1002" esntlYn="Y" lstIndctYn="Y" inqIndctYn="Y" inptIndctYn="Y" />
+            <docContsCn colId="docContsCn" colNm="내용" colTypeNm="TEXTAREA" bbsColExpln="" srchStngYn="Y" srchType="1002" esntlYn="Y" lstIndctYn="Y" inqIndctYn="Y" inptIndctYn="Y" />
+            <clsfNo colId="clsfNo" colNm="분류" colTypeNm="" bbsColExpln="" srchStngYn="N" srchType="" esntlYn="N" lstIndctYn="Y" inqIndctYn="Y" inptIndctYn="Y" />
+            <lwrkClsfSn colId="lwrkClsfSn" colNm="하위분류" colTypeNm="" bbsColExpln="" srchStngYn="N" srchType="" esntlYn="N" lstIndctYn="N" inqIndctYn="N" inptIndctYn="N" />
+            <mainCn colId="mainCn" colNm="내용요약" colTypeNm="TEXTAREA" bbsColExpln="" srchStngYn="N" srchType="" esntlYn="N" lstIndctYn="Y" inqIndctYn="N" inptIndctYn="N" />
+            <file colId="file" colNm="파일" colTypeNm="" bbsColExpln="" srchStngYn="N" srchType="" esntlYn="N" lstIndctYn="Y" inqIndctYn="Y" inptIndctYn="Y" />
+            <ansDtlCn colId="ansDtlCn" colNm="답변내용" colTypeNm="TEXTAREA" bbsColExpln="" srchStngYn="N" srchType="" esntlYn="N" lstIndctYn="N" inqIndctYn="N" inptIndctYn="N" />
+            <ansDt colId="ansDt" colNm="답변일시" colTypeNm="DATE" bbsColExpln="" srchStngYn="N" srchType="" esntlYn="N" lstIndctYn="N" inqIndctYn="N" inptIndctYn="N" />
+            <deptCdId colId="deptCdId" colNm="부서코드" colTypeNm="" bbsColExpln="" srchStngYn="N" srchType="" esntlYn="N" lstIndctYn="N" inqIndctYn="N" inptIndctYn="N" />
+            <deptNm colId="deptNm" colNm="부서명" colTypeNm="" bbsColExpln="" srchStngYn="N" srchType="" esntlYn="N" lstIndctYn="N" inqIndctYn="N" inptIndctYn="N" />
+            <picId colId="picId" colNm="담당자ID" colTypeNm="" bbsColExpln="" srchStngYn="N" srchType="" esntlYn="N" lstIndctYn="N" inqIndctYn="N" inptIndctYn="N" />
+            <picNm colId="picNm" colNm="담당자명" colTypeNm="" bbsColExpln="" srchStngYn="N" srchType="" esntlYn="N" lstIndctYn="N" inqIndctYn="N" inptIndctYn="N" />
+            <cpyrht colId="cpyrht" colNm="저작권" colTypeNm="" bbsColExpln="" srchStngYn="N" srchType="" esntlYn="N" lstIndctYn="N" inqIndctYn="N" inptIndctYn="N" />
+            <tagNms colId="tagNms" colNm="태그" colTypeNm="" bbsColExpln="" srchStngYn="N" srchType="" esntlYn="N" lstIndctYn="N" inqIndctYn="N" inptIndctYn="N" />
+            <inqCnt colId="inqCnt" colNm="조회수" colTypeNm="" bbsColExpln="" srchStngYn="N" srchType="" esntlYn="N" lstIndctYn="Y" inqIndctYn="Y" inptIndctYn="N" />
+            <dclrCnt colId="dclrCnt" colNm="신고횟수" colTypeNm="" bbsColExpln="" srchStngYn="N" srchType="" esntlYn="N" lstIndctYn="N" inqIndctYn="N" inptIndctYn="N" />
+            <rcmdtnCnt colId="rcmdtnCnt" colNm="추천횟수" colTypeNm="" bbsColExpln="" srchStngYn="N" srchType="" esntlYn="N" lstIndctYn="N" inqIndctYn="N" inptIndctYn="N" />
+            <stsfdgEvl colId="stsfdgEvl" colNm="만족도평가" colTypeNm="" bbsColExpln="" srchStngYn="N" srchType="" esntlYn="N" lstIndctYn="N" inqIndctYn="N" inptIndctYn="N" />
+            <cntnBrwsrNm colId="cntnBrwsrNm" colNm="에이전트" colTypeNm="" bbsColExpln="" srchStngYn="N" srchType="" esntlYn="N" lstIndctYn="N" inqIndctYn="N" inptIndctYn="N" />
+            <ipAddr colId="ipAddr" colNm="IP주소" colTypeNm="" bbsColExpln="" srchStngYn="N" srchType="" esntlYn="N" lstIndctYn="N" inqIndctYn="N" inptIndctYn="N" />
+            <userIdntfNm colId="userIdntfNm" colNm="사용자키" colTypeNm="" bbsColExpln="" srchStngYn="N" srchType="" esntlYn="N" lstIndctYn="N" inqIndctYn="N" inptIndctYn="N" />
+            <rgtrId colId="rgtrId" colNm="등록자ID" colTypeNm="" bbsColExpln="" srchStngYn="N" srchType="" esntlYn="N" lstIndctYn="N" inqIndctYn="N" inptIndctYn="N" />
+            <rgtrNm colId="rgtrNm" colNm="등록자명" colTypeNm="" bbsColExpln="" srchStngYn="N" srchType="" esntlYn="N" lstIndctYn="Y" inqIndctYn="Y" inptIndctYn="N" />
+            <rgtrTelno colId="rgtrTelno" colNm="등록자연락처" colTypeNm="" bbsColExpln="" srchStngYn="N" srchType="" esntlYn="N" lstIndctYn="N" inqIndctYn="N" inptIndctYn="N" />
+            <rgtrEmlAddr colId="rgtrEmlAddr" colNm="등록자이메일" colTypeNm="EMAIL" bbsColExpln="" srchStngYn="N" srchType="" esntlYn="N" lstIndctYn="N" inqIndctYn="N" inptIndctYn="N" />
+            <regDt colId="regDt" colNm="등록일시" colTypeNm="DATE" bbsColExpln="" srchStngYn="N" srchType="" esntlYn="N" lstIndctYn="Y" inqIndctYn="Y" inptIndctYn="N" />
+            <pswd colId="pswd" colNm="비밀번호" colTypeNm="" bbsColExpln="" srchStngYn="N" srchType="" esntlYn="N" lstIndctYn="N" inqIndctYn="N" inptIndctYn="N" />
+            <mdfrId colId="mdfrId" colNm="수정자ID" colTypeNm="" bbsColExpln="" srchStngYn="N" srchType="" esntlYn="N" lstIndctYn="N" inqIndctYn="N" inptIndctYn="N" />
+            <updtDt colId="updtDt" colNm="수정일시" colTypeNm="DATE" bbsColExpln="" srchStngYn="N" srchType="" esntlYn="N" lstIndctYn="N" inqIndctYn="N" inptIndctYn="N" />
+            <flctnColCn1 colId="flctnColCn1" colNm="확장컬럼1" colTypeNm="" bbsColExpln="" srchStngYn="N" srchType="" esntlYn="N" lstIndctYn="N" inqIndctYn="N" inptIndctYn="N" />
+            <flctnColCn2 colId="flctnColCn2" colNm="확장컬럼2" colTypeNm="" bbsColExpln="" srchStngYn="N" srchType="" esntlYn="N" lstIndctYn="N" inqIndctYn="N" inptIndctYn="N" />
+            <flctnColCn3 colId="flctnColCn3" colNm="확장컬럼3" colTypeNm="" bbsColExpln="" srchStngYn="N" srchType="" esntlYn="N" lstIndctYn="N" inqIndctYn="N" inptIndctYn="N" />
+            <flctnColCn4 colId="flctnColCn4" colNm="확장컬럼4" colTypeNm="" bbsColExpln="" srchStngYn="N" srchType="" esntlYn="N" lstIndctYn="N" inqIndctYn="N" inptIndctYn="N" />
+            <flctnColCn5 colId="flctnColCn5" colNm="확장컬럼5" colTypeNm="" bbsColExpln="" srchStngYn="N" srchType="" esntlYn="N" lstIndctYn="N" inqIndctYn="N" inptIndctYn="N" />
+            <flctnColCn6 colId="flctnColCn6" colNm="확장컬럼6" colTypeNm="" bbsColExpln="" srchStngYn="N" srchType="" esntlYn="N" lstIndctYn="N" inqIndctYn="N" inptIndctYn="N" />
+            <flctnColCn7 colId="flctnColCn7" colNm="확장컬럼7" colTypeNm="" bbsColExpln="" srchStngYn="N" srchType="" esntlYn="N" lstIndctYn="N" inqIndctYn="N" inptIndctYn="N" />
+            <flctnColCn8 colId="flctnColCn8" colNm="확장컬럼8" colTypeNm="" bbsColExpln="" srchStngYn="N" srchType="" esntlYn="N" lstIndctYn="N" inqIndctYn="N" inptIndctYn="N" />
+            <flctnColCn9 colId="flctnColCn9" colNm="확장컬럼9" colTypeNm="" bbsColExpln="" srchStngYn="N" srchType="" esntlYn="N" lstIndctYn="N" inqIndctYn="N" inptIndctYn="N" />
+            <flctnColCn10 colId="flctnColCn10" colNm="확장컬럼10" colTypeNm="" bbsColExpln="" srchStngYn="N" srchType="" esntlYn="N" lstIndctYn="N" inqIndctYn="N" inptIndctYn="N" />
+        </defaultConfig>
+
+        <!-- 게시판 Tag Lib에서 자동 생성되는 코드에서 사용하는 class 명으로 디자인시 아래 이름으로 CSS를 작성해야 함 -->
+        <!-- 목록/상세/등록/수정 화면에서 소스보기를 통하여 각 클레스명을 확인하고 적용한다. -->
+
+        <!-- bbsCheckBoxClass : input type="checkbox" tag에 적용되는 class 이름 -->
+        <!-- bbsRadioClass : input type="radio" tag에 적용되는 class 이름 -->
+        <!-- bbsTextareaClass : textarea tag에 적용되는 class 이름 -->
+        <!-- bbsInputClass : 일반 input tag에 적용되는 class 이름 -->
+        <!-- bbsSelectClass : select tag에 적용되는 class 이름 -->
+        <!-- bbsFileClass : input type="file" tag에 적용되는 class 이름 -->
+        <!-- bbsDateClass : input type="date" 또는 날짜형 input tag에 적용되는 class 이름 -->
+        <!-- bbsEmailClass :  input type="date" 또는 E-mail input tag에 적용되는 class 이름 -->
+        <!-- bbsLabelClass : label tag에 적용되는 class 이름 -->
+        <!-- bbsCheckBoxLabelClass : checkbox를 감싸고 있는 label tag에 적용되는 class 이름  -->
+        <!-- bbsRadioLabelClass : radio를 감싸고 있는 label tag에 적용되는 class 이름 -->
+        <!-- bbsHelpBlockClass : 해당컬럼에 대한 설명을 표시하는 class 이름 -->
+        <!-- bbsInnerButtonClass : 화면 내부에 위치하는 버튼 class 이름 -->
+
+        <!-- bbsRequireClass : 필수입력항목 태그 class 이름 -->
+
+        <!-- bbsReplyIco : 답글표시 아이콘 -->
+        <!-- bbsNewIco : 새글표시 아이콘 -->
+        <!-- bbsFileIco : 파일표시 아이콘 -->
+        <!-- bbsCmntIco : 댓글갯수 아이콘 -->
+        <bbsStyle>
+            <bbsCheckBoxClass>styled</bbsCheckBoxClass>
+            <bbsRadioClass>styled</bbsRadioClass>
+            <bbsTextareaClass>form-control</bbsTextareaClass>
+            <bbsInputClass>form-control</bbsInputClass>
+            <bbsSelectClass>form-control</bbsSelectClass>
+            <bbsFileClass>form-control</bbsFileClass>
+            <bbsDateClass>form-control</bbsDateClass>
+            <bbsEmailClass>form-control</bbsEmailClass>
+            <bbsLabelClass>control-label col-sm-2</bbsLabelClass>
+            <bbsCheckBoxLabelClass>checkbox-inline checkbox-primary</bbsCheckBoxLabelClass>
+            <bbsRadioLabelClass>radio-inline radio-primary</bbsRadioLabelClass>
+            <bbsHelpBlockClass>help-block op-validate</bbsHelpBlockClass>
+            <bbsInnerButtonClass>btn btn-xs btn-success</bbsInnerButtonClass>
+
+            <bbsRequireClass>mandatory</bbsRequireClass>
+
+            <bbsReplyIco>/resources/openworks4/theme/default/images/bbs/btn_reply.gif</bbsReplyIco>
+            <bbsNewIco>/resources/openworks4/theme/default/images/bbs/ico_new.gif</bbsNewIco>
+            <bbsFileIco></bbsFileIco>
+            <bbsCmntIco>/resources/openworks4/theme/default/images/bbs/ico_cmnt.gif</bbsCmntIco>
+        </bbsStyle>
+
+    </bbs-config>
+
+<typeAliases></typeAliases>
+</configuration>

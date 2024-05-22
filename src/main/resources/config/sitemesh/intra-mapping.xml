@@ -1,0 +1,23 @@
+<sitemesh xmlns="http://sitemesh.org/xml/config" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+    <!-- Map default decorator. This shall be applied to all paths if no other paths match. -->
+<!--     <mapping decorator="/WEB-INF/jsp/common/decorator/BD_Manage.jsp" /> -->
+
+    <!-- Exclude path from decoration. -->
+    <mapping path="/**/ND_*.do" exclue="true" />
+    <mapping path="/**/PV_*.do" exclue="true" />
+
+    <!-- Map decorators to path patterns. -->
+    <mapping path="/**/BD_*.do" decorator="/WEB-INF/jsp/common/decorator/BD_Manage.jsp" />
+    <mapping path="/**/PD_*.do" decorator="/WEB-INF/jsp/common/decorator/PD_Manage.jsp" />
+    <mapping path="/**/SD_*.do" decorator="/WEB-INF/jsp/common/decorator/SD_Manage.jsp" />
+    <mapping path="/**/INC_*.do" decorator="/WEB-INF/jsp/common/decorator/INC_Manage.jsp" />
+
+    <!-- Alternative convention. This is more verbose but allows multiple decorators to be applied to a single path. -->
+    <!-- <mapping> -->
+    <!-- <path>/popup/*</path> -->
+    <!-- <decorator>/web/f-decorator.jsp</decorator> -->
+    <!-- <decorator>/web/s-decorator.jsp</decorator> -->
+    <!-- </mapping> -->
+
+</sitemesh>

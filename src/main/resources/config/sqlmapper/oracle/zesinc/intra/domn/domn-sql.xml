@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="zesinc.intra.domn.DomnMapper">
+
+    <!-- 레이아웃 사용여부 체크 -->
+    <select id="selectLayoutUseChck" parameterType="domnVo" resultType="int">
+        SELECT
+            COUNT(A.LYT_CD_NO) AS CNT
+        FROM
+            TN_USER_MENU_LAYOUT A
+        WHERE
+                A.SITE_SN = #{paramMap.q_siteSn}
+    </select>
+
+    <!-- 사용자메뉴 사용여부 체크 -->
+    <select id="selectUserMenuUseChck" parameterType="domnVo" resultType="int">
+        SELECT
+            COUNT(A.USER_MENU_ENG_NM) AS CNT
+        FROM
+            TN_USER_MENU A
+        WHERE
+                A.SITE_SN = #{paramMap.q_siteSn}
+    </select>
+
+    <!-- 중복 도메인 조회 -->
+    <select id="selectDplctChckDomn" parameterType="domnVo" resultType="int">
+        SELECT
+            COUNT(A.SITE_SN) AS CNT
+        FROM
+            TN_DOMN A
+        WHERE
+                 A.SITE_NM = #{siteNm}
+             AND A.PORT_SN = #{portSn}
+             AND A.SITE_PATH_NM = #{sitePathNm}
+             <if test="siteSn != null and siteSn != ''">
+             AND A.SITE_SN != #{siteSn}
+             </if>
+    </select>
+
+    <!-- 담당자목록 Auto Complete 용 -->
+    <select id="selectMngrList" parameterType="domnOrgVo" resultType="domnOrgVo">
+        SELECT
+            (A.PIC_NM || ' / ' || B.DEPT_NM) AS label,
+            A.PIC_NM AS value,
+            A.PIC_ID,
+            A.PIC_NM,
+            A.DEPT_CD_ID,
+            B.DEPT_NM
+        FROM
+            TN_MNGR A, TN_DEPT B
+        WHERE
+                A.DEPT_CD_ID = B.DEPT_CD_ID
+            AND A.PIC_NM LIKE #{paramMap.q_picNm} || '%'
+            <if test="paramMap.q_useYn != null">
+            AND A.USE_YN = #{paramMap.q_useYn}
+            </if>
+            <if test="paramMap.q_maxRowNum != null">
+            AND ROWNUM &lt; #{paramMap.q_maxRowNum}
+            </if>
+        ORDER BY A.PIC_NM
+    </select>
+
+    <!-- 도메인 조회 -->
+    <select id="selectDomn" parameterType="domnVo" resultType="domnVo">
+        SELECT
+        <trim suffixOverrides=",">
+            A.SITE_SN,
+            A.SITE_NM,
+            A.SITE_EXPLN,
+            A.PORT_SN,
+            A.SITE_PATH_NM,
+            A.LANG_CD_ID,
+            A.TKCG_DEPT_CD_ID,
+            A.PIC_ID,
+            A.HTTPS_YN,
+            A.SCRTY_PORT_SN,
+            A.ACTL_STNG_YN,
+            A.USE_YN,
+            A.RGTR_ID,
+            A.REG_DT,
+            A.MDFR_ID,
+            A.UPDT_DT,
+            (SELECT DEPT_NM FROM TN_DEPT WHERE DEPT_CD_ID = A.TKCG_DEPT_CD_ID) AS CHRG_DEPT_NM,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.PIC_ID) AS PIC_NM,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.RGTR_ID) AS RGTR_NM,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.MDFR_ID) AS UPDUSR_NM,
+        </trim>
+        FROM
+            TN_DOMN A
+        WHERE
+                 A.SITE_SN = #{paramMap.q_siteSn}
+    </select>
+
+    <!-- 도메인 목록 -->
+    <sql id="incDomnWhere">
+        <where>
+            <if test="paramMap.q_searchKey != null">
+                 A.SITE_NM = #{paramMap.q_searchVal}
+            </if>
+        </where>
+    </sql>
+    <select id="selectDomnList" parameterType="domnVo" resultType="domnVo">
+        SELECT
+        <trim suffixOverrides=",">
+            A.SITE_SN,
+            A.SITE_NM,
+            A.SITE_EXPLN,
+        </trim>
+        FROM
+            TN_DOMN A
+        <include refid="incDomnWhere"/>
+        ORDER BY A.SITE_SN
+    </select>
+
+    <!-- 도메인 등록 -->
+    <insert id="insertDomn" parameterType="domnVo">
+        <selectKey order="BEFORE" keyProperty="siteSn" resultType="int">
+            SELECT NVL(MAX(SITE_SN), 0) + 1
+            FROM TN_DOMN
+        </selectKey>
+        INSERT INTO TN_DOMN (
+        <trim suffixOverrides=",">
+            SITE_SN,
+            SITE_NM,
+            SITE_EXPLN,
+            PORT_SN,
+            SITE_PATH_NM,
+            LANG_CD_ID,
+            TKCG_DEPT_CD_ID,
+            PIC_ID,
+            HTTPS_YN,
+            SCRTY_PORT_SN,
+            ACTL_STNG_YN,
+            USE_YN,
+            RGTR_ID,
+            REG_DT,
+        </trim>
+        ) VALUES (
+        <trim suffixOverrides=",">
+            #{siteSn},
+            #{siteNm},
+            #{siteExpln},
+            #{portSn},
+            #{sitePathNm},
+            #{langCdId},
+            #{tkcgDeptCdId},
+            #{picId},
+            #{httpsYn},
+            #{scrtyPortSn},
+            #{actlStngYn},
+            #{useYn},
+            #{rgtrId},
+            SYSDATE,
+        </trim>
+        )
+    </insert>
+
+    <!-- 도메인 수정 -->
+    <update id="updateDomn" parameterType="domnVo">
+        UPDATE TN_DOMN
+          <set>
+            SITE_NM = #{siteNm},
+            SITE_EXPLN = #{siteExpln},
+            PORT_SN = #{portSn},
+            SITE_PATH_NM = #{sitePathNm},
+            LANG_CD_ID = #{langCdId},
+            TKCG_DEPT_CD_ID = #{tkcgDeptCdId},
+            PIC_ID = #{picId},
+            HTTPS_YN = #{httpsYn},
+            SCRTY_PORT_SN = #{scrtyPortSn},
+            ACTL_STNG_YN = #{actlStngYn},
+            USE_YN = #{useYn},
+            MDFR_ID = #{mdfrId},
+            UPDT_DT = SYSDATE,
+          </set>
+        WHERE
+             SITE_SN = #{paramMap.q_siteSn}
+    </update>
+
+    <!-- 도메인 삭제 -->
+    <delete id="deleteDomn" parameterType="domnVo">
+        DELETE FROM TN_DOMN
+        WHERE
+             SITE_SN = #{paramMap.q_siteSn}
+    </delete>
+
+    <!-- 도메인그룹 조회 -->
+    <select id="selectDomnGroup" parameterType="domnGroupVo" resultType="domnGroupVo">
+        SELECT
+        <trim suffixOverrides=",">
+            B.SITE_SN,
+            B.SRVR_IP_ADDR,
+            B.GROUP_PORT_SN,
+        </trim>
+        FROM
+            TN_DOMN_GROUP B
+        WHERE
+                 B.SITE_SN = #{paramMap.q_siteSn}
+             <if test="paramMap.q_srvrIpAddr != null">
+            AND   B.SRVR_IP_ADDR = #{paramMap.q_srvrIpAddr}
+            </if>
+    </select>
+
+    <!-- 도메인그룹 목록 -->
+    <sql id="incDomnGroupWhere">
+        <where>
+            <if test="paramMap.q_siteSn != null">
+                    B.SITE_SN = #{paramMap.q_siteSn}
+            </if>
+        </where>
+    </sql>
+    <select id="selectDomnGroupList" parameterType="domnGroupVo" resultType="domnGroupVo">
+        SELECT
+        <trim suffixOverrides=",">
+            B.SITE_SN,
+            B.SRVR_IP_ADDR,
+            B.GROUP_PORT_SN,
+        </trim>
+        FROM
+            TN_DOMN_GROUP B
+        <include refid="incDomnGroupWhere"/>
+    </select>
+
+    <!-- 도메인그룹 등록 -->
+    <insert id="insertDomnGroup" parameterType="domnGroupVo">
+        INSERT INTO TN_DOMN_GROUP (
+        <trim suffixOverrides=",">
+            SITE_SN,
+            SRVR_IP_ADDR,
+            GROUP_PORT_SN,
+        </trim>
+        ) VALUES (
+        <trim suffixOverrides=",">
+            #{siteSn},
+            #{srvrIpAddr},
+            #{groupPortSn},
+        </trim>
+        )
+    </insert>
+
+    <!-- 도메인그룹 수정 -->
+    <update id="updateDomnGroup" parameterType="domnGroupVo">
+        UPDATE TN_DOMN_GROUP
+          <set>
+            SRVR_IP_ADDR = #{srvrIpAddr},
+            GROUP_PORT_SN = #{groupPortSn},
+          </set>
+        WHERE
+             SITE_SN = #{paramMap.q_siteSn}
+            AND   SRVR_IP_ADDR = #{paramMap.q_srvrIpAddr}
+    </update>
+
+    <!-- 도메인그룹 삭제 -->
+    <delete id="deleteDomnGroup" parameterType="domnGroupVo">
+        DELETE FROM TN_DOMN_GROUP
+        WHERE
+             SITE_SN = #{paramMap.q_siteSn}
+            <if test="paramMap.q_srvrIpAddr != null">
+            AND   SRVR_IP_ADDR = #{paramMap.q_srvrIpAddr}
+            </if>
+    </delete>
+
+</mapper>

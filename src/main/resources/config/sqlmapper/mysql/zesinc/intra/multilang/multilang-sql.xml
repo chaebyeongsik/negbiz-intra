@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="zesinc.intra.multilang.MultilangMapper">
+
+    <!-- 다국어 코드 중복 체크 -->
+    <select id="selectDplctChckMultilang" parameterType="multilangVo" resultType="int">
+        SELECT
+            COUNT(A.MTLNG_CD_NM) AS CNT
+        FROM
+            TN_MULTI_LANG A
+        WHERE
+                 A.MTLNG_CD_NM = #{paramMap.q_mtlngCdNm}
+    </select>
+
+    <!-- 다국어 조회 -->
+    <select id="selectMultilang" parameterType="multilangVo" resultType="multilangVo">
+        SELECT
+        <trim suffixOverrides=",">
+            A.MTLNG_CD_NM,
+            A.UP_MTLNG_CD_NM,
+            (SELECT MTLNG_CD_EXPLN FROM TN_MULTI_LANG WHERE MTLNG_CD_NM = A.UP_MTLNG_CD_NM) AS UP_MTLNG_CD_NM_DC,
+            A.MTLNG_UNQ_CD_NM,
+            A.MTLNG_CD_EXPLN,
+            A.USE_YN,
+            A.RGTR_ID,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.RGTR_ID) AS RGTR_NM,
+            A.REG_DT,
+            A.MDFR_ID,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.MDFR_ID) AS UPDUSR_NM,
+            A.UPDT_DT,
+            IF (((SELECT   COUNT(1) FROM   TN_MULTI_LANG
+                       WHERE   UP_MTLNG_CD_NM = A.MTLNG_CD_NM))= 0, '0', '1') AS isFolder,
+        </trim>
+        FROM
+            TN_MULTI_LANG A
+        WHERE
+                 A.MTLNG_CD_NM = #{paramMap.q_mtlngCdNm}
+    </select>
+
+    <!-- 다국어 트리 목록 -->
+    <select id="selectMultilangTreeList" parameterType="multilangVo" resultType="treeVo">
+        SELECT
+        <trim suffixOverrides=",">
+            A.MTLNG_CD_NM AS "key",
+            A.MTLNG_UNQ_CD_NM AS title,
+            A.USE_YN AS useYn,
+            IF (((SELECT   COUNT(1) FROM   TN_MULTI_LANG
+                       WHERE   UP_MTLNG_CD_NM = A.MTLNG_CD_NM))= 0, '0', '1') AS folder,
+            IF (((SELECT   COUNT(1) FROM   TN_MULTI_LANG
+                       WHERE   UP_MTLNG_CD_NM = A.MTLNG_CD_NM))= 0, '0', '1') AS lazy
+        </trim>
+        FROM
+            TN_MULTI_LANG A
+        WHERE
+            UP_MTLNG_CD_NM = #{paramMap.q_upMtlngCdNm}
+        ORDER BY A.MTLNG_CD_NM
+    </select>
+
+    <!-- 기능별 연계 화면 다국어 트리 목록 -->
+    <select id="selectConnectMultilangTreeList" parameterType="multilangVo" resultType="treeVo">
+        SELECT
+        <trim suffixOverrides=",">
+            A.MTLNG_CD_NM AS "key",
+            A.MTLNG_UNQ_CD_NM AS title,
+            A.USE_YN AS useYn,
+            IF (((SELECT   COUNT(1) FROM   TN_MULTI_LANG
+                       WHERE   UP_MTLNG_CD_NM = A.MTLNG_CD_NM))= 0, '0', '1') AS folder,
+            IF (((SELECT   COUNT(1) FROM   TN_MULTI_LANG
+                       WHERE   UP_MTLNG_CD_NM = A.MTLNG_CD_NM))= 0, '0', '1') AS lazy
+        </trim>
+        FROM
+            TN_MULTI_LANG A
+        WHERE
+            UP_MTLNG_CD_NM = #{paramMap.q_upMtlngCdNm}
+        ORDER BY A.MTLNG_CD_NM
+    </select>
+
+    <!-- 다국어 등록 -->
+    <insert id="insertMultilang" parameterType="multilangVo">
+        INSERT INTO TN_MULTI_LANG (
+        <trim suffixOverrides=",">
+            MTLNG_CD_NM,
+            UP_MTLNG_CD_NM,
+            MTLNG_UNQ_CD_NM,
+            MTLNG_CD_EXPLN,
+            USE_YN,
+            RGTR_ID,
+            REG_DT,
+        </trim>
+        ) VALUES (
+        <trim suffixOverrides=",">
+            #{mtlngCdNm},
+            #{upMtlngCdNm},
+            #{mtlngUnqCdNm},
+            #{mtlngCdExpln},
+            #{useYn},
+            #{rgtrId},
+            NOW(),
+        </trim>
+        )
+    </insert>
+
+    <!-- 다국어 수정 -->
+    <update id="updateMultilang" parameterType="multilangVo">
+        UPDATE TN_MULTI_LANG 
+          <set> 
+            MTLNG_CD_EXPLN = #{mtlngCdExpln},
+            <if test="useYn != null and useYn != ''">
+                USE_YN = #{useYn},
+            </if>
+            MDFR_ID = #{mdfrId},
+            UPDT_DT = NOW(),
+          </set> 
+        WHERE
+             MTLNG_CD_NM = #{paramMap.q_mtlngCdNm}
+    </update>
+
+    <!-- 다국어 삭제 -->
+    <delete id="deleteMultilang" parameterType="multilangVo">
+        DELETE FROM TN_MULTI_LANG
+        WHERE
+             MTLNG_CD_NM = #{paramMap.q_mtlngCdNm}
+    </delete>
+
+    <!-- 다국어그룹 목록 -->
+    <sql id="incMultilangGrpWhere">
+        <where>
+            <if test="paramMap.q_mtlngCdNm != null">
+                 B.MTLNG_CD_NM = #{paramMap.q_mtlngCdNm}
+            </if>
+        </where>
+    </sql>
+    <select id="selectMultilangGrpList" parameterType="multilangGrpVo" resultType="multilangGrpVo">
+        SELECT
+        <trim suffixOverrides=",">
+            B.LANG_CD_ID,
+            B.MTLNG_CD_NM,
+            B.MULTI_LANG_MSG_CN,
+        </trim>
+        FROM
+            TN_MULTI_LANG_GROUP B
+        <include refid="incMultilangGrpWhere"/>
+    </select>
+
+    <!-- 다국어그룹 등록 -->
+    <insert id="insertMultilangGrp" parameterType="multilangGrpVo">
+        INSERT INTO TN_MULTI_LANG_GROUP (
+        <trim suffixOverrides=",">
+            LANG_CD_ID,
+            MTLNG_CD_NM,
+            MULTI_LANG_MSG_CN,
+        </trim>
+        ) VALUES (
+        <trim suffixOverrides=",">
+            #{langCdId},
+            #{mtlngCdNm},
+            #{multiLangMsgCn},
+        </trim>
+        )
+    </insert>
+
+    <!-- 다국어그룹 삭제 -->
+    <delete id="deleteMultilangGrp" parameterType="multilangGrpVo">
+        DELETE FROM TN_MULTI_LANG_GROUP
+        WHERE
+            MTLNG_CD_NM = #{paramMap.q_mtlngCdNm}
+        <if test="paramMap.q_langCdId != null and paramMap.q_langCdId != ''">
+            AND LANG_CD_ID = #{paramMap.q_langCdId}
+        </if>
+    </delete>
+
+</mapper>

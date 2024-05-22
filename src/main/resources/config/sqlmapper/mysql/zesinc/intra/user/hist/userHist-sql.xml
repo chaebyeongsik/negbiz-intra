@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="zesinc.intra.user.hist.UserHistMapper">
+
+    <sql id="incWhereO">
+        <if test="paramMap.q_searchKey != null and paramMap.q_searchKey != ''">
+           <if test="paramMap.q_searchKey != 'ALL'">
+            AND LOG.MENU_NM = #{paramMap.q_searchKey}
+           </if>
+        </if>
+        <if test="paramMap.q_searchVal != null and paramMap.q_searchVal != ''">
+            AND
+            <if test="paramMap.q_searchKey1 == 1001">
+                (MNGR.PIC_ID LIKE CONCAT('%', #{paramMap.q_searchVal}, '%') OR MNGR.PIC_NM LIKE CONCAT('%', #{paramMap.q_searchVal}, '%'))
+            </if>
+            <if test="paramMap.q_searchKey1 == 1002">
+                MNGR.PIC_NM LIKE CONCAT('%', #{paramMap.q_searchVal}, '%')
+            </if>
+            <if test="paramMap.q_searchKey1 == 1003">
+                MNGR.PIC_ID LIKE CONCAT('%', #{paramMap.q_searchVal}, '%')
+            </if>
+        </if>
+        <if test="paramMap.q_startDt != null and paramMap.q_startDt != ''">
+            <if test="paramMap.q_endDt != null and paramMap.q_endDt != ''">
+                AND SUBSTR(LOG.LOG_UNQ_NO, 1,19) BETWEEN CONCAT(#{paramMap.q_startDt}, ' 00:00:00') AND CONCAT(#{paramMap.q_endDt}, ' 23:59:59')
+             </if>
+        </if>
+    </sql>
+
+    <sql id="incWhereRandU">
+        <if test="paramMap.q_searchVal != null and paramMap.q_searchVal != ''">
+            AND
+            <if test="paramMap.q_searchKey == 1001">
+                (USR.USER_IDNTF_NM LIKE CONCAT('%', #{paramMap.q_searchVal}, '%')
+                   OR USR.USER_NM LIKE CONCAT('%', #{paramMap.q_searchVal}, '%')
+                   OR MNGR.PIC_ID LIKE CONCAT('%', #{paramMap.q_searchVal}, '%')
+                   OR MNGR.PIC_NM LIKE CONCAT('%', #{paramMap.q_searchVal}, '%'))
+            </if>
+            <if test="paramMap.q_searchKey == 1002">
+                USR.USER_NM LIKE CONCAT('%', #{paramMap.q_searchVal}, '%')
+            </if>
+            <if test="paramMap.q_searchKey == 1003">
+                USR.USER_IDNTF_NM LIKE CONCAT('%', #{paramMap.q_searchVal}, '%')
+            </if>
+            <if test="paramMap.q_searchKey == 1004">
+                MNGR.PIC_NM LIKE CONCAT('%', #{paramMap.q_searchVal}, '%')
+            </if>
+            <if test="paramMap.q_searchKey == 1005">
+                MNGR.PIC_ID LIKE CONCAT('%', #{paramMap.q_searchVal}, '%')
+            </if>
+        </if>
+        <if test="paramMap.q_startDt != null and paramMap.q_startDt != ''">
+            <if test="paramMap.q_endDt != null and paramMap.q_endDt != ''">
+                AND SUBSTR(LOG.LOG_UNQ_NO, 1,19) BETWEEN CONCAT(#{paramMap.q_startDt}, ' 00:00:00') AND CONCAT(#{paramMap.q_endDt}, ' 23:59:59')
+             </if>
+        </if>
+    </sql>
+
+    <select id="selectUserLogList" parameterType="userHistVo" resultType="userHistVo">
+        SELECT Y.* FROM (
+            SELECT  X.* FROM (
+                SELECT LOG.LOG_UNQ_NO
+                     , LOG.PIC_ID
+                     , LOG.LOG_CN
+                     , LOG.CHG_AFTR_CN
+                     , LOG.MENU_NM
+                     , LOG.OTPT_NM
+                     , LOG.OTPT_FILE_NM
+                     , LOG.MENU_SE_CD
+                     , LOG.USER_ID
+                     , LOG.RSLT_NOCS
+                     , LOG.SRCH_STNG_CN
+                     , LOG.MENU_SN
+                     , MNGR.PIC_NM
+                     <if test='paramMap.q_menuSeCd != "O"'>
+                     , USR.USER_IDNTF_NM
+                     , USR.USER_NM
+                     </if>
+           <choose>
+               <when test='paramMap.q_menuSeCd == "O"'>
+                  FROM TH_USER_LOG LOG, TN_MNGR MNGR
+                 WHERE LOG.MENU_SE_CD    = #{paramMap.q_menuSeCd}
+                   AND LOG.PIC_ID = MNGR.PIC_ID
+                   <include refid="incWhereO"/>
+               </when>
+               <otherwise>
+                  FROM TH_USER_LOG LOG, TN_MNGR MNGR, TN_USER USR
+                 WHERE LOG.MENU_SE_CD    = #{paramMap.q_menuSeCd}
+                   AND LOG.USER_ID    = USR.USER_ID
+                   AND LOG.PIC_ID = MNGR.PIC_ID
+                   <include refid="incWhereRandU"/>
+               </otherwise>
+           </choose>
+                   ORDER BY LOG.LOG_UNQ_NO DESC
+            ) X
+         ) Y
+         LIMIT #{paramMap.q_rowPerPage}
+         OFFSET #{paramMap.q_pagingStartNum}
+    </select>
+
+    <select id="selectUserLogListCount" parameterType="userHistVo" resultType="int">
+        SELECT COUNT(*)
+       <choose>
+           <when test='paramMap.q_menuSeCd == "O"'>
+              FROM TH_USER_LOG LOG, TN_MNGR MNGR
+             WHERE LOG.MENU_SE_CD    = #{paramMap.q_menuSeCd}
+               AND LOG.PIC_ID = MNGR.PIC_ID
+               <include refid="incWhereO"/>
+           </when>
+           <otherwise>
+              FROM TH_USER_LOG LOG, TN_MNGR MNGR, TN_USER USR
+             WHERE LOG.MENU_SE_CD    = #{paramMap.q_menuSeCd}
+               AND LOG.USER_ID    = USR.USER_ID
+               AND LOG.PIC_ID = MNGR.PIC_ID
+               <include refid="incWhereRandU"/>
+           </otherwise>
+       </choose>
+    </select>
+
+    <insert id="insertUserLog" parameterType="userHistVo">
+        INSERT INTO TH_USER_LOG(
+            LOG_UNQ_NO
+          , PIC_ID
+          , USER_ID
+          , LOG_CN
+          , CHG_AFTR_CN
+          , MENU_NM
+          , OTPT_NM
+          , MENU_SE_CD
+          , OTPT_FILE_NM
+          , RSLT_NOCS
+          , SRCH_STNG_CN
+          , MENU_SN
+          , SRCH_SE_CD
+        ) VALUES(
+            SUBSTRING(DATE_FORMAT(NOW(3), '%Y-%m-%d %H:%i:%s.%f'),1,23)
+          , #{picId}
+          , #{userId}
+          , #{logCn}
+          , #{chgAftrCn}
+          , #{menuNm}
+          , #{otptNm}
+          , #{menuSeCd}
+          , #{otptFileNm}
+          , #{rsltNocs}
+          , #{srchStngCn}
+          , #{menuSn}
+          , #{srchSeCd}
+        )
+    </insert>
+
+    <select id="selectMenuNmList" parameterType="userHistVo" resultType="userHistVo">
+        SELECT DISTINCT MENU_NM AS menuNm
+          FROM TH_USER_LOG
+         WHERE MENU_SE_CD = 'O'
+           AND MENU_NM IS NOT NULL
+      ORDER BY MENU_NM DESC
+    </select>
+
+    <select id="selectUserLogListExcel" parameterType="userHistVo" resultType="hmap">
+        SELECT SUBSTR(LOG.LOG_UNQ_NO, 0, 19) AS LOG_UNQ_NO
+             , LOG.PIC_ID
+             , LOG.LOG_CN
+             , LOG.CHG_AFTR_CN
+             , LOG.MENU_NM
+             , LOG.OTPT_NM
+             , LOG.OTPT_FILE_NM
+             , LOG.MENU_SE_CD
+             , LOG.RSLT_NOCS
+             , LOG.SRCH_STNG_CN
+             , LOG.MENU_SN
+             , MNGR.PIC_NM
+             <if test='paramMap.q_menuSeCd != "O"'>
+             , USR.USER_IDNTF_NM
+             , USR.USER_NM
+             , CONCAT(USR.USER_NM,'(',USR.USER_IDNTF_NM,') 외 ',LOG.RSLT_NOCS,'명') AS WHO_IS
+             </if>
+     <choose>
+       <when test='paramMap.q_menuSeCd == "O"'>
+          FROM TH_USER_LOG LOG, TN_MNGR MNGR
+         WHERE LOG.MENU_SE_CD    = #{paramMap.q_menuSeCd}
+           AND LOG.PIC_ID = MNGR.PIC_ID
+           <include refid="incWhereO"/>
+       </when>
+       <otherwise>
+          FROM TH_USER_LOG LOG, TN_MNGR MNGR, TN_USER USR
+         WHERE LOG.MENU_SE_CD    = #{paramMap.q_menuSeCd}
+           AND LOG.USER_ID    = USR.USER_ID
+           AND LOG.PIC_ID = MNGR.PIC_ID
+           <include refid="incWhereRandU"/>
+       </otherwise>
+     </choose>
+           ORDER BY LOG.LOG_UNQ_NO DESC
+    </select>
+</mapper>

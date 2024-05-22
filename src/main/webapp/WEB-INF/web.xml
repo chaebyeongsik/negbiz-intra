@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app id="WebApp_ID" version="2.5" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
+
+    <display-name>openworks4</display-name>
+
+    <context-param>
+        <param-name>webAppRootKey</param-name>
+        <param-value>openworks4.intra.root</param-value>
+    </context-param>
+
+    <context-param>
+        <param-name>contextConfigLocation</param-name>
+        <param-value>classpath:/config/spring/context-*.xml</param-value>
+    </context-param>
+
+    <!--
+        XSS 취약점 보안 적용 , (쉼표)로 복수 URI를 지정하며 길이는 제한이 없다.
+            * XssInclude는 모든 URI를 대상으로 하는 /를 지정하고,
+              XssExclude에서 특정 URL을 제외하는 방식으로 사용을 권장
+
+        XssExclude : 취약점 보안 제외 대상 URI (XssInclude 보다 우선 판단에 사용됨)
+        XssInclude : 취약점 보안 대상 URI
+        XssType : all (모든 HTML TAG 무효화) / script(javascript 태그와 특정이벤트 무효화)
+    -->
+    <context-param>
+        <param-name>XssExclude</param-name>
+        <param-value>/intra/cms/layout/ND_insertCmsLayout.do, /intra/cms/layout/ND_updateCmsLayout.do, /intra/bbstmplat/ND_insertBbsTmplat.do, /intra/bbstmplat/ND_updateBbsTmplat.do</param-value>
+    </context-param>
+    <context-param>
+        <param-name>XssInclude</param-name>
+        <param-value></param-value>
+    </context-param>
+    <context-param>
+        <param-name>XssType</param-name>
+        <param-value>SCRIPT</param-value>
+    </context-param>
+
+    <!-- charracter encoding -->
+    <filter>
+        <filter-name>encodingFilter</filter-name>
+        <filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+        <init-param>
+            <param-name>encoding</param-name>
+            <param-value>utf-8</param-value>
+        </init-param>
+        <init-param>
+            <param-name>forceEncoding</param-name>
+            <param-value>true</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>encodingFilter</filter-name>
+        <url-pattern>*.do</url-pattern>
+    </filter-mapping>
+
+    <!-- Spring Security config -->
+    <filter>
+        <filter-name>springSecurityFilterChain</filter-name>
+        <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>springSecurityFilterChain</filter-name>
+        <url-pattern>*.do</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>springSecurityFilterChain</filter-name>
+        <url-pattern>/login</url-pattern>
+    </filter-mapping>
+
+    <listener>
+        <listener-class>org.springframework.security.web.session.HttpSessionEventPublisher</listener-class>
+    </listener>
+
+    <!-- XSS 취약점 보안 적용 -->
+    <filter>
+        <filter-name>XssFilter</filter-name>
+        <filter-class>zesinc.web.support.filter.XSSFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>XssFilter</filter-name>
+        <url-pattern>*.do</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>XssFilter</filter-name>
+        <url-pattern>*.jsp</url-pattern>
+    </filter-mapping>
+
+    <!-- intra layout -->
+    <filter>
+        <filter-name>intra-sitemesh</filter-name>
+        <filter-class>zesinc.common.sitemesh.IntraSiteMeshFilter</filter-class>
+        <init-param>
+            <param-name>configFile</param-name>
+            <param-value>/WEB-INF/classes/config/sitemesh/intra-mapping.xml</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>intra-sitemesh</filter-name>
+        <url-pattern>*.do</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>intra-sitemesh</filter-name>
+        <url-pattern>*.jsp</url-pattern>
+    </filter-mapping>
+
+    <listener>
+        <listener-class>org.springframework.web.util.WebAppRootListener</listener-class>
+    </listener>
+
+    <!-- Spring Framework context 설정 시작/종료 처리 -->
+    <listener>
+        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+    </listener>
+
+    <!-- Spring Framework -->
+    <servlet>
+        <servlet-name>dispatcher</servlet-name>
+        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+        <init-param>
+            <param-name>contextConfigLocation</param-name>
+            <param-value>classpath:/config/spring/dispatcher-servlet.xml</param-value>
+        </init-param>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>dispatcher</servlet-name>
+        <url-pattern>*.do</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>SimpleCaptcha</servlet-name>
+        <servlet-class>nl.captcha.servlet.SimpleCaptchaServlet</servlet-class>
+        <init-param>
+            <param-name>captcha-width</param-name>
+            <param-value>250</param-value>
+        </init-param>
+        <init-param>
+            <param-name>captcha-height</param-name>
+            <param-value>80</param-value>
+        </init-param>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>SimpleCaptcha</servlet-name>
+        <url-pattern>/simpleCaptcha.do</url-pattern>
+    </servlet-mapping>
+
+    <!-- 기본 세션 유지 시간 분단위 -->
+    <session-config>
+        <session-timeout>60</session-timeout>
+    </session-config>
+
+    <!-- URL을 경로구분까지만 입력된 경우 기본 호출 파일 -->
+    <welcome-file-list>
+        <welcome-file>index.do</welcome-file>
+        <welcome-file>index.jsp</welcome-file>
+        <welcome-file>index.html</welcome-file>
+    </welcome-file-list>
+
+    <!-- 오류 페이지 -->
+    <error-page>
+        <exception-type>java.lang.Throwable</exception-type>
+        <location>/WEB-INF/jsp/common/errors/500.jsp</location>
+    </error-page>
+    <error-page>
+        <error-code>404</error-code>
+        <location>/WEB-INF/jsp/common/errors/404.jsp</location>
+    </error-page>
+    <error-page>
+        <error-code>500</error-code>
+        <location>/WEB-INF/jsp/common/errors/500.jsp</location>
+    </error-page>
+
+</web-app>

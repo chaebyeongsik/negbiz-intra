@@ -1,0 +1,322 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="zesinc.samples.crud.CrudMapper">
+
+    <select id="selectCrud" parameterType="crudVo" resultType="crudVo">
+        SELECT
+            REG_SN,
+            RFRNC_DOC_NO,
+            SORT_SN,
+            DP,
+            CLSF_NO,
+            NTC_PST_YN,
+            TTL,
+            DOC_CONTS_CN,
+            CN_HIST,
+            FILE_SN,
+            INQ_CNT,
+            IP_ADDR,
+            RLS_YN,
+            ANSWER_AT,
+            PSWD,
+            RGTR_NM,
+            RGTR_ID,
+            TO_CHAR(REG_DT, 'YYYY-MM-DD HH24:MI:SS') AS REG_DT,
+            UPDUSR_NM,
+            MDFR_ID,
+            TO_CHAR(UPDT_DT, 'YYYY-MM-DD HH24:MI:SS') AS UPDT_DT
+        FROM
+            TN_SMPLE
+        WHERE
+                REG_SN = #{paramMap.q_regSn}
+    </select>
+
+    <update id="increase" parameterType="crudVo">
+        UPDATE TN_SMPLE SET
+            INQ_CNT = INQ_CNT + 1
+        WHERE
+            REG_SN = #{paramMap.q_regSn}
+    </update>
+
+    <sql id="incWhere">
+        <where>
+            <if test="paramMap.q_searchVal != null  and paramMap.q_searchVal != ''">
+                <if test="paramMap.q_searchKey == 1001">
+                    AND A.TTL LIKE '%' || #{paramMap.q_searchVal} || '%'
+                </if>
+                <if test="paramMap.q_searchKey == 1002">
+                    AND A.DOC_CONTS_CN LIKE '%' || #{paramMap.q_searchVal} || '%'
+                </if>
+                <if test="paramMap.q_searchKey == 1003">
+                    AND A.RGTR_NM LIKE '%' || #{paramMap.q_searchVal} || '%'
+                </if>
+            </if>
+        </where>
+    </sql>
+
+    <select id="selectCrudList" parameterType="crudVo" resultType="crudVo">
+        SELECT Y.* FROM (
+            SELECT ROWNUM NUM, X.* FROM (
+                SELECT
+                    REG_SN,
+                    TTL,
+                    CLSF_NO,
+                    FILE_SN,
+                    RGTR_NM,
+                    INQ_CNT,
+                    RLS_YN,
+                    ANSWER_AT,
+                    TO_CHAR(A.REG_DT, 'YYYY-MM-DD') AS REG_DT,
+                    (SELECT COUNT(FILE_SN) FROM TN_FILE WHERE FILE_SN = A.FILE_SN) AS FILE_CNT,
+                    0 AS COMM_CNT
+                FROM TN_SMPLE A
+                <include refid="incWhere"/>
+                <if test="paramMap.q_sortName != null  and paramMap.q_sortName != ''">
+                    ORDER BY ${paramMap.q_sortName} ${paramMap.q_sortOrder}
+                </if>
+                <if test="paramMap.q_sortName == null or paramMap.q_sortName == ''">
+                    ORDER BY A.REG_SN DESC
+                </if>
+            ) X
+            WHERE ROWNUM &lt;= #{paramMap.q_pagingEndNum}
+        ) Y
+        WHERE NUM &gt;= #{paramMap.q_pagingStartNum}
+    </select>
+
+    <select id="selectCrudListCount" parameterType="crudVo" resultType="int">
+        SELECT
+            COUNT(A.REG_SN) AS TOTAL_COUNT
+        FROM
+            TN_SMPLE A
+        <include refid="incWhere"/>
+    </select>
+
+    <insert id="insertCrud" parameterType="crudVo">
+        <selectKey order="BEFORE" keyProperty="regSn" resultType="int">
+            SELECT NVL(MAX(REG_SN), 0) +1 AS regSn FROM TN_SMPLE
+        </selectKey>
+            INSERT INTO TN_SMPLE (
+                REG_SN,
+                RFRNC_DOC_NO,
+                SORT_SN,
+                DP,
+                CLSF_NO,
+                NTC_PST_YN,
+                TTL,
+                DOC_CONTS_CN,
+                CN_HIST,
+                FILE_SN,
+                INQ_CNT,
+                IP_ADDR,
+                RLS_YN,
+                ANSWER_AT,
+                PSWD,
+                RGTR_NM,
+                RGTR_ID,
+                REG_DT
+            ) VALUES (
+                #{regSn},
+                <if test="rfrncDocNo == null or rfrncDocNo == ''">
+                #{regSn},
+                0,
+                0,
+                </if>
+                <if test="rfrncDocNo != null  and rfrncDocNo != ''">
+                #{rfrncDocNo},
+                #{sortSn},
+                #{dp},
+                </if>
+                #{clsfNo},
+                #{ntcPstYn},
+                #{ttl},
+                #{docContsCn},
+                #{cnHist},
+                #{fileSn},
+                0,
+                #{ipAddr},
+                #{rlsYn},
+                #{answerAt},
+                #{pswd},
+                #{rgtrNm},
+                #{rgtrId},
+                SYSDATETIME
+            )
+    </insert>
+
+    <update id="updateCrud" parameterType="crudVo">
+        UPDATE TN_SMPLE SET
+            CLSF_NO=#{clsfNo},
+            NTC_PST_YN=#{ntcPstYn},
+            TTL=#{ttl},
+            DOC_CONTS_CN=#{docContsCn},
+            CN_HIST=#{cnHist},
+            FILE_SN=#{fileSn},
+            IP_ADDR=#{ipAddr},
+            RLS_YN=#{rlsYn},
+            UPDUSR_NM=#{updusrNm},
+            MDFR_ID=#{mdfrId},
+            UPDT_DT=SYSDATETIME
+        WHERE
+                REG_SN = #{paramMap.q_regSn}
+    </update>
+
+    <delete id="deleteCrud" parameterType="crudVo">
+        DELETE FROM TN_SMPLE
+        WHERE REG_SN = #{paramMap.q_regSn}
+    </delete>
+
+    <select id="selectCrudReplyView" parameterType="crudReplyVo" resultType="crudReplyVo">
+        SELECT
+            REG_SN,
+            ANSWER_NO,
+            ANS_DTL_CN,
+            ANSWER_HIST,
+            ANSWRR_ID,
+            ANSWRR_NM,
+            ANS_DT,
+            IP_ADDR,
+            PSWD,
+            RGTR_NM,
+            RGTR_ID,
+            TO_CHAR(REG_DT, 'YYYY-MM-DD HH24:MI:SS') AS REG_DT,
+            UPDUSR_NM,
+            MDFR_ID,
+            TO_CHAR(UPDT_DT, 'YYYY-MM-DD HH24:MI:SS') AS UPDT_DT,
+            FILE_SN
+        FROM
+            TN_SMPLE_ANSWER A
+        WHERE
+                REG_SN = #{paramMap.q_regSn}
+            AND ANSWER_NO = #{paramMap.q_answerNo}
+    </select>
+
+    <select id="selectCrudReplyList" parameterType="crudReplyVo" resultType="crudReplyVo">
+        SELECT
+            REG_SN,
+            ANSWER_NO,
+            ANS_DTL_CN,
+            ANSWER_HIST,
+            ANSWRR_ID,
+            ANSWRR_NM,
+            ANS_DT,
+            IP_ADDR,
+            PSWD,
+            RGTR_NM,
+            RGTR_ID,
+            TO_CHAR(REG_DT, 'YYYY-MM-DD HH24:MI:SS') AS REG_DT,
+            UPDUSR_NM,
+            MDFR_ID,
+            TO_CHAR(UPDT_DT, 'YYYY-MM-DD HH24:MI:SS') AS UPDT_DT,
+            FILE_SN
+        FROM
+            TN_SMPLE_ANSWER A
+        WHERE
+            REG_SN = #{paramMap.q_regSn}
+        ORDER BY A.ANSWER_NO ASC
+    </select>
+
+    <insert id="insertCrudReply" parameterType="crudReplyVo">
+        <selectKey order="BEFORE" keyProperty="answerNo" resultType="int">
+            SELECT NVL(MAX(ANSWER_NO), 0) +1 AS answerNo FROM TN_SMPLE_ANSWER
+            WHERE REG_SN = #{paramMap.q_regSn}
+        </selectKey>
+        INSERT INTO TN_SMPLE_ANSWER (
+            REG_SN,
+            ANSWER_NO,
+            ANS_DTL_CN,
+            ANSWER_HIST,
+            ANSWRR_ID,
+            ANSWRR_NM,
+            ANS_DT,
+            IP_ADDR,
+            PSWD,
+            RGTR_NM,
+            RGTR_ID,
+            REG_DT,
+            FILE_SN
+        ) VALUES (
+            #{regSn},
+            #{answerNo},
+            #{ansDtlCn},
+            #{answerHist},
+            #{answrrId},
+            #{answrrNm},
+            SYSDATETIME,
+            #{ipAddr},
+            #{pswd},
+            #{rgtrNm},
+            #{rgtrId},
+            SYSDATETIME,
+            #{fileSn}
+        )
+    </insert>
+
+    <update id="updateCrudReply" parameterType="crudReplyVo">
+        UPDATE TN_SMPLE_ANSWER SET
+            ANS_DTL_CN=#{ansDtlCn},
+            ANSWER_HIST=#{answerHist},
+            ANSWRR_ID=#{answrrId},
+            ANSWRR_NM=#{answrrNm},
+            ANS_DT=#{ansDt},
+            IP_ADDR=#{ipAddr},
+            PSWD=#{pswd},
+            UPDUSR_NM=#{updusrNm},
+            MDFR_ID=#{mdfrId},
+            UPDT_DT=#{updtDt},
+            FILE_SN=#{fileSn}
+        WHERE
+                REG_SN = #{paramMap.q_regSn}
+            AND ANSWER_NO = #{paramMap.q_answerNo}
+    </update>
+
+    <update id="updateCrudReplyYn" parameterType="crudReplyVo">
+        UPDATE TN_SMPLE SET
+            ANSWER_AT = 
+            CASE
+                WHEN 0 &lt; (SELECT COUNT(ANSWER_NO) FROM TN_SMPLE_ANSWER WHERE REG_SN = #{paramMap.q_regSn})
+                THEN 'Y'
+                ELSE 'N'
+            END
+        WHERE
+                REG_SN = #{paramMap.q_regSn}
+    </update>
+
+    <delete id="deleteCrudReply" parameterType="crudReplyVo">
+        DELETE FROM TN_SMPLE_ANSWER
+        WHERE
+                REG_SN = #{paramMap.q_regSn}
+            AND ANSWER_NO = #{paramMap.q_answerNo}
+    </delete>
+
+    <delete id="deleteCrudReplyList" parameterType="crudReplyVo">
+        DELETE FROM TN_SMPLE_ANSWER
+        WHERE
+                REG_SN = #{paramMap.q_regSn}
+    </delete>
+    
+    <select id="selectCrudListExcel" parameterType="excelDownloadVo" resultType="hmap">
+        SELECT Y.* FROM (
+            SELECT ROWNUM NUM, X.* FROM (
+                SELECT
+                    REG_SN,
+                    TTL,
+                    CLSF_NO,
+                    RGTR_NM,
+                    INQ_CNT,
+                    RLS_YN,
+                    TO_CHAR(A.REG_DT, 'YYYY-MM-DD') AS REG_DT
+                FROM TN_SMPLE A
+                <include refid="incWhere"/>
+                <if test="paramMap.q_sortName != null  and paramMap.q_sortName != ''">
+                    ORDER BY ${paramMap.q_sortName} ${paramMap.q_sortOrder}
+                </if>
+                <if test="paramMap.q_sortName == null or paramMap.q_sortName == ''">
+                    ORDER BY A.REG_SN DESC
+                </if>
+            ) X
+            WHERE ROWNUM &lt;= #{paramMap.q_pagingEndNum}
+        ) Y
+        WHERE NUM &gt;= #{paramMap.q_pagingStartNum}
+    </select>
+
+</mapper>

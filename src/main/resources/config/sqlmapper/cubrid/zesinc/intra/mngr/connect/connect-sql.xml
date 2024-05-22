@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="zesinc.intra.mngr.connect.ConnectMapper">
+
+    <!-- 관리자접속이력 조회 -->
+    <select id="selectConnect" parameterType="connectVo" resultType="connectVo">
+        SELECT
+        <trim suffixOverrides=",">
+            A.PIC_ID,
+            (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.PIC_ID) AS PIC_NM,
+            A.LOG_DT,
+            A.LOG_SE_NO,
+            A.LGN_RSLT_NO,
+            A.LGN_IP_ADDR,
+        </trim>
+        FROM
+            TH_MNGR_CONECT A
+        WHERE
+                 A.PIC_ID = #{paramMap.q_picId}
+                AND A.LOG_DT = #{paramMap.q_logDt}
+    </select>
+
+    <!-- 관리자접속이력 목록 -->
+    <sql id="incConnectWhere">
+        <where>
+                 A.PIC_ID = #{paramMap.q_picId}
+             <if test="paramMap.q_logSeNo != null and paramMap.q_logSeNo != ''">
+                AND A.LOG_SE_NO = #{paramMap.q_logSeNo}
+             </if>
+             <if test="paramMap.q_startDt != null and paramMap.q_startDt != ''">
+                AND A.LOG_DT &gt;= TO_DATETIME(#{paramMap.q_startDt} || ' 000000', 'YYYY-MM-DD HH24MISS')
+             </if>
+             <if test="paramMap.q_endDt != null and paramMap.q_endDt != ''">
+                AND A.LOG_DT &lt;= TO_DATETIME(#{paramMap.q_endDt} || ' 235959', 'YYYY-MM-DD HH24MISS')
+             </if>
+        </where>
+    </sql>
+    <select id="selectConnectList" parameterType="connectVo" resultType="connectVo">
+        SELECT Y.* FROM (
+            SELECT ROWNUM NUM, X.* FROM (
+                SELECT
+                        <trim suffixOverrides=",">
+                        A.PIC_ID,
+                        (SELECT PIC_NM FROM TN_MNGR WHERE PIC_ID = A.PIC_ID) AS PIC_NM,
+                        A.LOG_DT,
+                        A.LOG_SE_NO,
+                        A.LGN_RSLT_NO,
+                        A.LGN_IP_ADDR,
+                        </trim>
+                FROM
+                        TH_MNGR_CONECT A
+                        <include refid="incConnectWhere"/>
+                 ORDER BY A.LOG_DT DESC
+            ) X
+            WHERE ROWNUM &lt;= #{paramMap.q_pagingEndNum}
+         ) Y
+         WHERE NUM &gt;= #{paramMap.q_pagingStartNum}
+    </select>
+
+    <!-- 관리자접속이력 조회 목록 카운트 -->
+    <select id="selectConnectListCount" parameterType="connectVo" resultType="int">
+        SELECT
+            COUNT(A.PIC_ID) AS TOTAL_COUNT
+        FROM
+            TH_MNGR_CONECT A
+        <include refid="incConnectWhere"/>
+    </select>
+
+    <!-- 관리자접속이력 등록 -->
+    <insert id="insertConnect" parameterType="connectVo">
+        INSERT INTO TH_MNGR_CONECT (
+        <trim suffixOverrides=",">
+            PIC_ID,
+            LOG_DT,
+            LOG_SE_NO,
+            LGN_RSLT_NO,
+            LGN_IP_ADDR,
+        </trim>
+        ) VALUES (
+        <trim suffixOverrides=",">
+            #{picId},
+            SYSDATETIME,
+            #{logSeNo},
+            #{lgnRsltNo},
+            #{lgnIpAddr},
+        </trim>
+        )
+    </insert>
+
+    <!-- 관리자접속이력 수정 -->
+    <update id="updateConnect" parameterType="connectVo">
+        UPDATE TH_MNGR_CONECT 
+          <set>
+            LOG_SE_NO = #{logSeNo},
+            LGN_RSLT_NO = #{lgnRsltNo},
+            LGN_IP_ADDR = #{lgnIpAddr},
+          </set>
+        WHERE
+             PIC_ID = #{paramMap.q_picId}
+            AND LOG_DT = #{paramMap.q_logDt}
+    </update>
+
+    <!-- 관리자접속이력 삭제 -->
+    <delete id="deleteConnect" parameterType="connectVo">
+        DELETE FROM TH_MNGR_CONECT
+        WHERE
+             PIC_ID = #{paramMap.q_picId}
+            AND LOG_DT = #{paramMap.q_logDt}
+    </delete>
+
+</mapper>

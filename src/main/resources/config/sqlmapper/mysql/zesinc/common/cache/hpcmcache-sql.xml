@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="zesinc.common.cache.hpcm.HpcmCacheMapper">
+
+    <select id="selectHpcmList" resultType="hpcmCacheVo">
+        SELECT REG_SN
+             , MENU_SN
+             , DOC_CN
+          FROM TN_HPCM
+    </select>
+</mapper>

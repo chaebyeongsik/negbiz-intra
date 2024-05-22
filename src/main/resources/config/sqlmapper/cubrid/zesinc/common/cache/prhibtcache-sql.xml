@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="zesinc.common.cache.prhibt.PrhibtCacheMapper">
+    <!-- 금지단어 조회 -->
+    <select id="selectPrhibtWrdList" parameterType="prhibtWrdCacheVo" resultType="prhibtWrdCacheVo">
+        SELECT
+        <trim suffixOverrides=",">
+            A.PHBWD_CD_ID,
+            A.TTL,
+            A.PHBWD_CN,
+        </trim>
+        FROM
+            TN_PRHIBT_WRD A
+        WHERE
+                 A.USE_YN = #{paramMap.q_useYn}
+    </select>
+</mapper>
